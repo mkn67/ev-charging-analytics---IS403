@@ -1,0 +1,10 @@
+Hạng mục kiểm tra,Số lượng bản ghi,Tỷ lệ (%),Hướng xử lý
+Tổng số bản ghi ban đầu,259415,100.0,Tập dữ liệu thô
+Bản ghi trùng lặp hoàn toàn (Quy tắc 5),4,0.0015,"Loại bỏ 4 bản ghi lặp, giữ 1 bản ghi đại diện"
+Lỗi logic: Thời gian sạc > Tổng kết nối (Quy tắc 3),45,0.0173,"Gắn cờ cách ly, không gán thời gian rỗi về 0"
+Dị biệt công suất vật lý (P_avg > P_max) (Mục 2.2.3),10,0.0039,Gắn cờ cách ly khỏi phân tích công suất/thời lượng sạc
+Giao dịch không phát sinh điện năng (Mục 2.2.4),0,0.0,Không có trong bộ dữ liệu hiện tại
+Xung đột/chồng lấn thời gian trên cổng sạc (Quy tắc 6),181,0.0698,Gắn cờ kiểm tra thiết bị & lịch sử kết nối
+Ngoại lệ thống kê thời gian kết nối (IQR),12763,4.92,Giữ nguyên để nghiên cứu hành vi chiếm dụng
+Ngoại lệ thống kê điện năng tiêu thụ (IQR),8697,3.35,Giữ nguyên phục vụ dự báo nhu cầu phụ tải
+Số phiên hợp lệ đầy đủ cho phân tích hành vi & hiệu suất,259356,99.979,Tập dữ liệu phân tích chuẩn hóa
