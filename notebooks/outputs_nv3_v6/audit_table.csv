@@ -1,0 +1,3 @@
+Kiểm tra,Số dòng,Tỷ lệ (%),Xử lý
+T_idle lệch (T_total - T_charging),0,0.0,"Giữ nguyên T_idle gốc, ghi nhận cảnh báo"
+Idle_Ratio lệch (T_idle/T_total),0,0.0,Dùng biến tái tính Idle_Ratio_check cho phân tích
