@@ -1,0 +1,5 @@
+Metric,N_Pre,N_Post,Users_Pre,Users_Post,Delta,CI 95% (Cluster),p-value (MWU)*,Mức độ (Cliff),p-value (Holm),Có ý nghĩa (Holm)
+T_idle_min,128253,123439,9579,15628,0.1232,"[0.093, 0.151]",0.00e+00,Negligible,0.00e+00,Có
+Idle_Ratio_check,128253,123439,9579,15628,0.1229,"[0.096, 0.151]",0.00e+00,Negligible,0.00e+00,Có
+Energy,128289,123445,9579,15628,-0.0281,"[-0.061, 0.002]",2.46e-34,Negligible,2.46e-34,Có
+T_charging,128289,123445,9579,15628,0.0714,"[0.042, 0.101]",2.00e-211,Negligible,4.01e-211,Có
