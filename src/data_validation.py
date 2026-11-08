@@ -96,7 +96,13 @@ def detect_port_overlaps(df: pd.DataFrame) -> pd.Series:
     """
     df_temp = df.copy()
     if 'port_id' not in df_temp.columns:
-        df_temp['port_id'] = df_temp['MAC Address'].astype(str) + '_Port_' + df_temp['Port Number'].astype(str)
+        mac = df_temp['MAC Address'].astype('string').str.strip()
+        port_number = df_temp['Port Number'].astype('string').str.strip()
+        has_physical_id = mac.notna() & port_number.notna() & mac.ne('') & port_number.ne('')
+        df_temp['port_id'] = pd.Series(pd.NA, index=df_temp.index, dtype='string')
+        df_temp.loc[has_physical_id, 'port_id'] = (
+            mac.loc[has_physical_id] + '_Port_' + port_number.loc[has_physical_id]
+        )
         
     df_temp = df_temp.sort_values(by=['port_id', 'start_datetime_utc'])
     prev_end = df_temp.groupby('port_id')['end_datetime_utc'].shift(1)

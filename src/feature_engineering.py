@@ -153,7 +153,13 @@ def build_clean_pipeline(raw_df: pd.DataFrame) -> Tuple[pd.DataFrame, int, int]:
     df['end_datetime_utc'] = convert_to_utc(df['end_dt_local'], df['End Time Zone'])
     
     # 4. Định danh cổng sạc
-    df['port_id'] = df['MAC Address'].astype(str) + '_Port_' + df['Port Number'].astype(str)
+    mac = df['MAC Address'].astype('string').str.strip()
+    port_number = df['Port Number'].astype('string').str.strip()
+    has_physical_id = mac.notna() & port_number.notna() & mac.ne('') & port_number.ne('')
+    df['port_id'] = pd.Series(pd.NA, index=df.index, dtype='string')
+    df.loc[has_physical_id, 'port_id'] = (
+        mac.loc[has_physical_id] + '_Port_' + port_number.loc[has_physical_id]
+    )
     
     # 5. Gắn cờ lỗi logic quan hệ thời lượng (T_charging > T_total)
     df['flag_charging_gt_total'] = check_duration_consistency(df)

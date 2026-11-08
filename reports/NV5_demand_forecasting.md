@@ -1,78 +1,60 @@
-# NV5 — Dự báo nhu cầu sạc và mức độ chiếm dụng trạm sạc (bản thực nghiệm)
+# NV5 — Dự báo occupancy cổng và session arrivals (mục 3.5.1–3.5.2)
 
-## 1. Mục tiêu và cơ sở nghiên cứu
+## 3.5.1. Định nghĩa mục tiêu và tạo chuỗi 15 phút
 
-Đồ án IS403 đặt ra bài toán dự báo ở độ phân giải **15 phút**, sử dụng các mô hình đối chứng (Historical Mean, Persistence theo ngày/tuần, Ridge) và mô hình đề xuất XGBoost. Theo Ostermann et al. (2022), nghiên cứu về dự báo tình trạng chiếm dụng cổng sạc cần làm rõ đầu ra (từng cổng hay mức chiếm dụng tổng hợp) và đánh giá so với baseline. Bản thực nghiệm này dự báo đồng thời:
+NV5 tạo chuỗi theo từng **cụm trạm** `cluster_id` đã được nhóm phê duyệt. Một cluster là đơn vị nhóm trạm do nhóm định nghĩa; không suy ra `cluster_id` từ tên trạm, số hiệu cổng hay cluster hành vi phiên của NV2. NV2 hiện phân cụm **phiên sạc theo hành vi**, không cung cấp mapping cụm trạm cho NV5. Vì vậy thí nghiệm theo cụm chưa được chạy cho tới khi nhóm hoàn tất `port_id,cluster_id` trong mapping.
 
-- **`occupancy_ports` (cổng):** số phiên kết nối đang giao với một khoảng 15 phút trên toàn tập dữ liệu; được suy từ thời điểm bắt đầu và kết thúc phiên sạc. Đây là **proxy của số cổng đang được sử dụng**, không phải số liệu trạng thái thiết bị đo trực tiếp. Các bản ghi cùng cổng nếu chồng lấn có thể bị đếm hai lần.
-- **`session_arrivals` (phiên/15 phút):** số phiên bắt đầu trong từng khoảng 15 phút; phản ánh lượng phiên đến, không trực tiếp bằng nhu cầu chưa được phục vụ.
+`port_id` của NV1 được tạo từ `MAC Address` và `Port Number` theo dạng `{MAC Address}_Port_{Port Number}`. Dữ liệu hiện có 139 `port_id`; mỗi ID ánh xạ duy nhất tới một cặp MAC/cổng, không có cặp nào sinh nhiều ID. NV5 kiểm tra lại quan hệ này khi nạp dữ liệu. Nếu thiếu một thành phần định danh, NV1 để `port_id` rỗng thay vì tạo chuỗi giả như `nan_Port_nan`.
 
-Thêm `session_energy_kwh_at_start` phục vụ tham khảo: là **tổng điện năng cả phiên được gán về thời điểm bắt đầu**, hoàn toàn **không phải tải điện đo theo 15 phút**. Không sử dụng biến này để khẳng định công suất phụ tải hay quá tải lưới.
+NV5 ưu tiên `sessions_features.parquet`, đồng thời đối chiếu số dòng, số phiên hợp lệ và khóa phiên với `sessions_clean.parquet`. Nếu parquet không đọc được hoặc hai bảng không khớp, NV5 chạy lại `build_clean_pipeline` của NV1 từ CSV gốc. Trên dữ liệu hiện tại:
 
-## 2. Chuẩn hóa và tạo chuỗi
+- Hai parquet đều có 259.411 dòng, 259.356 phiên `is_valid_session=True` và cùng khóa phiên.
+- CSV có 259.415 dòng; NV1 loại 4 dòng trùng nguyên văn, còn 259.411 dòng.
+- Có 12 phiên hợp lệ theo cờ NV1 nhưng có `end_datetime_utc == start_datetime_utc`. NV5 loại 12 phiên thời lượng bằng 0 khỏi chuỗi khoảng; không có khoảng kết thúc trước lúc bắt đầu. Do đó 259.344 trong kết quả NV5 cũ là số sau bộ lọc khoảng thời gian dương, không phải chênh lệch giữa hai parquet hay do nhánh fallback.
 
-Dùng bản `sessions_features.parquet` và `is_valid_session` theo NV1 khi môi trường có `pyarrow`. Nếu không đọc được parquet, script chạy lại hàm `build_clean_pipeline` hiện hữu của NV1 từ CSV gốc, giữ logic đánh cờ phiên hợp lệ của repo. Mốc thời gian dùng UTC đúng với dữ liệu NV1. Xây lưới 15 phút đều đặn; các khoảng không có phiên được điền 0. Mỗi phiên được tính là chiếm dụng các khung 15 phút giao với `[start_datetime_utc, end_datetime_utc)`. Không suy diễn điện năng/công suất từng khung từ thời lượng kết nối.
+Mỗi chuỗi có lưới UTC đều đặn 15 phút trên cùng khoảng thời gian. Khoảng hoạt động dùng quy ước nửa mở `[start_datetime_utc, end_datetime_utc)`: phiên kết thúc đúng ranh giới không chiếm khung tiếp theo. Các khung không có hoạt động được điền 0.
 
-## 3. Phương pháp học máy và kiểm soát leakage
+- **`occupancy_ports` (cổng):** số `port_id` vật lý riêng biệt có ít nhất một phiên giao với khung 15 phút, tính riêng từng cluster. Hai phiên chồng lấn cùng cổng chỉ tính một; hai cổng khác nhau tính hai. Bản ghi thiếu `port_id` không làm tăng occupancy.
+- **`session_arrivals` (phiên/khung):** số phiên bắt đầu trong khung, tính riêng từng cluster. Đây là lượng phiên bắt đầu, không phải số cổng đang bận.
+- **Phụ tải điện:** không phải mục tiêu trong NV5. Tổng kWh của cả phiên không được phân bổ thành kWh hay kW theo khung 15 phút; vì thế không dùng occupancy hoặc arrivals để kết luận công suất hay quá tải lưới.
 
-Dùng đặc trưng lịch `slot` (0–95), thứ, tháng, weekend, sin/cos chu kỳ; đặc trưng trễ tại 1, 4, 96 và 672 khoảng; trung bình trượt 4/96/672 khoảng **đều shift(1) trước khi tính**. Mỗi mục tiêu tạo một bảng feature riêng, không dùng occupancy của cùng thời điểm để dự báo arrivals hoặc ngược lại.
+Các phiên hợp lệ nhưng thiếu `port_id` vẫn có thể đóng góp arrivals nếu nhóm cung cấp được `cluster_id` đáng tin cậy cho chúng; nếu thiếu cả cluster, phiên không thể phân bổ theo cụm và được ghi trong audit. Occupancy luôn bỏ qua các phiên thiếu `port_id`.
 
-Chia **80% đầu thời gian** để train, **20% cuối** để test, không shuffle. Historical Mean tính từ **train**, theo `(thứ trong tuần, slot 15 phút)`; Persistence Day và Week dùng giá trị thực trước đó; Ridge, Random Forest và XGBoost huấn luyện chỉ bằng train. Random Forest dùng tối đa 100.000 dòng train lấy đều theo thứ tự để giảm RAM và thời gian chạy trên laptop; cần nêu rõ hạn chế này khi so sánh.
+## 3.5.2. Baseline và giao thức đánh giá
 
-Đây là đánh giá **one-step-ahead với dữ liệu lịch sử được cập nhật liên tục**, không phải dự báo nhiều bước hoàn toàn tự hồi quy trong tương lai. Vì lag-1 sử dụng giá trị quan sát trước đó (tại `t-1`), không được diễn giải thành dự báo một tuần trước mà không có quan sát cập nhật.
+Mọi baseline được fit/tính **riêng theo `cluster_id`**. Giao diện nhận các mốc train, validation, test do Khải/nhóm cung cấp; chương trình không tự chia 80/20. Các mốc là ranh giới kết thúc loại trừ (`train_end_utc`, `validation_end_utc`, `test_end_utc`) trong JSON.
 
-## 4. Kết quả thực nghiệm
+- **Historical Mean:** trung bình mục tiêu của train theo thứ trong tuần và slot 15 phút, riêng từng cluster. Nếu một slot chưa xuất hiện trong train, dùng trung bình train của cluster đó.
+- **Persistence Day (`t-96`)** và **Persistence Week (`t-672`):** lấy giá trị lịch sử cùng cluster, không trộn giữa các cluster.
+- **Ridge:** scaler được fit chỉ trên train của cluster; cùng scaler transform validation/test. Không fit lại scaler trên validation/test.
+- **Random Forest, XGBoost:** fit trên train của cluster. Đây là đối chứng mô hình; metric được xuất riêng cho validation và test.
+- **Persistence `t-1`:** đối chứng được đề xuất để nhóm cân nhắc mở rộng proposal, không phải lỗi thiếu của phân công hiện tại; chưa đưa vào bảng chính khi chưa có đồng thuận.
 
-Môi trường chạy kiểm tra không có `pyarrow` và không thể cài trực tuyến; kết quả dưới đây được chạy từ CSV gốc bằng **chính pipeline làm sạch NV1 trong repository**, không phải đọc trực tiếp Parquet. Số liệu này cần được chạy kiểm chứng trong môi trường Python của nhóm.
+Đánh giá là one-step-ahead: các lag trong validation/test dùng quan sát quá khứ đã có tại thời điểm dự báo. Kết quả của lượt cũ dùng một chuỗi toàn mạng và split tự đặt không còn đại diện cho thiết kế theo cụm; cần chạy lại sau khi nhận mapping và mốc chia từ nhóm. Vì hai đầu vào này chưa có trong repo, báo cáo này không giữ các metric cũ như kết quả bàn giao.
 
-### 4.1. Chiếm dụng cổng sạc
+### Đầu vào bắt buộc từ nhóm
 
-| Mô hình | MAE (cổng) | RMSE (cổng) | R² |
-|---|---:|---:|---:|
-| Historical Mean | 5.9228 | 7.9554 | 0.3990 |
-| Lag-1 Day | 3.2939 | 5.1332 | 0.7498 |
-| Lag-1 Week | 2.9398 | 4.6066 | 0.7985 |
-| Ridge | 0.8992 | 1.3792 | 0.9819 |
-| Random Forest | 0.8662 | 1.3712 | 0.9821 |
-| **XGBoost** | **0.8556** | **1.3540** | **0.9826** |
+1. CSV mapping có đúng hai cột `port_id,cluster_id`, một dòng cho mỗi cổng vật lý quan sát. Mẫu 139 cổng nằm ở `reports/station_cluster_map_template.csv`; sao chép mẫu thành `data/processed/station_cluster_map.csv` rồi điền cluster theo quyết định của nhóm. Notebook từ chối ID trùng, cổng không tồn tại hoặc cổng chưa được gán cụm.
+2. JSON mốc thời gian theo định dạng, ví dụ cấu trúc sau (giá trị phải do Khải/nhóm cung cấp; không dùng các chuỗi minh họa làm mốc chạy):
 
-### 4.2. Nhu cầu phiên bắt đầu
-
-| Mô hình | MAE (phiên/15 phút) | RMSE (phiên/15 phút) | R² |
-|---|---:|---:|---:|
-| Historical Mean | 0.7915 | 1.2539 | 0.2348 |
-| Lag-1 Day | 0.7876 | 1.3807 | 0.0722 |
-| Lag-1 Week | 0.7723 | 1.3594 | 0.1007 |
-| Ridge | 0.6749 | 1.0264 | 0.4873 |
-| Random Forest | 0.6580 | 1.0233 | 0.4904 |
-| **XGBoost** | **0.6441** | **1.0131** | **0.5005** |
-
-Dữ liệu dùng để đánh giá: **259.344 phiên hợp lệ**, 139 cổng quan sát được, 330.920 khung 15 phút; loại 672 khung đầu để tạo lag. Train 264.198 khung, test 66.050 khung; test bắt đầu **2019-02-17 04:45 UTC**. Kết quả model cho nhu cầu đến có R² khoảng 0.50, kém rõ rệt so với dự báo occupancy: không nên tuyên bố hai bài toán có độ chính xác tương đương.
-
-## 5. Diễn giải và giới hạn
-
-1. XGBoost tốt nhất trên tập test theo RMSE, nhưng chênh lệch so với Random Forest nhỏ. Chưa có kiểm định độ ổn định theo nhiều cửa sổ thời gian; chưa chứng minh mô hình tốt hơn ở mọi trạm hay mọi giai đoạn.
-2. Chưa có thông tin đầy đủ về **công suất vật lý, số cổng hoạt động theo từng thời kỳ**, hoặc tình trạng hỏng thiết bị. Do đó không dùng 139 cổng quan sát toàn kỳ làm mẫu số chính xác cho tỷ lệ chiếm dụng tại mọi thời điểm; không được công bố giờ “quá tải” như kết luận thực tế.
-3. Những kỳ gần năm 2020 có thể ảnh hưởng bởi biến động nhu cầu, làm giảm tính ổn định của phân phối. Cần thêm rolling backtest và phân tích theo giai đoạn để khẳng định độ bền vững.
-4. Thời gian UTC chưa phản ánh giờ sinh hoạt địa phương một cách trực quan, đặc biệt do thay đổi PDT/PST; nên bổ sung biểu đồ giờ địa phương với timezone `America/Los_Angeles` nếu phần kết quả đưa vào khuyến nghị vận hành.
-5. Các biến mục tiêu là dạng đếm nguyên không âm nhưng mô hình hồi quy có thể cho giá trị thực; đã chặn dự báo âm về 0, không làm tròn trước khi tính metrics.
-6. Các đặc trưng và so sánh là thiết kế nghiên cứu của đồ án; không sao chép số liệu thành công của Ostermann (2022) sang kết quả thực nghiệm của nhóm.
-
-## 6. Hướng tái lập và vị trí kết quả
-
-Chạy từ gốc repo:
-
-```bash
-python -m pip install -r requirements.txt
-python -m pip install -r requirements_nv5.txt
-python scripts/nv5_forecasting.py
-python -m pytest tests/test_nv5_forecasting.py -q
+```json
+{
+  "train_end_utc": "<UTC timestamp>",
+  "validation_end_utc": "<UTC timestamp>",
+  "test_end_utc": "<UTC timestamp>"
+}
 ```
 
-Bảng kết quả và biểu đồ xuất ra `outputs/nv5/`. Notebook `notebooks/05_NV5_demand_forecasting.ipynb` trình bày tuần tự code và các kết quả. Ghi chú: file `timeseries_15min.csv` (~10 MB) là dữ liệu phát sinh, có thể tự tái tạo và không cần commit nếu nhóm muốn giữ PR gọn.
+Toàn bộ mã NV5 được đặt trong `notebooks/05_NV5_demand_forecasting.ipynb`; thư mục `scripts/` chỉ chứa script chương 4. Mở notebook, chạy lần lượt các cell định nghĩa rồi chạy cell cuối sau khi điền hai đầu vào. Có thể chạy notebook bằng Jupyter từ thư mục gốc repo.
 
-### Nguồn nghiên cứu
+### Bảng bàn giao và kiểm tra
 
-- Ostermann, A., Fabel, Y., Ouan, K. & Koo, H. (2022). *Forecasting Charging Point Occupancy Using Supervised Learning Algorithms*. Energies 15(9), 3409. DOI: 10.3390/en15093409.
-- Luo, S. & Wang, Y. (2025). *The impacts of rate surge on electric vehicle charging behaviors: Evidence from California*. Journal of Economic Behavior & Organization 236, 107048. DOI: 10.1016/j.jebo.2025.107048.
-- Bayram, I. S. et al. (2023). *Statistical Characterization of Public AC EV Chargers in the U.K.* IEEE Access. DOI: 10.1109/ACCESS.2023.3293091.
+Notebook xuất `outputs/nv5/timeseries_15min.csv` với các cột `cluster_id`, `timestamp_utc`, `occupancy_ports`, `session_arrivals`; `outputs/nv5/baseline_predictions.csv` có `cluster_id`, `timestamp_utc`, `target`, `model`, `split`, `y_true`, `y_pred`; bảng metric chứa MAE, RMSE, R² riêng theo mục tiêu, cụm và validation/test. Kỳ có thể dùng bảng dự đoán để chạy thêm Robustness Checks.
+
+Cell kiểm tra dữ liệu chạy được trước khi có mapping và mốc chia; nó hiển thị kết quả NV1 trong notebook và lưu `outputs/nv5/nv5_input_audit.json`. Lần kiểm tra hiện tại đọc `sessions_features.parquet`: 259.356 phiên hợp lệ, 12 phiên thời lượng bằng 0, 139 cổng quan sát, không thiếu `port_id`, không lệch định danh MAC/cổng. `cluster_map_ready=False` và chưa có file mốc chia nên chưa có kết quả dự báo. Khi chạy mô hình, `outputs/nv5/data_audit.json` ghi số phiên được giữ, số khoảng không dương bị loại, cổng/cluster và giới hạn occupancy; nếu occupancy vượt số cổng vật lý quan sát được trong cụm, pipeline dừng lỗi. Test đọc và kiểm tra trực tiếp các cell định nghĩa trong notebook; gồm hai phiên cùng cổng, nhiều cổng đồng thời, kết thúc đúng biên, zero-fill, missing `port_id`, tính riêng theo cụm và kiểm tra ID/map.
+
+Chạy test:
+
+```bash
+python -m pytest tests/test_nv5_forecasting.py -q
+```
