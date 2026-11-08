@@ -1,0 +1,11 @@
+{
+  "valid_sessions":259344,
+  "observed_ports":139,
+  "first_utc":"2011-07-30 03:15:00",
+  "last_utc":"2021-01-05 05:15:00",
+  "time_bins":330920,
+  "max_occupancy":49,
+  "max_arrivals":13,
+  "overlap_port_limit_slots":0,
+  "source":"nv1_raw_recomputed"
+}
