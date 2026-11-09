@@ -81,8 +81,8 @@ $$CC_i = \frac{D_i^-}{D_i^+ + D_i^-}, \quad CC_i \in [0, 1]$$
 | 12 | PALO ALTO CA / MPL #6 | 8.970 | 0,3905 | 12 | 0,5204 | 21 | **9** |
 | 13 | PALO ALTO CA / HIGH #3 | 8.306 | 0,3836 | 13 | 0,5276 | 19 | 6 |
 | 14 | PALO ALTO CA / CAMBRIDGE #1 | 11.148 | 0,3776 | 14 | 0,4900 | 25 | **11** |
-| 15 | PALO ALTO CA / BRYANT #4 | 3.594 | 0,3672 | 15 | 0,5743 | 7 | **8** |
-| 16 | PALO ALTO CA / RINCONADA LIB 1 | 6.203 | 0,3660 | 16 | 0,5309 | 18 | 2 |
+| 15 | PALO ALTO CA / BRYANT #4 | 3.594 | 0,3072 | 15 | 0,5743 | 7 | **8** |
+| 16 | PALO ALTO CA / RINCONADA LIB 1 | 6.203 | 0,3060 | 16 | 0,5309 | 18 | 2 |
 | 17 | PALO ALTO CA / RINCONADA LIB 3 | 6.489 | 0,3557 | 17 | 0,5230 | 20 | 3 |
 | 18 | PALO ALTO CA / RINCONADA LIB 2 | 5.541 | 0,3509 | 18 | 0,5310 | 17 | 1 |
 | 19 | PALO ALTO CA / MPL #4 | 7.757 | 0,3495 | 19 | 0,5111 | 23 | 4 |
@@ -116,13 +116,13 @@ $$CC_i = \frac{D_i^-}{D_i^+ + D_i^-}, \quad CC_i \in [0, 1]$$
 | *Bottom 32* | MPL #3 ($CC = 0,1797$) | MPL #1 ($CC = 0,2796$) |
 | *Bottom 33* | **CAMBRIDGE #4** ($CC = 0,1710$) | **MPL #2** ($CC = 0,2692$) |
 
-![Biểu đồ điểm TOPSIS](file:///e:/backup/class/s5/business%20analyst/doan/project/ev-charging-analytics---IS403/reports/figures/hinh_3_7_diem_topsis.png)
+![Biểu đồ điểm TOPSIS](figures/hinh_3_7_diem_topsis.png)
 *Hình 3.7. Điểm số TOPSIS của 33 trạm sạc dưới hai phương pháp gán trọng số (sắp xếp tăng dần theo điểm số Entropy).*
 
-![Biểu đồ chuyển dịch thứ hạng](file:///e:/backup/class/s5/business%20analyst/doan/project/ev-charging-analytics---IS403/reports/figures/hinh_3_8_so_sanh_thu_hang.png)
+![Biểu đồ chuyển dịch thứ hạng](figures/hinh_3_8_so_sanh_thu_hang.png)
 *Hình 3.8. Sơ đồ dịch chuyển thứ hạng (Slope Chart) của 33 trạm sạc giữa Trọng số Entropy và Trọng số đều.*
 
-![Đồ thị phân tán điểm TOPSIS](file:///e:/backup/class/s5/business%20analyst/doan/project/ev-charging-analytics---IS403/reports/figures/hinh_3_9_phan_tan_diem.png)
+![Đồ thị phân tán điểm TOPSIS](figures/hinh_3_9_phan_tan_diem.png)
 *Hình 3.9. Tương quan điểm số TOPSIS giữa Trọng số Entropy và Trọng số đều cùng các trạm sạc nhạy cảm điển hình.*
 
 *Diễn giải các dịch chuyển thứ hạng đáng chú ý:*
@@ -141,13 +141,13 @@ $$CC_i = \frac{D_i^-}{D_i^+ + D_i^-}, \quad CC_i \in [0, 1]$$
 ### g) Phân tích độ ổn định và độ nhạy của kết quả
 
 #### 1. Mức độ đồng thuận giữa hai mô hình cơ sở (S0)
-- **Hệ số tương quan hạng Spearman:** Đạt **$\rho = 0,8185$** ($p < 0,001$).
-- **Hệ số tương quan Kendall Tau:** Đạt **$\tau = 0,6288$** ($p < 0,001$).
+- **Hệ số tương quan hạng Spearman:** Đạt **$\rho = 0,8192$** ($p < 0,001$).
+- **Hệ số tương quan Kendall Tau:** Đạt **$\tau = 0,6364$** ($p < 0,001$).
 - **Độ trùng khớp Top 5:** Đạt $3/5$ trạm ($60\%$).
 - **Độ lệch thứ hạng tuyệt đối bình quân:** $4,30$ bậc; độ lệch lớn nhất là $14$ bậc.
 - **Tỷ lệ trạm có độ lệch $\ge 5$ bậc:** $14 / 33$ trạm ($42,4\%$).
 
-*Luận chứng phương pháp:* Mặc dù hệ số Spearman $\rho = 0,8185$ thể hiện sự tương quan thứ bậc thuận ở mức cao, việc có tới hơn $42\%$ số trạm thay đổi từ 5 bậc trở lên cho thấy **quyết định gán trọng số có tác động chi phối mạnh mẽ đến thứ hạng cụ thể của từng trạm**.
+*Luận chứng phương pháp:* Mặc dù hệ số Spearman $\rho = 0,8192$ thể hiện sự tương quan thứ bậc thuận ở mức cao, việc có tới hơn $42\%$ số trạm thay đổi từ 5 bậc trở lên cho thấy **quyết định gán trọng số có tác động chi phối mạnh mẽ đến thứ hạng cụ thể của từng trạm**.
 
 #### 2. Kết quả kiểm định độ nhạy qua 6 kịch bản (S1–S6)
 
@@ -160,18 +160,18 @@ $$CC_i = \frac{D_i^-}{D_i^+ + D_i^-}, \quad CC_i \in [0, 1]$$
 | **S0: Cơ sở** | Đầy đủ $C_1 - C_6$ (Min-Max TOPSIS) | 6 | 1,0000 | 1,0000 | 0,00 | 0 | 0 | 5/5 |
 | **S1: Loại $C_2$** | Loại Tổng điện năng ($C_2 = C_1 \times C_3$) | 5 | 0,9545 | 0,8409 | 2,00 | 8 | 4 | 4/5 |
 | **S2: Loại $C_1$** | Loại Số phiên sạc ($C_1$) | 5 | 0,9228 | 0,7652 | 2,97 | 11 | 9 | 3/5 |
-| **S3: Loại $C_6$** | Loại Chiếm dụng nghiêm trọng ($C_6$) | 5 | **0,9967** | **0,9773** | **0,36** | **2** | **0** | **5/5** |
-| **S4: Loại $C_4$** | Loại Thời gian sạc hữu ích ($C_4$) | 5 | **0,9926** | **0,9470** | **0,79** | **3** | **0** | **5/5** |
-| **S5: $C_5$ trọng số** | Thay $C_5$ bằng $\sum T_{\text{idle}} / \sum T_{\text{total}}$ | 6 | **0,9977** | **0,9848** | **0,24** | **3** | **0** | **5/5** |
-| **S6: Chuẩn hóa vector** | TOPSIS kinh điển chuẩn hóa vector | 6 | 0,8877 | 0,7348 | 3,09 | 16 | 5 | 5/5 |
+| **S3: Loại $C_6$** | Loại Chiếm dụng nghiêm trọng ($C_6$) | 5 | **0,9970** | **0,9773** | **0,30** | **2** | **0** | **5/5** |
+| **S4: Loại $C_4$** | Loại Thời gian sạc hữu ích ($C_4$) | 5 | **0,9920** | **0,9470** | **0,79** | **3** | **0** | **5/5** |
+| **S5: $C_5$ trọng số** | Thay $C_5$ bằng $\sum T_{\text{idle}} / \sum T_{\text{total}}$ | 6 | **0,9987** | **0,9848** | **0,24** | **3** | **0** | **5/5** |
+| **S6: Chuẩn hóa vector** | TOPSIS kinh điển chuẩn hóa vector | 6 | 0,8870 | 0,7348 | 3,09 | 16 | 5 | 5/5 |
 
-![Biểu đồ phân tích độ nhạy](file:///e:/backup/class/s5/business%20analyst/doan/project/ev-charging-analytics---IS403/reports/figures/hinh_3_10_phan_tich_do_nhay.png)
+![Biểu đồ phân tích độ nhạy](figures/hinh_3_10_phan_tich_do_nhay.png)
 *Hình 3.10. Hệ số tương quan thứ hạng Spearman và Kendall của các kịch bản kiểm định so với mô hình cơ sở S0 (Mô hình Entropy).*
 
 *Phát hiện quan trọng từ phân tích độ nhạy:*
-1. **Tính dư thừa thông tin giữa $C_5$ và $C_6$ (Kịch bản S3):** Loại bỏ $C_6$ tạo ra sự dịch chuyển thứ hạng gần như bằng không ($\rho = 0,9967$, độ lệch bình quân chỉ $0,36$ bậc, không trạm nào lệch quá 2 bậc). Điều này chứng minh $C_6$ mang thông tin trùng lặp cao với $C_5$ đúng như kết quả tương quan Pearson $r = 0,9852$.
-2. **Ảnh hưởng hạn chế của tiêu chí $C_4$ (Kịch bản S4):** Khi loại bỏ thời gian sạc bình quân $C_4$, thứ hạng mô hình Entropy gần như không đổi ($\rho = 0,9926$, Top 5 giữ nguyên $100\%$). Điều này giải tỏa lo ngại về tính mơ hồ trong định hướng lợi ích của $C_4$.
-3. **Tính bền vững của thước đo nhàn rỗi (Kịch bản S5):** Thay thế $C_5$ trung bình phiên bằng $C_{5,\text{weighted}}$ dựa trên tổng thời lượng cắm cáp cho tương quan thứ hạng lên tới $\rho = 0,9977$, khẳng định phương pháp đo lường hành vi nhàn rỗi ở cấp phiên sạc có tính đại diện xuất sắc cho tổn thất thời gian toàn mạng.
+1. **Tính dư thừa thông tin giữa $C_5$ và $C_6$ (Kịch bản S3):** Loại bỏ $C_6$ tạo ra sự dịch chuyển thứ hạng gần như bằng không ($\rho = 0,9970$, độ lệch bình quân chỉ $0,30$ bậc, không trạm nào lệch quá 2 bậc). Điều này chứng minh $C_6$ mang thông tin trùng lặp cao với $C_5$ đúng như kết quả tương quan Pearson $r = 0,9853$.
+2. **Ảnh hưởng hạn chế của tiêu chí $C_4$ (Kịch bản S4):** Khi loại bỏ thời gian sạc bình quân $C_4$, thứ hạng mô hình Entropy gần như không đổi ($\rho = 0,9920$, Top 5 giữ nguyên $100\%$). Điều này giải tỏa lo ngại về tính mơ hồ trong định hướng lợi ích của $C_4$.
+3. **Tính bền vững của thước đo nhàn rỗi (Kịch bản S5):** Thay thế $C_5$ trung bình phiên bằng $C_{5,\text{weighted}}$ dựa trên tổng thời lượng cắm cáp cho tương quan thứ hạng lên tới $\rho = 0,9987$, khẳng định phương pháp đo lường hành vi nhàn rỗi ở cấp phiên sạc có tính đại diện xuất sắc cho tổn thất thời gian toàn mạng.
 4. **Tác động của mối quan hệ đại số $C_1 - C_2 - C_3$ (Kịch bản S1 & S2):** Loại bỏ $C_1$ hoặc $C_2$ làm giảm tương quan xuống $0,92 - 0,95$ và làm dịch chuyển một số trạm tầm trung. Điều này phản ánh thực tế rằng việc đưa cả hai biến quy mô vào mô hình Entropy đã nhân đôi sức nặng của khía cạnh quy mô nhu cầu, tạo ra một sự thiên vị nhẹ có lợi cho các cụm trạm lớn.
 
 ---

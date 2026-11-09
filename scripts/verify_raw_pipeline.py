@@ -1,53 +1,31 @@
+"""Print NV1-to-NV4 reconciliation using the shared production pipeline."""
+from pathlib import Path
+import sys
 import pandas as pd
-import numpy as np
 
-TRAN_CONG_SUAT_L2_KW = 19.2
-NGUONG_PHIEN_TOI_THIEU = 500
-NGUONG_CHIEM_DUNG = 0.5
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from src.config import RAW_DATA_FILE
+from src.nv4_analysis import prepare_nv4_sessions, build_station_criteria
 
-def giay(s):
-    try:
-        h, m, gi = str(s).split(":")
-        return int(h) * 3600 + int(m) * 60 + int(gi)
-    except Exception:
-        return np.nan
-
-df = pd.read_csv("data/raw/EVChargingStationUsage.csv", encoding="utf-8-sig", low_memory=False)
-print("Raw rows:", len(df))
-
-df["total_s"] = df["Total Duration (hh:mm:ss)"].map(giay)
-df["charging_s"] = df["Charging Time (hh:mm:ss)"].map(giay)
-df["total_h"] = df["total_s"] / 3600
-df["charging_h"] = df["charging_s"] / 3600
-df["energy_kwh"] = pd.to_numeric(df["Energy (kWh)"], errors="coerce")
-
-df = df.drop_duplicates()
-print("After drop duplicates:", len(df))
-
-hop_le_thoi_gian = (
-    df["total_h"].gt(0) & df["charging_h"].gt(0) & df["charging_h"].le(df["total_h"])
-)
-df = df[hop_le_thoi_gian]
-print("After time logic:", len(df))
-
-df = df[(df["energy_kwh"] / df["charging_h"]).le(TRAN_CONG_SUAT_L2_KW)]
-print("After power cap (19.2 kW):", len(df))
-
-bat_dau = pd.to_datetime(df["Start Date"], errors="coerce")
-ket_thuc = pd.to_datetime(df["End Date"], errors="coerce")
-lech_giay = (df["total_s"] - (ket_thuc - bat_dau).dt.total_seconds()).abs()
-df = df[lech_giay.le(59)]
-print("After timestamp tolerance <= 59s:", len(df))
-
-# Station name normalization
-df["Station Name"] = (df["Station Name"].str.replace(r"\s+", " ", regex=True).str.strip()
-                      .str.replace("BRYANT # 1", "BRYANT #1", regex=False))
-
-distinct_stations = df["Station Name"].nunique()
-print("Distinct station names:", distinct_stations)
-
-station_counts = df.groupby("Station Name").size()
-eligible_stations = station_counts[station_counts >= NGUONG_PHIEN_TOI_THIEU]
-print("Eligible stations (>= 500):", len(eligible_stations))
-print("Sessions in eligible stations:", eligible_stations.sum())
-
+raw = pd.read_csv(RAW_DATA_FILE, encoding="utf-8-sig", low_memory=False)
+sessions, ledger, metadata = prepare_nv4_sessions(raw)
+stations, eligible = build_station_criteria(sessions)
+ledger = pd.concat([
+    ledger,
+    pd.DataFrame([
+        {"stage": "Distinct stations after NV4 filters", "rows_remaining": len(stations),
+         "removed_at_stage": None, "rule": "Unique normalized Station Name"},
+        {"stage": "Stations eligible for ranking", "rows_remaining": len(eligible),
+         "removed_at_stage": len(stations) - len(eligible), "rule": "At least 500 NV4-valid sessions"},
+        {"stage": "Sessions in eligible stations", "rows_remaining": int(eligible.C1_so_phien.sum()),
+         "removed_at_stage": len(sessions) - int(eligible.C1_so_phien.sum()),
+         "rule": "Sessions in stations meeting the 500-session threshold"},
+    ])
+], ignore_index=True)
+print("NV4 session reconciliation")
+print(ledger.to_string(index=False))
+print("\nRun metadata")
+print(pd.Series({**metadata, "station_count_after_cleaning": len(stations),
+                 "eligible_station_count": len(eligible),
+                 "sessions_in_eligible_stations": int(eligible.C1_so_phien.sum())}).to_string())

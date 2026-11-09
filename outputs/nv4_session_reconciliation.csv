@@ -1,0 +1,11 @@
+﻿stage,rows_remaining,removed_at_stage,rule
+Raw CSV rows,259415,,Raw source rows
+After exact duplicate removal,259411,4.0,Exact duplicate rows removed
+After positive/consistent duration checks,259366,45.0,"Require total > 0, charging > 0, charging <= total"
+After Port Type power limits,259356,10.0,Use POWER_LIMITS_KW from src.config by Port Type
+After timestamp consistency,258875,481.0,NV1 date parser + UTC; absolute duration difference <= 59 seconds
+NV1 is_valid_session (comparison),259356,,charging <= total and power <= configured Port Type limit
+NV1-valid sessions excluded by NV4 timestamp check,481,,Only the additional NV4 timestamp consistency requirement
+Distinct stations after NV4 filters,46,,Unique normalized Station Name
+Stations eligible for ranking,33,13.0,At least 500 NV4-valid sessions
+Sessions in eligible stations,258836,39.0,Sessions in stations meeting the threshold

@@ -1,86 +1,49 @@
+"""Tests import the same production functions used by NV4 pipeline and notebook."""
 import numpy as np
 import pandas as pd
-import pytest
+
+from src.topsis import entropy_weights, normalize_minmax, topsis, vector_topsis
 
 
-def run_topsis(R, w):
-    """
-    Min-Max-based TOPSIS:
-    R: normalized decision matrix (all criteria benefit-oriented, in [0, 1])
-    w: weight vector (sums to 1, length equals R.shape[1])
-    """
-    if isinstance(w, (list, np.ndarray)):
-        w = pd.Series(w, index=R.columns)
-    
-    # 1. Weighted normalized matrix
-    V = R.multiply(w, axis=1)
-    
-    # 2. Positive and negative ideal solutions
-    A_plus = V.max(axis=0)
-    A_minus = V.min(axis=0)
-    
-    # 3. Separation Euclidean distances
-    D_plus = np.sqrt(((V - A_plus) ** 2).sum(axis=1))
-    D_minus = np.sqrt(((V - A_minus) ** 2).sum(axis=1))
-    
-    # 4. Relative closeness coefficient
-    total_d = D_plus + D_minus
-    CC = np.where(total_d == 0, 0.5, D_minus / total_d)
-    
-    res = pd.DataFrame({
-        "D_plus": D_plus,
-        "D_minus": D_minus,
-        "TOPSIS_Score": CC,
-    }, index=R.index)
-    res["Rank"] = res["TOPSIS_Score"].rank(ascending=False, method="min").astype(int)
-    return res
+def test_minmax_respects_benefit_and_cost_directions():
+    raw = pd.DataFrame({"benefit": [10.0, 20.0, 30.0], "cost": [2.0, 4.0, 8.0]})
+    normalized = normalize_minmax(raw, {"benefit": 1, "cost": -1})
+    assert normalized["benefit"].tolist() == [0.0, 0.5, 1.0]
+    assert normalized["cost"].tolist() == [1.0, 2 / 3, 0.0]
 
 
-def test_topsis_dominance():
-    # Synthetic test where Alt_A dominates Alt_B dominates Alt_C
-    # 3 alternatives, 3 criteria (all benefit, normalized in [0, 1])
-    R = pd.DataFrame({
+def test_topsis_dominance_and_entropy_weights():
+    normalized = pd.DataFrame({
         "C1": [1.0, 0.5, 0.0],
         "C2": [1.0, 0.6, 0.1],
-        "C3": [0.9, 0.4, 0.0]
+        "C3": [0.9, 0.4, 0.0],
     }, index=["Alt_A", "Alt_B", "Alt_C"])
-    
-    w = pd.Series([0.4, 0.3, 0.3], index=R.columns)
-    res = run_topsis(R, w)
-    
-    assert res.loc["Alt_A", "Rank"] == 1
-    assert res.loc["Alt_B", "Rank"] == 2
-    assert res.loc["Alt_C", "Rank"] == 3
-    assert res.loc["Alt_A", "TOPSIS_Score"] > res.loc["Alt_B", "TOPSIS_Score"]
-    assert res.loc["Alt_B", "TOPSIS_Score"] > res.loc["Alt_C", "TOPSIS_Score"]
-    assert 0.0 <= res["TOPSIS_Score"].min() <= 1.0
-    assert 0.0 <= res["TOPSIS_Score"].max() <= 1.0
+    _, weights = entropy_weights(normalized)
+    assert np.isclose(weights.sum(), 1.0)
+    result = topsis(normalized, weights)
+    assert result["Rank"].tolist() == [1, 2, 3]
+    assert result["TOPSIS_Score"].between(0, 1).all()
 
 
-def test_topsis_identical_alternatives():
-    # When alternatives are identical, scores should be equal and well-defined
-    R = pd.DataFrame({
-        "C1": [0.5, 0.5],
-        "C2": [0.5, 0.5]
-    }, index=["Alt_1", "Alt_2"])
-    w = pd.Series([0.5, 0.5], index=R.columns)
-    res = run_topsis(R, w)
-    
-    assert res.loc["Alt_1", "TOPSIS_Score"] == 0.5
-    assert res.loc["Alt_2", "TOPSIS_Score"] == 0.5
-    assert res.loc["Alt_1", "Rank"] == 1
-    assert res.loc["Alt_2", "Rank"] == 1
+def test_full_precision_score_tie_breaks_by_alternative_name():
+    normalized = pd.DataFrame({"C1": [0.5, 0.5], "C2": [0.5, 0.5]}, index=["Station_B", "Station_A"])
+    weights = pd.Series([0.5, 0.5], index=normalized.columns)
+    result = topsis(normalized, weights)
+    assert result.loc["Station_A", "Rank"] == 1
+    assert result.loc["Station_B", "Rank"] == 2
+    assert result["TOPSIS_Score"].nunique() == 1
 
 
-def test_topsis_single_criterion():
-    R = pd.DataFrame({
-        "C1": [1.0, 0.0]
-    }, index=["Best", "Worst"])
-    w = pd.Series([1.0], index=R.columns)
-    res = run_topsis(R, w)
-    
-    assert res.loc["Best", "TOPSIS_Score"] == 1.0
-    assert res.loc["Worst", "TOPSIS_Score"] == 0.0
-    assert res.loc["Best", "Rank"] == 1
-    assert res.loc["Worst", "Rank"] == 2
+def test_vector_topsis_uses_same_deterministic_tie_break():
+    raw = pd.DataFrame({"benefit": [1.0, 1.0], "cost": [2.0, 2.0]}, index=["B", "A"])
+    result = vector_topsis(raw, {"benefit": 1, "cost": -1}, pd.Series([0.5, 0.5], index=raw.columns))
+    assert result.loc["A", "Rank"] == 1
+    assert result.loc["B", "Rank"] == 2
 
+
+def test_constant_criterion_has_finite_normalization_and_equal_entropy_fallback():
+    raw = pd.DataFrame({"constant": [3.0, 3.0], "varying": [1.0, 2.0]})
+    normalized = normalize_minmax(raw, {"constant": 1, "varying": 1})
+    assert normalized.constant.tolist() == [1.0, 1.0]
+    _, weights = entropy_weights(pd.DataFrame({"a": [1.0, 1.0], "b": [1.0, 1.0]}))
+    assert np.allclose(weights.to_numpy(), [0.5, 0.5])

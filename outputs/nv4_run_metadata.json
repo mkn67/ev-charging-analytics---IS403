@@ -1,0 +1,17 @@
+{
+  "raw_rows":259415,
+  "exact_duplicates_removed":4,
+  "nv1_valid_sessions":259356,
+  "nv4_valid_sessions":258875,
+  "nv4_timestamp_rejected_after_other_checks":481,
+  "power_limits_kw":{
+    "Level 1":1.92,
+    "Level 2":22.0,
+    "default":22.0
+  },
+  "timestamp_tolerance_seconds":59,
+  "station_count_after_cleaning":46,
+  "eligible_station_count":33,
+  "sessions_in_eligible_stations":258836,
+  "sessions_clean_parquet_valid_sessions":259356
+}
