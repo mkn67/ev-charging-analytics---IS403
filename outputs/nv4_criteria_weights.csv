@@ -1,7 +1,0 @@
-﻿Tiêu chí,Entropy (e_j),Độ phân kỳ (d_j = 1 - e_j),Trọng số Entropy (w_j),Tên tiêu chí
-C1_so_phien,0.9204309670078197,0.07956903299218032,0.29438756610522365,Số phiên sạc
-C2_tong_dien_nang,0.9249478526499608,0.07505214735003918,0.2776761028567481,Tổng điện năng
-C3_dien_nang_moi_phien,0.9438566074714579,0.05614339252854206,0.20771795330215945,Điện năng bình quân mỗi phiên
-C4_gio_sac_moi_phien,0.9730636085570609,0.026936391442939134,0.09965860358418235,Thời gian sạc hữu ích bình quân
-C5_ty_le_nhan_roi,0.9824170762787461,0.017582923721253918,0.06505287201143234,Tỷ lệ chiếm dụng nhàn rỗi
-C6_ty_le_chiem_dung_nghiem_trong,0.984997224624246,0.015002775375754007,0.05550690214025412,Tỷ lệ phiên chiếm dụng nghiêm trọng

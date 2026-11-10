@@ -59,3 +59,7 @@ ehthumbs.db
 # Large raw dataset files (Tùy chọn: bỏ comment nếu không muốn commit dữ liệu nặng lên Git)
 # data/raw/*.csv
 
+# Generated analysis outputs
+/outputs/
+/notebooks/outputs_*/
+

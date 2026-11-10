@@ -1,8 +1,0 @@
-﻿Scenario,Criteria_Count,Spearman_Entropy,Kendall_Entropy,Mean_Rank_Diff_Entropy,Max_Rank_Diff_Entropy,Stations_Diff_ge5_Entropy,Top5_Overlap_Entropy,Spearman_Equal,Kendall_Equal,Mean_Rank_Diff_Equal,Max_Rank_Diff_Equal,Stations_Diff_ge5_Equal,Top5_Overlap_Equal
-S0: Gốc (C1-C6),6,1.0,1.0,0.0,0,0,5/5,1.0,1.0,0.0,0.0,0.0,5/5
-S1: Loại C2 (Tổng kWh),5,0.9559,0.8447,2.0,8,3,4/5,0.9178,0.803,2.85,9.0,8.0,4/5
-S2: Loại C1 (Số phiên),5,0.9261,0.7727,2.85,11,7,3/5,0.8927,0.7803,3.15,12.0,9.0,4/5
-S3: Loại C6 (Chiếm dụng nặng),5,0.997,0.9811,0.3,2,0,5/5,0.989,0.9432,0.73,5.0,1.0,5/5
-S4: Loại C4 (Thời gian sạc),5,0.992,0.9432,0.85,3,0,5/5,0.9208,0.7841,2.55,10.0,6.0,4/5
-S5: C5 trọng số thời lượng,6,0.9987,0.9886,0.18,2,0,5/5,0.9923,0.9508,0.73,4.0,0.0,5/5
-S6: Vector Normalization,6,0.887,0.7311,3.09,16,6,5/5,,,,,,N/A

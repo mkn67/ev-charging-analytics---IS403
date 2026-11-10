@@ -1,5 +1,6 @@
 """NV5 tests: source IDs, physical port occupancy, boundaries and cluster isolation."""
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -68,21 +69,46 @@ def test_missing_port_id_is_excluded_from_occupancy_but_arrival_is_counted():
 
 
 def test_port_id_must_match_mac_plus_port_mapping(tmp_path):
-    d = pd.DataFrame({"MAC Address": ["aa:bb"], "Port Number": [1], "port_id": ["aa:bb_Port_1"]})
+    d = pd.DataFrame({
+        "MAC Address": ["aa:bb"], "Port Number": [1], "port_id": ["aa:bb_Port_1"],
+        "Station Name": ["PALO ALTO CA / BRYANT #1"],
+    })
     path = tmp_path / "mapping.csv"
-    pd.DataFrame({"port_id": ["aa:bb_Port_1"], "cluster_id": ["site-group-1"]}).to_csv(path, index=False)
+    pd.DataFrame({"station_name": ["PALO ALTO CA / BRYANT #1"], "cluster_id": ["BRYANT"]}).to_csv(path, index=False)
     result = nv5.attach_clusters(d, path)
-    assert result.loc[0, "cluster_id"] == "site-group-1"
+    assert result.loc[0, "cluster_id"] == "BRYANT"
     d.loc[0, "port_id"] = "1"
     with pytest.raises(ValueError, match="disagrees"):
         nv5.attach_clusters(d, path)
 
 
-def test_cluster_map_requires_unique_mapping_per_physical_port(tmp_path):
-    d = pd.DataFrame({"MAC Address": ["aa", "aa"], "Port Number": [1, 1]})
+def test_station_name_mapping_handles_a_port_relocated_between_sites(tmp_path):
+    d = pd.DataFrame({
+        "MAC Address": ["aa:bb", "aa:bb"], "Port Number": [1, 1],
+        "port_id": ["aa:bb_Port_1", "AABB_Port_1"],
+        "Station Name": ["PALO ALTO CA / HAMILTON #2", "PALO ALTO CA / BRYANT #3"],
+    })
     path = tmp_path / "mapping.csv"
-    pd.DataFrame({"port_id": ["aa_Port_1", "aa_Port_1"], "cluster_id": ["A", "B"]}).to_csv(path, index=False)
-    with pytest.raises(ValueError, match="exactly one"):
+    pd.DataFrame({
+        "station_name": ["PALO ALTO CA / HAMILTON #2", "PALO ALTO CA / BRYANT #3"],
+        "cluster_id": ["HAMILTON", "BRYANT"],
+    }).to_csv(path, index=False)
+    result = nv5.attach_clusters(d, path)
+    assert result.port_id.nunique() == 1
+    assert result.cluster_id.tolist() == ["HAMILTON", "BRYANT"]
+
+
+def test_station_cluster_map_requires_one_cluster_per_station_name(tmp_path):
+    d = pd.DataFrame({
+        "MAC Address": ["aa", "bb"], "Port Number": [1, 1],
+        "Station Name": ["PALO ALTO CA / BRYANT #1", "PALO ALTO CA / BRYANT #2"],
+    })
+    path = tmp_path / "mapping.csv"
+    pd.DataFrame({
+        "station_name": ["PALO ALTO CA / BRYANT #1", "PALO ALTO CA / BRYANT #1"],
+        "cluster_id": ["BRYANT", "HAMILTON"],
+    }).to_csv(path, index=False)
+    with pytest.raises(ValueError, match="exactly one cluster_id"):
         nv5.attach_clusters(d, path)
 
 
@@ -97,7 +123,9 @@ def test_lags_and_rolling_features_are_cluster_local_and_past_only():
     fa = f.loc[f.cluster_id.eq("A")].reset_index(drop=True)
     fb = f.loc[f.cluster_id.eq("B")].reset_index(drop=True)
     assert fa.loc[0, "lag_1"] == 671
+    assert fa.loc[0, "lag_2"] == 670
     assert fa.loc[0, "rolling_mean_4"] == np.mean([668, 669, 670, 671])
+    assert fa.loc[0, "rolling_mean_12"] == np.mean(np.arange(660, 672))
     assert fb.loc[0, "lag_96"] == fa.loc[0, "lag_96"] + 10000
     assert fb.loc[0, "rolling_mean_4"] == fa.loc[0, "rolling_mean_4"] + 10000
 
@@ -114,3 +142,55 @@ def test_ridge_scaler_is_fit_on_train_only():
     test = pd.DataFrame({"x": [-100.0], "y": [0.0]})
     _, _, scaler = nv5.ridge_predictions(train, validation, test, ["x"], "y")
     assert scaler.mean_.tolist() == [1.0]
+
+
+def test_port_ids_normalize_mac_format_and_case():
+    values = pd.Series(["aa:bb_Port_1", "AABB_Port_1"])
+    assert nv5._normalize_port_id(values).tolist() == ["AABB_Port_1", "AABB_Port_1"]
+
+
+def test_count_forecasts_are_clipped_to_physical_port_limit():
+    assert nv5.clip_to_port_limit([-2, 1.5, 9], 4).tolist() == [0.0, 1.5, 4.0]
+    # Arrivals are sessions, so do not cap them by the number of physical ports.
+    assert nv5.clip_to_port_limit([-1, 3, 8]).tolist() == [0.0, 3.0, 8.0]
+
+
+def test_stress_test_boundary_is_optional_and_must_follow_test():
+    base = {"train_end_utc": "2019-01-01", "validation_end_utc": "2019-07-01",
+            "test_end_utc": "2020-01-01"}
+    assert nv5._parse_splits(base)[3] is None
+    with pytest.raises(ValueError, match="stress_start_utc"):
+        nv5._parse_splits({**base, "stress_start_utc": "2019-12-01"})
+    assert nv5._parse_splits({**base, "stress_start_utc": "2020-01-01"})[3] == pd.Timestamp("2020-01-01")
+
+
+def test_run_target_emits_separate_stress_metrics(monkeypatch):
+    class FakeXGBRegressor:
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def fit(self, x, y):
+            self.value = float(np.mean(y))
+            return self
+
+        def predict(self, x):
+            return np.full(len(x), self.value)
+
+    monkeypatch.setitem(sys.modules, "xgboost", SimpleNamespace(XGBRegressor=FakeXGBRegressor))
+    timestamps = pd.date_range("2020-01-01", periods=800, freq="15min")
+    series = pd.DataFrame({
+        "cluster_id": "A", "timestamp_utc": timestamps,
+        "occupancy_ports": (np.arange(800) % 5).astype(float),
+        "observed_physical_ports": 5,
+    })
+    splits = {
+        "train_end_utc": timestamps[710],
+        "validation_end_utc": timestamps[750],
+        "test_end_utc": timestamps[775],
+        "stress_start_utc": timestamps[780],
+    }
+    scores, predictions = nv5.run_target(series, "occupancy_ports", splits)
+    stress_scores = scores.loc[scores.split.eq("stress_2020")]
+    assert len(stress_scores) == 7
+    assert predictions.loc[predictions.split.eq("stress_2020"), "timestamp_utc"].nunique() == 20
+    assert stress_scores.test_end_utc.nunique() == 1
