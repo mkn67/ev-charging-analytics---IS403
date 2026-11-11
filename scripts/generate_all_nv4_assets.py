@@ -25,7 +25,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from src.config import RAW_DATA_FILE, SESSIONS_CLEAN_PARQUET
 from src.nv4_analysis import NV4_CRITERIA, build_station_criteria, prepare_nv4_sessions
-from src.nv4_sensitivity import run_sensitivity
+from src.nv4_sensitivity import run_sensitivity, summarize_rank_robustness
 from src.topsis import entropy_weights, normalize_minmax, topsis
 
 OUTPUT_DIR = ROOT / "outputs"
@@ -175,6 +175,10 @@ fig.tight_layout()
 save_figure(fig, "hinh_3_9_phan_tan_diem.png")
 
 sensitivity = run_sensitivity(X, NV4_CRITERIA)
+rank_robustness = summarize_rank_robustness(X, NV4_CRITERIA, sensitivity)
+(OUTPUT_DIR / "nv4_rank_robustness.json").write_text(
+    json.dumps(rank_robustness, ensure_ascii=False, indent=2), encoding="utf-8"
+)
 sensitivity.to_csv(OUTPUT_DIR / "nv4_sensitivity_analysis.csv", index=False, encoding="utf-8-sig")
 sens_plot = sensitivity.loc[sensitivity.Scenario.str.match(r"S[1-6]:")].copy()
 if sens_plot.empty:

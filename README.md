@@ -120,6 +120,8 @@ A before-and-after comparison can identify associations, but it does not by itse
 - Use chronological train/validation/test splits and lagged features that do not use future information.
 - Report appropriate metrics such as MAE and RMSE; use MAPE only when its handling of zero or near-zero actual values is justified.
 
+For the complete workflow, see the [Vietnamese NV1–NV5 team run guide](docs/HUONG_DAN_CHAY_NV1_DEN_NV5.md). The [NV5 guide](docs/HUONG_DAN_CHAY_NV5.md) adds details on its mapping, split configuration, and output checks.
+
 ## 🧰 Tech Stack
 
 - **Language:** Python

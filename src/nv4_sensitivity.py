@@ -102,3 +102,31 @@ def run_sensitivity(matrix: pd.DataFrame, criteria: dict):
         "Stations_Diff_ge5_Equal": np.nan, "Top5_Overlap_Equal": "N/A",
     })
     return pd.DataFrame(rows)
+
+
+def summarize_rank_robustness(matrix: pd.DataFrame, criteria: dict, sensitivity: pd.DataFrame) -> dict:
+    """Expose correlated criteria and material rank changes for interpretation."""
+    columns = list(criteria)
+    corr = matrix[columns].corr(method="pearson")
+    normalized = normalize_minmax(matrix[columns], _directions(criteria))
+    _, weights = entropy_weights(normalized)
+    scenarios = {}
+    for label in ("S1", "S2", "S6"):
+        row = sensitivity.loc[sensitivity["Scenario"].astype(str).str.startswith(label + ":")]
+        if row.empty:
+            raise ValueError(f"Missing sensitivity scenario {label}")
+        item = row.iloc[0]
+        scenarios[label] = {
+            "spearman_entropy": float(item["Spearman_Entropy"]),
+            "stations_shifted_at_least_5_ranks": int(item["Stations_Diff_ge5_Entropy"]),
+            "max_rank_shift": int(item["Max_Rank_Diff_Entropy"]),
+            "top5_overlap": str(item["Top5_Overlap_Entropy"]),
+        }
+    return {
+        "station_count": int(len(matrix)),
+        "correlation_c1_c2": float(corr.loc["C1_so_phien", "C2_tong_dien_nang"]),
+        "correlation_c5_c6": float(corr.loc["C5_ty_le_nhan_roi", "C6_ty_le_chiem_dung_nghiem_trong"]),
+        "entropy_weight_c1_c2_sum": float(weights["C1_so_phien"] + weights["C2_tong_dien_nang"]),
+        "scenarios": scenarios,
+        "interpretation": "Ranking is conditional on criteria, weights and observation exposure; inspect S1/S2/S6 before operational use.",
+    }

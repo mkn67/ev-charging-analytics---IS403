@@ -1,3 +1,10 @@
+"""Legacy one-off notebook rewrite; retained only for historical reference.
+
+The current NV2 notebook is the source of truth. Running this old patch would
+restore obsolete clustering numbers and narrative, so it is intentionally disabled.
+"""
+raise SystemExit("Obsolete NV2 patch: run notebooks/02_NV2_occupancy_clustering.ipynb instead")
+
 import json
 
 nb_path = 'notebooks/02_NV2_occupancy_clustering.ipynb'

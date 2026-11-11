@@ -59,7 +59,8 @@ def convert_to_utc(dt_series: pd.Series, tz_series: pd.Series) -> pd.Series:
     """
     Chuẩn hóa dấu thời gian sang UTC dựa vào múi giờ (PDT, PST, UTC).
     """
-    deltas = pd.to_timedelta(tz_series.map(TIMEZONE_OFFSETS).fillna(0), unit='h')
+    # Unknown time zones stay missing instead of being silently treated as UTC.
+    deltas = pd.to_timedelta(tz_series.map(TIMEZONE_OFFSETS), unit='h')
     return dt_series - deltas
 
 
@@ -151,6 +152,12 @@ def build_clean_pipeline(raw_df: pd.DataFrame) -> Tuple[pd.DataFrame, int, int]:
     df['end_dt_local'] = parse_dates_robust(df['End Date'])
     df['start_datetime_utc'] = convert_to_utc(df['start_dt_local'], df['Start Time Zone'])
     df['end_datetime_utc'] = convert_to_utc(df['end_dt_local'], df['End Time Zone'])
+    known_zones = set(TIMEZONE_OFFSETS)
+    df['flag_unknown_timezone'] = (~df['Start Time Zone'].isin(known_zones) |
+                                   ~df['End Time Zone'].isin(known_zones))
+    observed_sec = (df['end_datetime_utc'] - df['start_datetime_utc']).dt.total_seconds()
+    df['flag_nonpositive_connection_interval'] = observed_sec.le(0) | observed_sec.isna()
+    df['flag_timestamp_mismatch_59s'] = observed_sec.sub(df['total_duration_sec']).abs().gt(59) | observed_sec.isna()
     
     # 4. Định danh cổng sạc
     mac = df['MAC Address'].astype('string').str.strip()
