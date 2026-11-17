@@ -1,6 +1,7 @@
 import pandas as pd
+import pytest
 
-from src.nv4_analysis import build_station_criteria, prepare_nv4_sessions
+from src.nv4_analysis import build_station_criteria, build_station_rankings, prepare_nv4_sessions
 
 
 def source_row(station, start, end, zone_start, zone_end, duration, energy, port_type="Level 2"):
@@ -53,3 +54,60 @@ def test_criteria_threshold_is_applied_after_session_reconciliation():
     assert eligible.index.tolist() == ["A"]
     assert eligible.loc["A", "C1_so_phien"] == 500
     assert "C5_weighted" in all_stations
+
+
+def ranking_inputs():
+    criteria = pd.DataFrame(
+        {"C1_so_phien": [500, 700, 600]}, index=["Station B", "Station C", "Station A"]
+    )
+    entropy = pd.DataFrame(
+        {"TOPSIS_Score": [0.8, 0.2, 0.5], "Rank": [1, 3, 2]},
+        index=["Station C", "Station A", "Station B"],
+    )
+    equal = pd.DataFrame(
+        {"TOPSIS_Score": [0.6, 0.9, 0.3], "Rank": [2, 1, 3]},
+        index=["Station A", "Station B", "Station C"],
+    )
+    criteria.columns.name = "Tiêu chí"
+    return criteria, entropy, equal
+
+
+def test_station_rankings_align_independently_ordered_inputs_by_station_name():
+    criteria, entropy, equal = ranking_inputs()
+    result = build_station_rankings(criteria, entropy, equal)
+
+    assert result.columns.name is None
+    assert result["Station Name"].tolist() == ["Station C", "Station B", "Station A"]
+    assert result["C1_so_phien"].tolist() == [700, 500, 600]
+    assert result["Score_Entropy"].tolist() == [0.8, 0.5, 0.2]
+    assert result["Rank_Entropy"].tolist() == [1, 2, 3]
+    assert result["Score_Equal"].tolist() == [0.3, 0.9, 0.6]
+    assert result["Rank_Equal"].tolist() == [3, 1, 2]
+    assert result["Rank_Diff"].tolist() == [2, 1, 1]
+    pd.testing.assert_frame_equal(
+        result,
+        build_station_rankings(criteria.iloc[::-1], entropy.iloc[::-1], equal.iloc[::-1]),
+    )
+
+
+def test_station_rankings_reject_missing_or_different_station_identifiers():
+    criteria, entropy, equal = ranking_inputs()
+    with pytest.raises(ValueError, match="cover exactly"):
+        build_station_rankings(criteria, entropy.iloc[:-1], equal)
+    different = equal.rename(index={"Station A": "Unknown Station"})
+    with pytest.raises(ValueError, match="cover exactly"):
+        build_station_rankings(criteria, entropy, different)
+
+
+def test_station_rankings_reject_duplicate_station_identifiers_and_missing_values():
+    criteria, entropy, equal = ranking_inputs()
+    duplicates = pd.concat([entropy, entropy.iloc[:1]])
+    with pytest.raises(ValueError, match="unique station"):
+        build_station_rankings(criteria, duplicates, equal)
+    duplicate_criteria = pd.concat([criteria, criteria.iloc[:1]])
+    with pytest.raises(ValueError, match="unique station"):
+        build_station_rankings(duplicate_criteria, entropy, equal)
+    missing_score = equal.copy()
+    missing_score.loc["Station A", "TOPSIS_Score"] = float("nan")
+    with pytest.raises(ValueError, match="populated"):
+        build_station_rankings(criteria, entropy, missing_score)

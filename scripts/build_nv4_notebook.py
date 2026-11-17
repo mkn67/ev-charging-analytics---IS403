@@ -38,7 +38,7 @@ while not (ROOT / "src" / "config.py").exists():
 sys.path.insert(0, str(ROOT))
 
 from src.config import RAW_DATA_FILE, SESSIONS_CLEAN_PARQUET, POWER_LIMITS_KW
-from src.nv4_analysis import NV4_CRITERIA, build_station_criteria, prepare_nv4_sessions
+from src.nv4_analysis import NV4_CRITERIA, build_station_criteria, build_station_rankings, prepare_nv4_sessions
 from src.nv4_sensitivity import run_sensitivity
 from src.topsis import entropy_weights, normalize_minmax, topsis
 
@@ -97,16 +97,7 @@ display(entropy_table.round(6))
 
 top_entropy = topsis(R, w_entropy)
 top_equal = topsis(R, w_equal)
-df_rank = pd.DataFrame({
-    "Station Name": X.index.to_numpy(),
-    "C1_so_phien": X["C1_so_phien"].to_numpy(),
-    "Score_Entropy": top_entropy["TOPSIS_Score"].to_numpy(),
-    "Rank_Entropy": top_entropy["Rank"].to_numpy(),
-    "Score_Equal": top_equal["TOPSIS_Score"].to_numpy(),
-    "Rank_Equal": top_equal["Rank"].to_numpy(),
-})
-df_rank["Rank_Diff"] = (df_rank.Rank_Entropy - df_rank.Rank_Equal).abs()
-df_rank = df_rank.sort_values(["Rank_Entropy", "Station Name"], kind="mergesort").reset_index(drop=True)
+df_rank = build_station_rankings(X, top_entropy, top_equal)
 display(df_rank)
 display(df_rank.head(5))
 display(df_rank.tail(5))

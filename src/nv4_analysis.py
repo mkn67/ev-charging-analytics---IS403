@@ -146,3 +146,34 @@ def build_station_criteria(
         "C1_so_phien", ascending=False
     ).copy()
     return all_stations, eligible
+
+
+def build_station_rankings(
+    station_criteria: pd.DataFrame,
+    entropy_results: pd.DataFrame,
+    equal_results: pd.DataFrame,
+) -> pd.DataFrame:
+    """Align both TOPSIS results to station identifiers before exporting ranks."""
+    station_names = station_criteria.index
+    if not station_names.is_unique:
+        raise ValueError("Station criteria must have unique station identifiers")
+    for name, results in (("Entropy", entropy_results), ("Equal", equal_results)):
+        if not results.index.is_unique:
+            raise ValueError(f"{name} results must have unique station identifiers")
+        if len(results) != len(station_names) or not station_names.isin(results.index).all():
+            raise ValueError(f"{name} results must cover exactly the criterion stations")
+
+    ranking = station_criteria[["C1_so_phien"]].copy()
+    ranking["Score_Entropy"] = entropy_results["TOPSIS_Score"].reindex(station_names)
+    ranking["Rank_Entropy"] = entropy_results["Rank"].reindex(station_names)
+    ranking["Score_Equal"] = equal_results["TOPSIS_Score"].reindex(station_names)
+    ranking["Rank_Equal"] = equal_results["Rank"].reindex(station_names)
+    if ranking.isna().any().any():
+        raise ValueError("Station counts, TOPSIS scores, and ranks must be populated")
+    ranking["Rank_Diff"] = (ranking["Rank_Entropy"] - ranking["Rank_Equal"]).abs()
+    return (
+        ranking.rename_axis(index="Station Name", columns=None)
+        .reset_index()
+        .sort_values(["Rank_Entropy", "Station Name"], kind="mergesort")
+        .reset_index(drop=True)
+    )

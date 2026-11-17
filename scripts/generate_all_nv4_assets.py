@@ -24,7 +24,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
 from src.config import RAW_DATA_FILE, SESSIONS_CLEAN_PARQUET
-from src.nv4_analysis import NV4_CRITERIA, build_station_criteria, prepare_nv4_sessions
+from src.nv4_analysis import NV4_CRITERIA, build_station_criteria, build_station_rankings, prepare_nv4_sessions
 from src.nv4_sensitivity import run_sensitivity, summarize_rank_robustness
 from src.topsis import entropy_weights, normalize_minmax, topsis
 
@@ -86,15 +86,7 @@ w_equal = pd.Series(1.0 / len(criterion_columns), index=criterion_columns, name=
 top_entropy = topsis(R, w_entropy)
 top_equal = topsis(R, w_equal)
 
-rank = pd.DataFrame({
-    "Station Name": X.index,
-    "C1_so_phien": X["C1_so_phien"],
-    "Score_Entropy": top_entropy["TOPSIS_Score"],
-    "Rank_Entropy": top_entropy["Rank"],
-    "Score_Equal": top_equal["TOPSIS_Score"],
-    "Rank_Equal": top_equal["Rank"],
-    "Rank_Diff": (top_entropy["Rank"] - top_equal["Rank"]).abs(),
-}).reset_index(drop=True).sort_values(["Rank_Entropy", "Station Name"], kind="mergesort")
+rank = build_station_rankings(X, top_entropy, top_equal)
 
 export_criteria = X[criterion_columns].copy()
 export_criteria.to_csv(OUTPUT_DIR / "nv4_station_criteria.csv", encoding="utf-8-sig")
@@ -158,7 +150,7 @@ for _, row in rank.iterrows():
     ax.text(1.03, row["Rank_Equal"], f"{row['Rank_Equal']}. {name}", ha="left", va="center", fontsize=6.5)
 ax.set_xticks([0, 1], ["Entropy", "Đều"])
 ax.set_ylim(len(rank) + 1, 0)
-ax.set_ylabel("Hạng")
+ax.set_yticks([])
 ax.set_title("So sánh hạng theo hai bộ trọng số")
 ax.spines[["top", "right", "bottom"]].set_visible(False)
 fig.tight_layout()
