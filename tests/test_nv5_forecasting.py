@@ -130,6 +130,43 @@ def test_lags_and_rolling_features_are_cluster_local_and_past_only():
     assert fb.loc[0, "rolling_mean_4"] == fa.loc[0, "rolling_mean_4"] + 10000
 
 
+def test_changing_present_and_future_targets_cannot_change_current_features():
+    timestamps = pd.date_range("2019-07-01", periods=800, freq="15min")
+    original = pd.DataFrame({"cluster_id": "A", "timestamp_utc": timestamps,
+                             "occupancy_ports": np.arange(800, dtype=float) % 7})
+    changed = original.copy()
+    changed.loc[720:, "occupancy_ports"] = 9999
+    before = nv5.add_features(original, "occupancy_ports").set_index("timestamp_utc")
+    after = nv5.add_features(changed, "occupancy_ports").set_index("timestamp_utc")
+    features = before.columns.difference(["occupancy_ports"])
+    pd.testing.assert_frame_equal(before.loc[:timestamps[720], features],
+                                  after.loc[:timestamps[720], features])
+
+
+def test_calendar_features_follow_palo_alto_including_dst():
+    times = pd.date_range("2019-03-01", periods=1100, freq="15min")
+    series = pd.DataFrame({"cluster_id": "A", "timestamp_utc": times,
+                           "occupancy_ports": np.ones(len(times))})
+    features = nv5.add_features(series, "occupancy_ports")
+    local = features.timestamp_utc.dt.tz_localize("UTC").dt.tz_convert("America/Los_Angeles")
+    assert features.slot.tolist() == (local.dt.hour * 4 + local.dt.minute // 15).tolist()
+    assert features.dow.tolist() == local.dt.dayofweek.tolist()
+
+
+def test_fast_occupancy_agrees_with_independent_interval_intersection():
+    rng = np.random.default_rng(42)
+    origin = pd.Timestamp("2019-01-01")
+    rows = [{"port_id": f"p{rng.integers(4)}",
+             "start_datetime_utc": origin + pd.Timedelta(minutes=int(start)),
+             "end_datetime_utc": origin + pd.Timedelta(minutes=int(start + duration))}
+            for start, duration in zip(rng.integers(0, 150, 40), rng.integers(1, 70, 40))]
+    data = sessions(rows)
+    fast, _ = nv5.make_regular_series(data)
+    for row in fast.itertuples():
+        intersect = (data.start_datetime_utc < row.timestamp_utc + pd.Timedelta(minutes=15)) & (data.end_datetime_utc > row.timestamp_utc)
+        assert row.occupancy_ports == data.loc[intersect, "port_id"].nunique()
+
+
 def test_split_milestones_are_required_in_chronological_order():
     with pytest.raises(ValueError, match="train_end_utc"):
         nv5._parse_splits({"train_end_utc": "2020-03-01", "validation_end_utc": "2020-02-01",
@@ -194,3 +231,31 @@ def test_run_target_emits_separate_stress_metrics(monkeypatch):
     assert len(stress_scores) == 7
     assert predictions.loc[predictions.split.eq("stress_2020"), "timestamp_utc"].nunique() == 20
     assert stress_scores.test_end_utc.nunique() == 1
+
+
+def test_test_targets_cannot_change_validation_selection(monkeypatch):
+    class MeanModel:
+        def __init__(self, **kwargs):
+            pass
+
+        def fit(self, x, y):
+            self.mean = float(np.mean(y))
+            return self
+
+        def predict(self, x):
+            return np.full(len(x), self.mean)
+
+    monkeypatch.setitem(sys.modules, "xgboost", SimpleNamespace(XGBRegressor=MeanModel))
+    timestamps = pd.date_range("2019-01-01", periods=800, freq="15min")
+    original = pd.DataFrame({"cluster_id": "A", "timestamp_utc": timestamps,
+                             "occupancy_ports": np.arange(800) % 5})
+    changed = original.copy()
+    changed.loc[750:, "occupancy_ports"] = 1000
+    splits = {"train_end_utc": timestamps[710], "validation_end_utc": timestamps[750],
+              "test_end_utc": timestamps[800-1]}
+    first, _ = nv5.run_target(original, "occupancy_ports", splits)
+    second, _ = nv5.run_target(changed, "occupancy_ports", splits)
+    for a, b in zip(first.attrs["candidates"], second.attrs["candidates"]):
+        assert a["params"] == b["params"]
+        assert a["validation_RMSE"] == pytest.approx(b["validation_RMSE"], abs=1e-12)
+    pd.testing.assert_frame_equal(first.loc[first.split.eq("validation")], second.loc[second.split.eq("validation")])

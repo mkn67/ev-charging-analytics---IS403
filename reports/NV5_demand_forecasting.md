@@ -1,5 +1,7 @@
 # NV5 — Dự báo occupancy cổng và session arrivals (mục 3.5.1–3.5.2)
 
+> Rà soát ngày 19/11/2026: notebook đã được sửa giao thức chọn cấu hình, baseline, stress test và lịch Palo Alto. Các metric mô tả bên dưới thuộc báo cáo/lượt chạy trước, không tự động đại diện cho notebook đã sửa. Xem [bản kiểm chứng phương pháp](NV5_method_audit_20261119.md) và bộ kết quả mới tại `outputs/nv5/method_audit_20261119/` trước khi cập nhật mục 4.5.
+
 ## 3.5.1. Định nghĩa mục tiêu và tạo chuỗi 15 phút
 
 NV5 gán cluster_id theo vị trí ghi trong Station Name, không theo cluster hành vi phiên của NV2. 47 cách viết tên trạm được gom về 9 họ vị trí nêu trong đề cương: BRYANT, CAMBRIDGE, HAMILTON, HIGH, MPL, RINCONADA LIB, SHERMAN, TED THOMPSON và WEBSTER. Crosswalk đã được điền tại data/processed/station_cluster_map.csv; file mẫu nằm ở reports/station_cluster_map_template.csv. Gán theo từng phiên xử lý đúng hai cổng chuẩn hóa cùng MAC/cổng xuất hiện ở HAMILTON #2 đến tháng 01/2016 và BRYANT #3 từ tháng 01/2016 trở đi. Mapping tĩnh theo port_id sẽ gán sai một giai đoạn.
