@@ -1,1535 +1,1596 @@
-
+% !TeX program = xelatex
 \documentclass[conference,a4paper]{IEEEtran}
-
-% ==========================================
-% CẤU HÌNH IEEE TIẾNG VIỆT
-% Compiler: XeLaTeX
-% ==========================================
-
 \usepackage{fontspec}
 \usepackage[vietnamese]{babel}
-\setmainfont{TeX Gyre Termes}
-
+\IfFontExistsTF{TeX Gyre Termes}{\setmainfont{TeX Gyre Termes}}{%
+  \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Latin Modern Roman}}}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{array}
-\usepackage{caption}
-\usepackage{url}
-\usepackage{cite}
-\usepackage{microtype}
-
-\graphicspath{{images/}{reports/figures/}}
-
-\captionsetup{
-    font=footnotesize,
-    labelfont=bf
-}
-
-\renewcommand{\abstractname}{Tóm tắt}
-\renewcommand{\IEEEkeywordsname}{Từ khóa}
-\renewcommand{\refname}{Tài liệu tham khảo}
-
-% ==========================================
-% KHUNG HÌNH GIỮ CHỖ
-% Có thể dùng cho các phần sau
-% ==========================================
-
-\newcommand{\imageplaceholder}[2]{
-    \begin{figure}[!t]
-        \centering
-        \fbox{
-            \parbox[c][3cm][c]
-            {0.92\columnwidth}{
-                \centering
-                \footnotesize
-                \texttt{\detokenize{#1}}
-            }
-        }
-        \caption{#2}
-    \end{figure}
-}
+\usepackage{booktabs,tabularx}
+\usepackage{url,cite}
+\graphicspath{{figures/}{reports/figures/}}
+\urlstyle{same}
 
 \begin{document}
-
-% ==========================================
-% TIÊU ĐỀ BÀI BÁO
-% ==========================================
-
-\title{
-PHÂN TÍCH HÀNH VI CHIẾM DỤNG
-VÀ DỰ BÁO NHU CẦU SẠC NHẰM
-NÂNG CAO HIỆU SUẤT VẬN HÀNH
-MẠNG LƯỚI TRẠM SẠC XE ĐIỆN
-CÔNG CỘNG
-}
-
-% ==========================================
-% THÔNG TIN NHÓM
-% ==========================================
-
-\author{
-\IEEEauthorblockN{
-Nguyễn Mai Kỳ,
-Trương Như Khải,
-Hồ Thị Thùy Dung,
-Nguyễn Thị Lam Giang
-}
-\IEEEauthorblockA{
-Khoa Hệ thống Thông tin\\
-Trường Đại học Công nghệ Thông tin\\
-Đại học Quốc gia TP. Hồ Chí Minh\\
-TP. Hồ Chí Minh, Việt Nam\\
-IS403 -- Phân tích dữ liệu kinh doanh
-}
-}
-
+\title{Kết nối hành vi phiên sạc, đối chuẩn trạm và dự báo 15 phút để hỗ trợ vận hành tại Palo Alto}
+\author{\IEEEauthorblockN{Nguyễn Mai Kỳ, Trương Như Khải, Hồ Thị Thùy Dung, Nguyễn Thị Lam Giang}
+\IEEEauthorblockA{Khoa Hệ thống Thông tin, Trường Đại học Công nghệ Thông tin\\
+Đại học Quốc gia TP. Hồ Chí Minh, TP. Hồ Chí Minh, Việt Nam}}
 \maketitle
 
-% ==========================================
-% TÓM TẮT
-% ==========================================
-
 \begin{abstract}
-
-Sự phát triển của phương tiện giao thông điện
-đặt ra yêu cầu nâng cao hiệu quả khai thác
-hạ tầng sạc công cộng, đặc biệt trong bối cảnh
-thời gian phương tiện chiếm giữ cổng sạc
-không hoàn toàn tương ứng với thời gian
-truyền điện thực tế.
-
-Nghiên cứu này xây dựng một quy trình
-phân tích dữ liệu kinh doanh nhằm đánh giá
-hành vi sử dụng, mức độ chiếm dụng nhàn rỗi,
-hiệu suất vận hành và nhu cầu sạc
-của mạng lưới trạm sạc công cộng
-tại Palo Alto, California, Hoa Kỳ.
-
-Bộ dữ liệu gốc gồm 259.415 phiên sạc,
-chủ yếu thuộc giai đoạn 2011--2020.
-Quy trình nghiên cứu bao gồm năm nhiệm vụ:
-kiểm soát chất lượng dữ liệu;
-phân nhóm hành vi bằng K-Means và DBSCAN;
-phân tích sự khác biệt trước và sau
-thay đổi chính sách giá;
-xếp hạng hiệu suất trạm bằng Entropy--TOPSIS;
-và dự báo nhu cầu, mức độ chiếm dụng
-bằng các mô hình học máy,
-trong đó có XGBoost.
-
-Kết quả tiền xử lý xác định 259.356 phiên
-đạt điều kiện hợp lệ của NV1.
-Phân tích K-Means trên 258.720 phiên
-nhận diện bốn nhóm hành vi,
-trong đó nhóm chiếm dụng nhàn rỗi kéo dài
-chiếm 2,67\% số phiên.
-Đánh giá TOPSIS được thực hiện trên
-33 trạm theo sáu tiêu chí vận hành.
-
-Các kết quả phân tích cung cấp cơ sở
-để xem xét chính sách quản lý thời gian
-nhàn rỗi, đánh giá sự khác biệt giữa các trạm
-và hỗ trợ quyết định vận hành.
-Các kết quả dự báo được đánh giá
-theo phân hoạch thời gian và đối chiếu
-với các mô hình cơ sở.
-
+Đơn vị vận hành cần phân biệt ba vấn đề có biểu hiện giống nhau là xe giữ cổng sau khi sạc, nhu cầu tập trung theo giờ và thiếu cổng khả dụng. Nghiên cứu sử dụng 259.415 bản ghi tại Palo Alto để kết nối bằng chứng ở cấp phiên, trạm và khung 15 phút. Nhóm nhàn rỗi kéo dài chiếm 2,67\% số phiên nhưng đóng góp 41,20\% giờ nhàn rỗi. Ba trạm cùng dẫn đầu dưới hai bộ trọng số, trong khi 14 trong 33 trạm đổi ít nhất năm bậc. Trong kiểm thử nửa cuối năm 2019, XGBoost giảm căn sai số bình phương trung bình (RMSE) 4,72\% so với dự báo từ khung liền trước trên tám cụm có chuỗi chiếm dụng biến động. Khoảng tin cậy 95\% từ bootstrap khối bảy ngày là 4,32--5,09\%. Tuy nhiên, sai số tăng 30,16\% trong nửa cuối năm 2018. Kết quả định hướng thí điểm phí giữ cổng, giá sạc theo giờ và khảo sát sức chứa, với chỉ số đánh giá riêng cho từng quyết định.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Xe điện, trạm sạc công cộng,
-chiếm dụng nhàn rỗi, Idle Time,
-K-Means, DBSCAN, Mann--Whitney U,
-TOPSIS, XGBoost, dự báo nhu cầu.
+Chiếm dụng cổng sạc, dự báo chuỗi thời gian, đối chuẩn trạm, phí nhàn rỗi, xe điện.
 \end{IEEEkeywords}
 
+\section{Giới thiệu}
+\label{sec:intro}
+Khi một trạm thường xuyên đông, người vận hành có thể cân nhắc giải phóng cổng đang bị giữ, dịch chuyển lượt đến hoặc tăng số cổng hoạt động. Ba quyết định cần những bằng chứng khác nhau. Số phiên tại một trạm chưa cho thấy bao nhiêu thời gian bị giữ ngoài thời gian sạc. Thứ hạng cao cũng chưa cho biết khi nào trạm hết khả năng phục vụ. Tại cấp phiên, Bayram và cộng sự \cite{bayram2023} dùng thời gian sạc và nhàn rỗi để mô tả cách sử dụng cổng. Straka và Buzna \cite{straka2019} nghiên cứu phân nhóm hành vi. Luo và Wang \cite{luowang2025} phân tích phản ứng quanh mốc giá tại Palo Alto, còn Ostermann và cộng sự \cite{ostermann2022} đánh giá dự báo chiếm dụng bằng học có giám sát.
 
-% ==========================================
-% I. GIỚI THIỆU
-% ==========================================
+Trong phạm vi các công trình đối chiếu, các hướng trên tập trung vào những đơn vị phân tích khác nhau. Bài báo đặt câu hỏi chung trong cùng mạng lưới: \emph{Khi kết hợp bằng chứng về phiên giữ cổng, khác biệt giữa trạm và sai số dự báo theo thời gian, quyết định nào đã có căn cứ và quyết định nào cần đo thêm?} Cụ thể, nghiên cứu kiểm tra mức tập trung giờ nhàn rỗi, độ nhạy của danh sách ưu tiên theo trọng số và tính ổn định của lợi thế dự báo so với khung trước.
 
-\section{GIỚI THIỆU}
+Đóng góp là một nghiên cứu tình huống thực nghiệm tích hợp ba cấp độ, trong đó mỗi phát hiện được gắn với quyết định, đối chứng và điều kiện sử dụng. Cấp phiên sàng lọc hành vi cần can thiệp. Cấp trạm giúp chọn nơi khảo sát và kiểm tra độ nhạy của thứ hạng. Cấp thời gian xác định lợi thế và giới hạn của dự báo ngắn hạn. Bài báo sử dụng các thuật toán đã công bố để kiểm định các mắt xích này trên cùng bối cảnh Palo Alto.
 
-\subsection{Bối cảnh nghiên cứu}
+\section{Nghiên cứu liên quan}
+\subsection{Thời gian kết nối và hành vi nhàn rỗi}
 
-Trong những năm gần đây,
-phương tiện giao thông điện ngày càng
-được quan tâm như một giải pháp
-hướng đến giảm phát thải trong
-lĩnh vực giao thông vận tải.
-Cùng với sự gia tăng phương tiện điện,
-nhu cầu phát triển hạ tầng sạc
-công cộng cũng trở nên quan trọng.
+Bayram và cộng sự \cite{bayram2023} phân tích gần 12.000 phiên sạc tại 595 cổng sạc AC công cộng ở Vương quốc Anh trong giai đoạn tháng 4–7/2022, gồm 505 cổng công suất 7 kW và 90 cổng công suất 22 kW. Nghiên cứu tập trung mô tả thời điểm đến và rời trạm, thời gian kết nối, điện năng cung cấp và thời gian chiếm dụng nhàn rỗi, qua đó cung cấp cơ sở đánh giá mức độ sử dụng hạ tầng và tiềm năng điều phối hoạt động sạc.
 
-Tuy nhiên, hiệu quả vận hành mạng lưới
-trạm sạc không chỉ phụ thuộc vào
-số lượng trạm hoặc cổng sạc được lắp đặt.
-Khả năng khai thác hạ tầng
-còn chịu ảnh hưởng bởi vị trí,
-thời gian phát sinh nhu cầu,
-thời lượng kết nối và hành vi sử dụng
-của người điều khiển phương tiện.
+Kết quả phân tích cho thấy thời gian nhàn rỗi chiếm một phần đáng kể trong nhiều phiên sạc. Với nhóm cổng 7 kW, trung vị thời gian nhàn rỗi là 1,03 giờ và phân vị thứ ba đạt 4,35 giờ; ở nhóm 22 kW, hai giá trị tương ứng là 1,2 giờ và 2,2 giờ. Như vậy, nhóm 7 kW có phần đuôi phân phối thời gian nhàn rỗi kéo dài hơn, dù trung vị thấp hơn nhóm 22 kW. Các kết quả này cho thấy thời gian chiếm dụng cổng không thể được phản ánh đầy đủ chỉ bằng số phiên hoặc điện năng cung cấp. Nghiên cứu còn sử dụng phương pháp bề mặt đáp ứng (Response Surface Methodology – RSM) để mô hình hóa mối liên hệ giữa thời gian nhàn rỗi với thời gian đỗ xe, đơn giá sạc và thời điểm bắt đầu phiên. Theo phân tích của nhóm tác giả, đơn giá sạc là yếu tố quan trọng liên quan đến thời gian nhàn rỗi; tuy nhiên, kết quả từ dữ liệu quan sát này chưa đủ để xác lập tác động nhân quả của chính sách giá.
 
-Bayram và cộng sự \cite{bayram2023}
-đã phân tích gần 12.000 phiên sạc
-từ 595 cổng sạc AC công cộng
-tại Vương quốc Anh.
-Nghiên cứu cho thấy hoạt động sử dụng
-trạm có sự khác biệt đáng kể
-theo thời điểm, loại cổng
-và thời gian phương tiện lưu trú.
-Việc phân tích các đặc trưng vận hành
-giúp cung cấp thông tin cho
-quy hoạch và quản lý hạ tầng sạc.
+Hạn chế chính của nghiên cứu nằm ở phạm vi dữ liệu bốn tháng và cách ước tính thời gian sạc. Công suất thực tế có thể thấp hơn công suất định mức do giới hạn của phương tiện và điều kiện vận hành, khiến thời gian sạc bị ước tính thấp và thời gian nhàn rỗi bị ước tính cao. Bên cạnh đó, kết quả tại Vương quốc Anh cần được kiểm chứng khi áp dụng cho mạng lưới có đặc điểm sử dụng và chính sách giá khác. Nhóm tác giả cũng lưu ý rằng thời gian kết nối dư thừa vừa có thể cản trở xe khác tiếp cận cổng sạc, vừa tạo dư địa điều chỉnh lịch sạc nhằm giảm hoặc dịch chuyển phụ tải điện.
 
-Trong thực tế, một trạm có số lượng
-cổng sạc lớn chưa chắc đạt hiệu suất
-phục vụ tương ứng.
-Tương tự, một trạm có tổng thời gian
-kết nối cao chưa chắc cung cấp
-lượng điện năng lớn,
-bởi phương tiện có thể tiếp tục
-chiếm giữ cổng sau khi kết thúc
-quá trình truyền điện.
+\subsection{Phân nhóm phiên và phân nhóm trạm}
 
-Do đó, phân tích hiệu quả khai thác
-hạ tầng sạc cần tiếp cận từ nhiều
-góc độ, bao gồm nhu cầu sử dụng,
-thời lượng sạc thực tế,
-thời gian chiếm dụng nhàn rỗi
-và sự phân bố hoạt động theo thời gian.
+Straka và Buzna \cite{straka2019} nghiên cứu việc phân nhóm các trạm sạc theo đặc điểm sử dụng dựa trên hơn một triệu giao dịch tại hơn 1.700 trạm thuộc mạng lưới sạc xe điện ở Hà Lan trong khoảng thời gian bốn năm. Nghiên cứu xem xét các đặc trưng liên quan đến mức độ phổ biến, thời gian sử dụng và hiệu suất khai thác trạm, từ đó áp dụng các thuật toán K-Means, DBSCAN và phân cụm phân cấp để nhận diện những nhóm có kiểu sử dụng khác nhau.
 
-\subsection{Vấn đề chiếm dụng nhàn rỗi}
+Về phương pháp, nhóm tác giả xây dựng đặc trưng ở cả cấp giao dịch và cấp trạm. Các đặc trưng bao gồm số lượng giao dịch, tỷ lệ thời gian sạc trên tổng thời gian kết nối, cùng thời điểm bắt đầu và kết thúc giao dịch. Việc đối chiếu nhiều thuật toán cho phép xem xét sự khác biệt giữa các cách tiếp cận phân cụm, trong khi kết quả được diễn giải dựa trên đặc điểm của từng nhóm. Nghiên cứu cho thấy các cụm có thể phản ánh những kiểu sử dụng khác nhau, chẳng hạn trạm được sử dụng trong giờ làm việc, trạm phục vụ nhu cầu mua sắm hoặc giải trí, và trạm có thời gian kết nối kéo dài qua đêm.
 
-Đối với một phiên sạc,
-tổng thời gian phương tiện kết nối
-với cổng sạc thường bao gồm
-thời gian truyền điện thực tế
-và khoảng thời gian phương tiện
-tiếp tục giữ cổng nhưng không
-nhận thêm điện năng.
+Tuy nhiên, đối tượng phân nhóm trong nghiên cứu bao gồm các trạm sạc được mô tả thông qua đặc trưng sử dụng tổng hợp; vì vậy, kết quả không thể được xem là bằng chứng trực tiếp rằng các thuật toán sẽ phân nhóm tốt nhất khi áp dụng cho từng phiên sạc riêng lẻ. Ngoài ra, việc lựa chọn thuật toán và đặc trưng cần được điều chỉnh theo đơn vị phân tích, cấu trúc dữ liệu và mục tiêu nghiên cứu cụ thể.
 
-Khoảng thời gian thứ hai được gọi là
-\textit{Idle Time} hoặc
-\textit{Overstay Time}.
-Đây là một chỉ tiêu quan trọng
-trong đánh giá hành vi sử dụng
-trạm sạc công cộng.
+Đối với đề tài này, nghiên cứu cung cấp cơ sở tham khảo trực tiếp cho việc đối chiếu K-Means và DBSCAN, đồng thời gợi ý sử dụng các đặc trưng liên quan đến thời gian kết nối, tỷ lệ thời gian sạc và thời điểm sử dụng. Khác với nghiên cứu trên tập trung phân nhóm trạm sạc, đề tài hướng đến phân nhóm các phiên sạc tại Palo Alto nhằm nhận diện những kiểu hành vi chiếm dụng khác nhau. Do đó, chất lượng phân cụm được kiểm tra bằng thực nghiệm trên dữ liệu của đề tài, sau đó các cụm được diễn giải dựa trên đặc trưng thực tế thay vì kế thừa nguyên trạng nhãn nhóm từ nghiên cứu trước.
 
-Khi phương tiện vẫn chiếm giữ cổng
-sau khi kết thúc sạc,
-cổng đó chưa thể phục vụ
-một phương tiện khác,
-mặc dù hoạt động truyền điện
-không còn tiếp diễn.
-Điều này có thể làm giảm
-khả năng phục vụ thực tế,
-đặc biệt tại những địa điểm
-có nhu cầu sử dụng cao.
+\subsection{Thiết kế đánh giá thay đổi giá}
 
-Theo Bayram và cộng sự
-\cite{bayram2023},
-thời gian chiếm dụng sau sạc
-có sự khác biệt giữa các loại
-cổng và bối cảnh sử dụng.
-Vì vậy, chỉ thống kê số phiên
-hoặc điện năng cung cấp
-chưa đủ để phản ánh
-đặc điểm vận hành của hạ tầng.
+Luo và Wang \cite{luowang2025} nghiên cứu tác động của chính sách thu phí đến hành vi sử dụng trạm sạc công cộng tại Palo Alto, California. Nghiên cứu sử dụng bộ dữ liệu gồm 259.415 phiên sạc tại mạng lưới sạc công cộng Palo Alto trong giai đoạn tháng 7/2011–12/2020. Sự kiện được khai thác là việc thành phố chuyển từ dịch vụ miễn phí sang thu 0,23 USD/kWh và áp dụng phí đỗ xe sau sạc 2 USD/giờ, sau khoảng miễn phí 20 phút, kể từ ngày 01/08/2017. Thay đổi này tạo điều kiện khảo sát phản ứng của người dùng đối với chi phí năng lượng và chi phí chiếm dụng cổng sạc sau khi kết thúc quá trình truyền điện.
 
-Trong nghiên cứu này,
-thời gian nhàn rỗi của phiên $i$
-được xác định bằng:
+Về phương pháp, nhóm tác giả áp dụng thiết kế hồi quy gián đoạn theo thời gian (Regression Discontinuity in Time – RDiT) để ước lượng sự thay đổi hành vi quanh thời điểm chính sách có hiệu lực. Quy trình gồm hai bước: điều chỉnh các yếu tố kiểm soát, khác biệt cố định giữa trạm và yếu tố thời gian; sau đó ước lượng mức gián đoạn trên phần dư bằng các quan sát gần mốc chính sách. Nghiên cứu đồng thời kiểm tra độ vững của kết quả với các khoảng thời gian quan sát và đặc tả mô hình khác nhau. Cách tiếp cận này nhằm hạn chế ảnh hưởng của xu hướng dài hạn và tính mùa vụ khi đánh giá phản ứng trước thay đổi giá.
 
-\begin{equation}
-T_{\mathrm{idle},i}
-=
-T_{\mathrm{total},i}
--
-T_{\mathrm{charge},i}.
-\label{eq:idle_time}
-\end{equation}
+Một đóng góp khác của nghiên cứu là phân biệt sự điều chỉnh hành vi của cùng người dùng với sự thay đổi thành phần người dùng. Phân tích ở cấp cá nhân cho thấy 35,1\% mức giảm điện năng trung bình mỗi phiên được quy cho sự điều chỉnh của cùng người dùng, còn 64,9\% gắn với thay đổi thành phần người sử dụng trạm. Sau khi thu phí, tỷ trọng người dùng thường xuyên giảm và tỷ trọng người dùng tạm thời tăng. Phát hiện này cho thấy biến động ở cấp mạng lưới không nhất thiết phản ánh mức thay đổi tương ứng trong hành vi của từng cá nhân; vì vậy, thông tin định danh người dùng có vai trò quan trọng trong việc diễn giải kết quả.
 
-Trong đó,
-$T_{\mathrm{total},i}$ là tổng thời gian
-kết nối và $T_{\mathrm{charge},i}$
-là thời gian sạc thực tế.
+Đối với đề tài này, nghiên cứu cung cấp cơ sở trực tiếp để lựa chọn mốc 01/08/2017 và các chỉ số so sánh trước–sau, gồm số phiên sạc, điện năng mỗi phiên và thời gian nhàn rỗi. Kết quả cũng gợi ý xem xét đồng thời tần suất sử dụng và sự thay đổi thành phần người dùng khi diễn giải hành vi chiếm dụng. Tuy nhiên, kiểm định Mann–Whitney U được định hướng trong đề tài chỉ hỗ trợ đánh giá sự khác biệt về phân phối giữa hai giai đoạn, chưa đủ để khẳng định quan hệ nhân quả như mục tiêu của thiết kế RDiT. Vì vậy, các kết quả được diễn giải trong phạm vi thay đổi quan sát được, làm cơ sở đề xuất chính sách quản lý thời gian nhàn rỗi và hỗ trợ vận hành mạng lưới.
 
-Tỷ lệ thời gian nhàn rỗi
-của phiên sạc được xác định:
+Khác biệt quan trọng là Mann–Whitney U không thay thế cho thiết kế RDiT trong việc ước lượng tác động nhân quả của chính sách. Trong phạm vi đề tài, kết quả kiểm định được sử dụng để xác định liệu có bằng chứng thống kê về sự khác biệt giữa hai giai đoạn hay không. Các khác biệt quan sát được không được quy hoàn toàn cho chính sách giá, bởi chúng cũng có thể chịu ảnh hưởng của xu hướng thời gian, tính mùa vụ, thay đổi thành phần người dùng hoặc những yếu tố khác.
 
-\begin{equation}
-R_{\mathrm{idle},i}
-=
-\frac{T_{\mathrm{idle},i}}
-{T_{\mathrm{total},i}},
-\quad T_{\mathrm{total},i}>0.
-\label{eq:idle_ratio}
-\end{equation}
+\subsection{Đánh giá dự báo chiếm dụng}
 
-Chỉ số Idle Time phản ánh
-thời lượng nhàn rỗi tuyệt đối,
-trong khi Idle Ratio cho phép
-so sánh mức độ chiếm dụng
-giữa những phiên có
-thời gian kết nối khác nhau.
+Ostermann và cộng sự \cite{ostermann2022} nghiên cứu khả năng dự báo mức độ chiếm dụng cổng sạc bằng các thuật toán học máy có giám sát, sử dụng bộ dữ liệu Adaptive Charging Network (ACN) tại hai địa điểm ở California: Caltech, có các cổng sạc phục vụ công cộng, và Jet Propulsion Laboratory (JPL), phục vụ nhân viên. Nghiên cứu phân biệt hai bài toán: phân loại trạng thái có hoặc không bị chiếm dụng của từng cổng và hồi quy số cổng bị chiếm dụng tại toàn bộ địa điểm. Đối tượng dự báo là trạng thái kết nối của phương tiện, không phải lượng điện năng tiêu thụ hay trạng thái đang truyền điện.
 
-Hai chỉ số này tạo cơ sở
-để nhận diện những nhóm hành vi
-cần được quan tâm trong
-công tác quản lý và vận hành
-mạng lưới trạm sạc.
+Về xử lý dữ liệu, nhóm tác giả sử dụng mã cổng, thời điểm kết nối và ngắt kết nối để chuyển các phiên sạc thành chuỗi thời gian theo khoảng 15 phút. Bộ đặc trưng cơ bản gồm các yếu tố lịch như tháng, ngày trong tháng, thứ trong tuần, ngày lễ và khung giờ. Bộ đặc trưng mở rộng bổ sung trạng thái chiếm dụng tại cùng khung giờ của ngày trước và tuần trước nhằm khai thác tính lặp lại trong hành vi sử dụng. Dữ liệu được chia thành các tập huấn luyện, xác thực và kiểm tra theo thứ tự thời gian, với các giai đoạn gần nhất dành cho xác thực và kiểm tra.
 
-% ==========================================
-% CHỖ CHÈN HÌNH TÙY CHỌN 1
-%
-% ---<Hinh minh hoa Idle Time va Charging Time>---
-%
-% Không bắt buộc giữ hình này vì hai
-% công thức phía trên đã giải thích khái niệm.
-%
-% Nếu muốn dùng, bỏ dấu % ở các dòng dưới.
-%
-% \begin{figure}[!t]
-%     \centering
-%     \fbox{
-%         \parbox[c][2.5cm][c]
-%         {0.92\columnwidth}{
-%             \centering
-%             ---<Hinh Charging Time va Idle Time>---
-%         }
-%     }
-%     \caption{Cấu trúc thời gian
-%     của một phiên sạc xe điện.}
-%     \label{fig:idle_explanation}
-% \end{figure}
-% ==========================================
+Kết quả cho thấy việc bổ sung thông tin chiếm dụng trong quá khứ cải thiện chất lượng dự báo, trong đó XGBoost nhìn chung đạt kết quả tốt nhất trong các cấu hình được khảo sát. Tuy nhiên, học máy không luôn vượt trội so với phương pháp đơn giản; dự báo dựa trên giá trị trung bình vẫn cho kết quả cạnh tranh trong một số trường hợp. Mô hình huấn luyện chung có kết quả nhỉnh hơn xét theo trung vị, còn mô hình riêng có thể phù hợp hơn với một số cổng cụ thể. Những cổng có mức độ sử dụng thấp thường khó dự báo trạng thái chiếm dụng hơn, cho thấy hiệu quả mô hình phụ thuộc vào đặc điểm dữ liệu và tần suất sử dụng hạ tầng.
 
+Hạn chế của nghiên cứu là chỉ khảo sát hai địa điểm, sử dụng bộ dữ liệu cố định và loại trừ giai đoạn COVID-19. Vì vậy, khả năng thích ứng khi hành vi sử dụng thay đổi chưa được kiểm chứng đầy đủ. Mỗi thuật toán cũng chỉ được thực hiện một lần trong từng cấu hình, trong khi phạm vi tìm kiếm siêu tham số còn giới hạn. Các kết quả do đó cung cấp cơ sở lựa chọn phương pháp, nhưng chưa đủ để khẳng định một mô hình luôn phù hợp với mọi mạng lưới sạc.
 
-\subsection{Mục tiêu và câu hỏi nghiên cứu}
+Đối với đề tài này, nghiên cứu cung cấp định hướng xây dựng chuỗi thời gian 15 phút từ dữ liệu phiên sạc Palo Alto, kết hợp đặc trưng lịch và các biến trễ để dự báo mức độ chiếm dụng. Số cổng bị chiếm dụng có thể được chuyển thành tỷ lệ lấp đầy khi xác định được số cổng đang hoạt động tại từng thời điểm. Việc đánh giá cần tuân theo thứ tự thời gian và so sánh với các phương pháp dự báo cơ sở trước khi lựa chọn mô hình. Đồng thời, số phiên phát sinh, điện năng tiêu thụ và mức độ chiếm dụng cần được xác định thành các biến mục tiêu riêng. Cách tiếp cận này hỗ trợ nhận diện thời điểm có nhu cầu sử dụng cao, làm đầu vào cho tầng hỗ trợ quyết định về phân bổ và mở rộng năng lực trạm sạc.
 
-Mục tiêu tổng quát của đề tài
-là ứng dụng các phương pháp
-phân tích dữ liệu kinh doanh
-để nghiên cứu hành vi sử dụng,
-mức độ chiếm dụng nhàn rỗi
-và hiệu suất vận hành
-mạng lưới trạm sạc xe điện công cộng.
+\section{Dữ liệu và tiền xử lý}
+Dữ liệu mở Palo Alto \cite{paloalto2021} gồm 259.415 bản ghi với thời điểm bắt đầu phiên từ tháng 7/2011 đến hết tháng 12/2020. Ba phiên bắt đầu cuối năm 2020 kết thúc vào tháng 1/2021. Các trường sử dụng gồm thời điểm kết nối và ngắt kết nối, thời gian sạc, điện năng, định danh cổng, tên trạm và mã người dùng.
 
-Nghiên cứu sử dụng dữ liệu
-các phiên sạc tại Palo Alto,
-California, nhằm kết hợp
-phân tích thống kê,
-học máy và xếp hạng đa tiêu chí
-trong một quy trình thống nhất.
+NV1 bỏ bốn bản ghi trùng hoàn toàn, còn 259.411 phiên. Kiểm tra quan hệ thời lượng và giới hạn công suất theo cấp sạc xác định 259.356 phiên hợp lệ. Sai lệch giữa thời lượng ghi nhận và chênh lệch dấu thời gian trên 59 giây được gắn cờ để đối soát. Tập hợp lệ NV1 vẫn có 481 phiên mang cờ này. NV2 sử dụng bộ lọc riêng với giới hạn công suất 19,2~kW và kiểm tra dấu thời gian. NV4 áp dụng dung sai 59 giây trước khi lọc theo quy mô trạm. Bảng~\ref{tab:samples} tóm tắt quy mô mẫu.
 
-Các câu hỏi nghiên cứu chính gồm:
-
-\begin{enumerate}
-\item
-Hành vi sạc và chiếm dụng nhàn rỗi
-có những đặc điểm nào?
-Có thể nhận diện các nhóm
-phiên sạc khác nhau bằng phân cụm
-hay không?
-
-\item
-Các chỉ tiêu hành vi sử dụng trạm
-khác nhau như thế nào giữa
-giai đoạn trước và sau
-thay đổi chính sách giá
-ngày 01/08/2017?
-
-\item
-Hiệu suất vận hành giữa các trạm
-có sự khác biệt ra sao
-khi đánh giá đồng thời
-nhiều tiêu chí?
-
-\item
-Có thể khai thác chuỗi dữ liệu
-lịch sử để dự báo nhu cầu
-và mức độ chiếm dụng
-trong các khung thời gian
-15 phút hay không?
-\end{enumerate}
-
-Để trả lời các câu hỏi trên,
-đề tài triển khai năm nhiệm vụ.
-
-NV1 thực hiện kiểm soát chất lượng,
-tiền xử lý và xây dựng đặc trưng
-dữ liệu phiên sạc.
-
-NV2 sử dụng K-Means và DBSCAN
-nhằm nhận diện các nhóm hành vi
-sử dụng hạ tầng.
-
-NV3 phân tích sự khác biệt
-trước và sau thay đổi chính sách
-bằng các phương pháp thống kê
-và kiểm định phi tham số.
-
-NV4 sử dụng TOPSIS kết hợp
-trọng số Entropy và trọng số đều
-để đánh giá, xếp hạng hiệu suất
-của các trạm sạc.
-
-NV5 xây dựng bài toán
-dự báo chuỗi thời gian,
-đối chiếu các mô hình cơ sở
-với những thuật toán học máy,
-trong đó có XGBoost.
-
-Kết quả của năm nhiệm vụ được
-tổng hợp thành tầng
-hỗ trợ quyết định vận hành
-(\textit{Decision Layer}),
-phục vụ việc xem xét
-quản lý thời gian nhàn rỗi,
-đánh giá hiệu suất trạm
-và phân bổ nguồn lực.
-
-\subsection{Phạm vi và đóng góp nghiên cứu}
-
-Nghiên cứu sử dụng dữ liệu
-giao dịch sạc xe điện công cộng
-tại thành phố Palo Alto,
-bang California, Hoa Kỳ.
-Bộ dữ liệu gốc gồm 259.415 phiên sạc
-trong giai đoạn từ tháng 7/2011
-đến đầu tháng 1/2021,
-trong đó phần phân tích theo năm
-tập trung chủ yếu vào 2011--2020.
-
-Đối tượng phân tích bao gồm
-phiên sạc, người dùng,
-trạm sạc và các nhóm vị trí.
-Những thuộc tính trọng tâm
-là thời điểm bắt đầu và kết thúc,
-tổng thời gian kết nối,
-thời gian truyền điện,
-điện năng tiêu thụ
-và thông tin định danh trạm.
-
-Đóng góp thứ nhất của nghiên cứu
-là xây dựng quy trình phân tích
-có kiểm soát chất lượng và đối soát
-giữa các nhiệm vụ,
-hạn chế việc sử dụng các tập dữ liệu
-khác nhau mà không ghi rõ
-điều kiện lọc.
-
-Đóng góp thứ hai là kết hợp
-nhiều phương pháp phân tích
-trên các cấp độ khác nhau:
-cấp phiên để phân nhóm hành vi,
-cấp người dùng để xem xét
-thay đổi cơ cấu,
-cấp trạm để đánh giá hiệu suất
-và cấp thời gian để dự báo nhu cầu.
-
-Đóng góp thứ ba là chuyển hóa
-các phát hiện định lượng
-thành cơ sở thông tin hỗ trợ
-quyết định vận hành,
-thay vì chỉ dừng ở việc
-so sánh các thuật toán.
-
-Nghiên cứu có một số giới hạn.
-Dữ liệu chỉ thuộc mạng lưới
-tại Palo Alto,
-nên không thể mặc định kết quả
-đại diện cho mọi hệ thống sạc.
-
-Bên cạnh đó,
-việc so sánh hai giai đoạn
-trước và sau chính sách
-chỉ cho thấy sự khác biệt
-quan sát được trong dữ liệu.
-Những khác biệt này chưa đủ
-để khẳng định quan hệ nhân quả
-nếu không có thiết kế nhận dạng
-phù hợp.
-
-Đối với bài toán dự báo,
-kết quả được đánh giá
-trong bối cảnh dữ liệu lịch sử
-và các điều kiện thực nghiệm
-đã xác định.
-
-% ==========================================
-% II. NGHIÊN CỨU LIÊN QUAN
-% ==========================================
-
-\section{NGHIÊN CỨU LIÊN QUAN}
-
-Các nghiên cứu về hạ tầng sạc
-xe điện đã tiếp cận bài toán vận hành
-theo nhiều hướng,
-bao gồm mô tả hành vi sử dụng,
-phân nhóm các mẫu sạc,
-phân tích phản ứng trước chính sách giá
-và dự báo trạng thái chiếm dụng.
-
-Trong phạm vi đề tài,
-bốn công trình được lựa chọn
-làm cơ sở nghiên cứu chính.
-Những công trình này cung cấp
-định hướng về biến phân tích,
-phương pháp thực nghiệm
-và cách đánh giá kết quả,
-đồng thời làm rõ những giới hạn
-cần chú ý khi diễn giải
-các phát hiện của nhóm.
-
-\subsection{Phân tích thống kê hành vi
-sử dụng trạm sạc}
-
-Bayram và cộng sự \cite{bayram2023}
-thực hiện nghiên cứu
-``Statistical Characterization
-of Public AC EV Chargers in the U.K.'',
-được công bố trên IEEE Access
-năm 2023.
-
-Nghiên cứu khảo sát gần 12.000
-phiên sạc được thu thập
-từ 595 cổng sạc AC công cộng
-tại Vương quốc Anh
-trong khoảng tháng 4
-đến tháng 7/2022.
-Các cổng được khảo sát
-thuộc hai mức công suất
-7 kW và 22 kW.
-
-Mục tiêu của công trình là
-mô tả những đặc điểm
-quan trọng của hoạt động sạc,
-bao gồm mức độ sử dụng hạ tầng,
-thời điểm phương tiện đến
-và rời khỏi trạm,
-thời lượng kết nối,
-điện năng cung cấp
-và thời gian chiếm dụng sau sạc.
-
-Về phương pháp,
-nhóm tác giả sử dụng
-phân tích thống kê mô tả,
-phân tích phân phối,
-phân nhóm hành vi theo thời điểm
-và đánh giá sự khác biệt
-giữa loại cổng sạc,
-ngày thường và cuối tuần.
-Ngoài ra, nghiên cứu khảo sát
-những yếu tố liên quan đến
-thời gian chiếm dụng nhàn rỗi.
-
-Kết quả cho thấy
-hoạt động sử dụng trạm
-không đồng đều giữa các địa điểm
-và loại cổng.
-Đặc biệt, thời gian phương tiện
-tiếp tục kết nối sau quá trình sạc
-có sự khác biệt đáng kể
-giữa các nhóm cổng sạc,
-cho thấy cần đánh giá
-thời gian nhàn rỗi riêng
-với thời gian truyền điện.
-
-Nghiên cứu cũng phân tích
-khả năng khai thác sự linh hoạt
-trong thời gian kết nối
-để hỗ trợ điều phối hoạt động sạc.
-Những kết quả này cho thấy
-dữ liệu phiên sạc không chỉ
-phục vụ thống kê sản lượng,
-mà còn có giá trị
-đối với quản lý hạ tầng.
-
-Tuy nhiên, phạm vi dữ liệu
-thuộc mạng lưới tại Vương quốc Anh,
-trong một giai đoạn quan sát
-tương đối ngắn,
-nên các đặc điểm thu được
-có thể phụ thuộc vào
-bối cảnh sử dụng cụ thể.
-
-Đối với đề tài IS403,
-công trình cung cấp
-cơ sở phân biệt
-tổng thời gian kết nối,
-thời gian sạc thực tế
-và thời gian chiếm dụng nhàn rỗi.
-
-Hai chỉ số Idle Time
-và Idle Ratio được sử dụng
-để lượng hóa mức độ chiếm dụng
-ở cấp phiên và hỗ trợ
-phân tích hành vi tại NV1,
-NV2 và hiệu suất trạm tại NV4.
-
-\subsection{Phân cụm hành vi sử dụng
-hạ tầng sạc}
-
-Straka và Buzna \cite{straka2019}
-công bố công trình
-``Clustering Algorithms Applied
-to Usage Related Segments
-of Electric Vehicle Charging Stations''
-trên Transportation Research Procedia
-năm 2019.
-
-Nghiên cứu tập trung
-vào việc nhận diện những mẫu
-sử dụng trạm sạc khác nhau
-từ dữ liệu giao dịch,
-qua đó hỗ trợ mô tả
-các phân khúc sử dụng hạ tầng.
-
-Thay vì giả định rằng
-toàn bộ các phiên sạc
-có cùng đặc điểm,
-nhóm tác giả áp dụng
-các phương pháp học không giám sát
-để tìm kiếm cấu trúc tiềm ẩn
-trong dữ liệu.
-
-Ba phương pháp được khảo sát
-gồm K-Means, DBSCAN
-và phân cụm phân cấp kết tụ
-(\textit{Agglomerative Clustering}).
-
-K-Means tổ chức dữ liệu
-thành các nhóm dựa trên
-khoảng cách tới tâm cụm.
-Trong khi đó,
-DBSCAN hình thành cụm
-từ mật độ quan sát
-và cho phép tách riêng
-những điểm không thuộc
-vùng mật độ đủ lớn.
-
-Việc đối chiếu các phương pháp
-giúp đánh giá liệu
-các nhóm sử dụng
-có cấu trúc tập trung rõ rệt
-hay tồn tại các quan sát
-khó được đại diện bằng
-những tâm cụm cố định.
-
-Công trình cho thấy
-phân cụm có thể hỗ trợ
-nhận diện những phân khúc
-liên quan đến cách sử dụng trạm.
-Kết quả mang ý nghĩa
-đối với quy hoạch
-và phát triển hạ tầng,
-bởi các nhóm người dùng
-hoặc phiên sạc khác nhau
-có thể tạo ra yêu cầu
-vận hành không giống nhau.
-
-Hạn chế cần lưu ý là
-kết quả phân nhóm chịu ảnh hưởng
-của bộ đặc trưng,
-cách chuẩn hóa
-và lựa chọn tham số thuật toán.
-Các nhãn cụm không có
-ý nghĩa nghiệp vụ cố định
-nếu chưa được diễn giải
-bằng những thuộc tính quan sát.
-
-Kế thừa hướng tiếp cận này,
-NV2 áp dụng K-Means và DBSCAN
-trên các đặc trưng hành vi
-được xây dựng từ dữ liệu
-phiên sạc Palo Alto.
-
-Nghiên cứu lựa chọn số cụm
-dựa trên nhiều chỉ số,
-bao gồm Silhouette,
-Davies--Bouldin và WCSS;
-đồng thời kiểm tra độ ổn định
-bằng cách chia mẫu.
-
-Điểm khác biệt là
-các cụm trong đề tài
-được diễn giải trực tiếp
-theo thời gian sạc,
-điện năng tiêu thụ
-và mức độ chiếm dụng nhàn rỗi,
-phù hợp với mục tiêu
-đánh giá hiệu quả vận hành
-ở cấp phiên sạc.
-
-\subsection{Phân tích tác động
-của chính sách giá}
-
-Luo và Wang \cite{luowang2025}
-nghiên cứu sự thay đổi
-hành vi sạc xe điện
-trong công trình
-``The Impacts of Rate Surge
-on Electric Vehicle Charging Behaviors:
-Evidence from California'',
-công bố năm 2025.
-
-Nghiên cứu khai thác
-bối cảnh chính sách giá
-tại Palo Alto, California,
-nơi dịch vụ sạc chuyển
-từ miễn phí sang cơ chế
-thu phí năng lượng
-và phí đỗ xe sau sạc.
-
-Từ ngày 01/08/2017,
-mức thu phí năng lượng
-được áp dụng là
-0,23 USD/kWh,
-cùng khoản phí
-2 USD/giờ đối với
-thời gian đỗ sau sạc
-theo cơ chế của chính sách.
-
-Điểm quan trọng của nghiên cứu
-là sử dụng dữ liệu
-ở cấp phiên sạc,
-qua đó quan sát được
-thời lượng, điện năng
-và đặc điểm sử dụng trạm
-trước và sau
-thời điểm thay đổi giá.
-
-Về phương pháp,
-nhóm tác giả sử dụng
-thiết kế hồi quy gián đoạn
-theo thời gian
-(\textit{Regression Discontinuity
-in Time} -- RDiT).
-
-Thiết kế này tập trung
-vào biến động gần mốc
-chính sách có hiệu lực,
-đồng thời xem xét
-những yếu tố có thể ảnh hưởng
-đến hành vi sử dụng.
-
-Theo kết quả được công bố,
-số phiên sạc giảm khoảng
-32,2\% sau thay đổi chính sách.
-Điện năng trung bình mỗi phiên
-giảm 20,5\%,
-trong khi thời gian đỗ
-không thực hiện sạc
-giảm khoảng 72,3\%.
-
-Những tỷ lệ này là
-kết quả ước lượng
-từ thiết kế nghiên cứu
-của Luo và Wang,
-không phải số liệu
-được nhóm IS403 tính
-bằng cách lấy chênh lệch
-trung bình hai giai đoạn.
-
-Công trình cũng nhấn mạnh
-sự cần thiết phải phân biệt
-thay đổi hành vi của
-người dùng hiện hữu
-với sự thay đổi thành phần
-người sử dụng trạm.
-
-Một biến động được ghi nhận
-ở toàn mạng lưới
-có thể đồng thời phản ánh
-sự điều chỉnh của các cá nhân
-và việc một số người
-ngừng hoặc bắt đầu sử dụng dịch vụ.
-
-Đối với IS403,
-nghiên cứu của Luo và Wang
-cung cấp cơ sở lựa chọn
-mốc ngày 01/08/2017
-và các chỉ tiêu hành vi
-cần đối chiếu trong NV3.
-
-Tuy nhiên, đề tài hiện tại
-không tái triển khai
-thiết kế RDiT của nghiên cứu gốc.
-Thay vào đó, nhóm sử dụng
-thống kê mô tả,
-phân khúc người dùng,
-kiểm định Mann--Whitney U,
-Cliff's Delta
-và bootstrap theo User ID.
-
-Vì vậy, kết quả NV3
-chỉ được diễn giải
-như sự khác biệt quan sát được
-giữa hai giai đoạn,
-không khẳng định
-quan hệ nhân quả
-giữa chính sách và hành vi.
-
-\subsection{Dự báo mức độ chiếm dụng
-trạm sạc bằng học máy}
-
-Ostermann và cộng sự
-\cite{ostermann2022}
-công bố nghiên cứu
-``Forecasting Charging Point Occupancy
-Using Supervised Learning Algorithms''
-trên tạp chí Energies
-năm 2022.
-
-Nghiên cứu sử dụng
-dữ liệu Adaptive Charging Network
-(ACN) tại hai địa điểm
-ở California,
-bao gồm một địa điểm
-phục vụ công cộng
-và một địa điểm phục vụ
-nhu cầu tại nơi làm việc.
-
-Bài toán được chia thành
-hai hướng dự báo.
-
-Hướng thứ nhất là
-xác định trạng thái
-có hoặc không có phương tiện
-chiếm dụng tại từng cổng sạc.
-
-Hướng thứ hai là
-dự báo số cổng bị chiếm dụng
-trong toàn bộ địa điểm
-tại một thời điểm.
-
-Để thực hiện,
-nhóm tác giả chuyển dữ liệu
-phiên sạc thành chuỗi thời gian
-với độ phân giải 15 phút.
-
-Các biến đầu vào
-bao gồm thông tin lịch
-và trạng thái chiếm dụng
-trong quá khứ,
-nhằm khai thác tính chu kỳ
-của hoạt động sử dụng trạm.
-
-Các mô hình được khảo sát
-gồm hồi quy tuyến tính
-hoặc logistic,
-K-Nearest Neighbors,
-Random Forest và XGBoost,
-tùy theo bài toán
-hồi quy hoặc phân loại.
-
-Hiệu quả dự báo
-được đối chiếu bằng
-các thước đo phù hợp
-và so sánh với những
-phương pháp cơ sở
-dựa trên lịch sử sử dụng.
-
-Kết quả cho thấy
-khả năng dự báo phụ thuộc
-đáng kể vào đặc điểm
-của từng địa điểm và cổng sạc.
-Thông tin chiếm dụng trong quá khứ
-có giá trị đối với
-việc dự báo trạng thái tiếp theo.
-
-Tuy nhiên, các phương pháp
-học máy phức tạp
-không nhất thiết vượt trội
-trong mọi trường hợp,
-đặc biệt khi chuỗi dữ liệu
-có mức sử dụng thấp
-hoặc biến động mạnh.
-
-Điểm hạn chế là
-công trình khảo sát
-những địa điểm cụ thể
-với dữ liệu và điều kiện
-vận hành khác Palo Alto.
-Kết quả do đó không thể
-chuyển trực tiếp thành
-độ chính xác dự báo
-của bộ dữ liệu IS403.
-
-Đối với NV5,
-nghiên cứu được kế thừa
-ở cách xây dựng chuỗi 15 phút,
-sử dụng đặc trưng thời gian,
-biến trễ và tổ chức
-mô hình đối chứng.
-
-Đề tài đồng thời
-tổ chức phân hoạch dữ liệu
-theo thứ tự thời gian
-để tránh rò rỉ
-thông tin tương lai.
-
-XGBoost được so sánh
-với các phương pháp dự báo
-dựa trên lịch sử
-và các mô hình học máy khác,
-nhằm đánh giá hiệu quả
-trên dữ liệu ngoài mẫu.
-
-\subsection{Tổng hợp các nghiên cứu
-và khoảng trống nghiên cứu}
-
-Bốn nghiên cứu trên
-cung cấp những góc nhìn
-bổ sung cho bài toán
-vận hành hạ tầng sạc
-xe điện công cộng.
-
-Bayram và cộng sự
-tập trung vào thống kê
-hành vi sử dụng,
-đặc biệt thời gian kết nối
-và chiếm dụng sau sạc.
-
-Straka và Buzna
-khai thác khả năng
-phân cụm để nhận diện
-các nhóm sử dụng hạ tầng.
-
-Luo và Wang
-nghiên cứu phản ứng
-của người dùng
-trước thay đổi chính sách giá.
-
-Ostermann và cộng sự
-tập trung vào dự báo
-trạng thái và số lượng
-cổng sạc bị chiếm dụng.
-
-Bảng~\ref{tab:related_work}
-tóm tắt phương pháp
-và nội dung được kế thừa
-trong đề tài IS403.
-
-% ==========================================
-% BẢNG II.1 - NGHIÊN CỨU LIÊN QUAN
-% Bảng trải ngang hai cột
-% ==========================================
-
-
-% Bảng nghiên cứu liên quan - bản rút gọn một cột
 \begin{table}[!t]
-\centering
-\caption{Tổng hợp nghiên cứu liên quan}
-\label{tab:related_work}
-
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.05}
-
-\begin{tabularx}{\columnwidth}{
-@{}p{1.65cm} X p{0.65cm}@{}
-}
+\caption{Quy mô dữ liệu theo nhiệm vụ}
+\label{tab:samples}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}lXr@{}}
 \toprule
-\textbf{Nghiên cứu} &
-\textbf{Nội dung kế thừa} &
-\textbf{NV}\\
+\textbf{NV} & \textbf{Phạm vi mẫu} & \textbf{Số phiên} \\
 \midrule
+1 & Phiên đạt cờ hợp lệ & 259.356 \\
+2 & Mẫu sau bộ lọc phân cụm & 258.720 \\
+3 & Đầu vào sau loại trùng, lọc theo chỉ tiêu & 259.411 \\
+4 & Phiên thuộc 33 trạm đủ tiêu chí & 258.836 \\
+5 & Phiên dùng để tạo chuỗi 15 phút & 259.344 \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-Bayram và cs. (2023) \cite{bayram2023}
-& Idle Time, Idle Ratio và hành vi chiếm dụng.
-& 1,2,4\\
+Với phiên $i$ có tổng thời gian kết nối $T_i>0$ và thời lượng sạc $C_i$, thời lượng nhàn rỗi $I_i$ và tỷ lệ nhàn rỗi $R_i$ được tính theo
+\begin{equation}
+I_i=T_i-C_i,\qquad R_i=I_i/T_i.
+\label{eq:idle}
+\end{equation}
+Hai đại lượng trong \eqref{eq:idle} phản ánh mức chiếm dụng ngoài thời gian truyền điện trên dữ liệu phiên. Việc tính phí tại trạm cần thời điểm hoàn tất sạc và ngắt kết nối đo trực tiếp từ thiết bị.
 
-Straka và Buzna (2019) \cite{straka2019}
-& Phân nhóm hành vi bằng K-Means, DBSCAN.
-& 2\\
+Ở bước kiểm tra công suất, công suất sạc trung bình là $E_i/C_i$, với điện năng $E_i$ tính bằng kWh và $C_i$ tính bằng giờ. NV1 dùng giới hạn 1,92~kW cho Level 1 và 22~kW cho Level 2 hoặc cấp sạc chưa xác định. Các cờ về khoảng kết nối không dương, chồng lấn cùng cổng và sai lệch thời gian phục vụ đối soát hoặc lọc theo nhiệm vụ. Các quan sát ngoại lệ theo khoảng tứ phân vị được đánh dấu để kiểm tra. Thời lượng rất lớn vẫn có thể phản ánh hành vi giữ cổng cần khảo sát.
 
-Luo và Wang (2025) \cite{luowang2025}
-& Chính sách giá, so sánh Pre/Post.
-& 3\\
+Phân tích khám phá trên mẫu 258.720 phiên cho thấy trung vị thời gian nhàn rỗi khoảng 26 giây, trong khi trung bình xấp xỉ 29 phút. Tỷ lệ nhàn rỗi có trung vị 0,87\% và trung bình khoảng 11,57\% khi lấy trung bình theo phiên. Tổng số giờ nhàn rỗi chiếm 19,56\% tổng giờ kết nối. Hai tỷ lệ trung bình dùng mẫu số khác nhau và trả lời hai câu hỏi, lần lượt là mức nhàn rỗi của một phiên và phần thời gian hạ tầng bị giữ ngoài thời gian sạc. Chênh lệch giữa trung vị và trung bình là lý do cần xét riêng các phiên có thời gian giữ cổng rất dài.
 
-Ostermann và cs. (2022) \cite{ostermann2022}
-& Chuỗi 15 phút, baseline và XGBoost.
-& 5\\
+\subsection{Nguồn, địa bàn và bối cảnh chính sách}
 
+Bộ dữ liệu được lấy từ cổng dữ liệu mở của Thành phố Palo Alto, California, do Sở Công trình và Đô thị thành phố phát hành. Nội dung gồm toàn bộ các phiên sạc tại trụ sạc công cộng do thành phố quản lý, được ghi nhận theo từng phiên.
+
+Sáu năm đầu của chuỗi quan sát, toàn bộ các phiên sạc đều được miễn phí. Từ ngày 1/8/2017, thành phố áp dụng thu phí tính theo lượng điện đã nạp. Đây là thay đổi chính sách duy nhất quan sát được trong toàn bộ chuỗi dữ liệu và tạo thành ranh giới rõ rệt giữa hai giai đoạn vận hành.
+
+Diễn biến theo tháng cho thấy trước tháng 8/2017 không tồn tại phiên nào có phí khác 0, và từ tháng 9/2017 trở đi tỷ lệ phiên có thu phí luôn ở mức trên 98,5\%, chỉ hai tháng dưới 99\% là tháng 1/2020 (98,9\%) và tháng 9/2020 (98,7\%). Tỷ lệ này đạt 94,7\% ngay trong tháng đầu áp dụng, cho thấy chính sách được thực hiện tương đối đồng loạt ngay từ đầu.
+
+Sau mốc này vẫn còn 1.076 phiên được miễn phí, chiếm 0,85\% tổng số phiên của giai đoạn sau, kéo dài đến ngày 29/12/2020. Số phiên này xuất hiện ở tất cả các năm còn lại của giai đoạn sau, với 275 phiên năm 2017, 322 phiên năm 2018, 331 phiên năm 2019 và 148 phiên năm 2020.
+
+Đơn giá năng lượng trong dữ liệu tương đối ổn định quanh mức 0,23 USD/kWh. Trong tổng số 125.665 phiên có thu phí, 89,30\% phiên có đơn giá nằm trong khoảng ±0,01 USD/kWh so với mức này. Mức phí trung vị mỗi phiên là 1,69 USD, trong khi mức trung bình đạt 2,26 USD.
+
+Năm 2020 ghi nhận 20.064 phiên sạc, chỉ đạt khoảng 42\% so với năm 2019, tương ứng mức giảm khoảng 58\%. Mức suy giảm này diễn ra trong bối cảnh đại dịch COVID-19. Đáng chú ý, tháng 4/2020 chỉ ghi nhận 487 phiên sạc, thấp hơn nhiều so với mức trung bình khoảng 3.972 phiên mỗi tháng trong năm 2019. Do đó, cần xem xét riêng năm 2020 khi phân tích sự khác biệt giữa các giai đoạn, tránh diễn giải toàn bộ mức giảm về số phiên sạc và tỷ lệ chiếm dụng như hệ quả của chính sách phí.
+
+Đa số phiên sạc kết thúc khi người dùng rút phích tại xe, với 210.371 phiên (81,31\%). Nhóm thứ hai là các phiên kết thúc theo xác nhận thủ công của người dùng, gồm 41.013 phiên (15,85\%). Các phiên được ghi nhận tự động từ hệ thống có 7.058 phiên (2,73\%). Nhóm còn lại gồm lỗi kỹ thuật và các phiên không ghi nhận nguyên nhân kết thúc, với 278 phiên (0,11\%).
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/network.pdf}
+\caption{Vị trí các điểm sạc công cộng trong dữ liệu Palo Alto.}
+\label{fig:ext_network}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/historical_fee.pdf}
+\caption{Diễn biến tỷ trọng phiên có phí quanh mốc chính sách năm 2017.}
+\label{fig:ext_historical_fee}
+\end{figure}
+
+\subsection{Các quy tắc kiểm soát dữ liệu}
+
+Các quy tắc toàn vẹn logic được xây dựng để kiểm tra sự hợp lý của từng phiên sạc và tính nhất quán giữa các trường dữ liệu. Việc kiểm tra tập trung vào thông tin thời gian, điện năng và định danh cổng sạc, làm cơ sở xác định những bản ghi đủ điều kiện cho các bước phân tích tiếp theo.
+
+Kiểm tra ban đầu trên 259.415 dòng dữ liệu gốc ghi nhận 4 dòng trùng hoàn toàn và 45 dòng có thời gian sạc lớn hơn tổng thời gian kết nối. Các dòng trùng hoàn toàn cần được loại phần lặp để tránh tính nhiều lần cùng một phiên. Những bản ghi vi phạm quan hệ thời lượng được gắn cờ và tách để đối chiếu; không tự động đưa thời gian nhàn rỗi âm về 0 vì thao tác này có thể che giấu sai lệch dữ liệu.
+
+Việc xử lý được thực hiện theo yêu cầu của từng bài toán. Chẳng hạn, phiên thiếu mã người dùng không thể phục vụ phân tích hành vi cá nhân nhưng vẫn có thể sử dụng để thống kê hoạt động của trạm nếu thông tin cổng, thời gian và điện năng hợp lệ. Các trường thời gian và điện năng không được tự ý điền bằng giá trị trung bình khi chưa có căn cứ. Mỗi trường hợp xử lý cần được ghi lại cùng nguyên nhân nhằm bảo đảm khả năng kiểm tra và đối chiếu kết quả.
+
+Đối với cổng Level 2, công suất 7,2 kW được ghi nhận là mức danh định tham khảo của thiết bị, trong khi ngưỡng 22 kW được sử dụng làm giới hạn kiểm tra trong quy trình tiền xử lý. Việc sử dụng ngưỡng theo loại cổng nhằm tránh áp dụng một mức công suất chung không phù hợp cho toàn bộ dữ liệu.
+
+Kết quả kiểm tra phát hiện 10 phiên sạc có công suất trung bình vượt ngưỡng được cấu hình theo loại cổng. Các trường hợp này được đánh dấu bằng biến flag\_physical\_power\_anomaly nhằm phục vụ việc kiểm tra tính nhất quán giữa điện năng, thời lượng sạc và thông tin thiết bị.
+
+Cần nhấn mạnh rằng đây là các trường hợp được gắn cờ bất thường theo quy tắc kiểm tra của nghiên cứu, chưa phải bằng chứng xác nhận thiết bị xảy ra sự cố vật lý. Trong quy trình NV1, các phiên có cờ này không được chọn vào tập is\_valid\_session, nhưng vẫn được lưu trong dữ liệu sau loại trùng để phục vụ truy vết.
+
+Bên cạnh việc kiểm tra quan hệ thời lượng và công suất, nghiên cứu thực hiện chuẩn hóa thời điểm bắt đầu và kết thúc phiên sạc sang múi giờ UTC. Các giá trị thời gian thuộc múi giờ PDT, PST và UTC được chuyển đổi theo độ lệch tương ứng để bảo đảm thống nhất khi so sánh.
+
+Các cờ kiểm tra thời gian được bổ sung nhằm tăng khả năng phát hiện sai lệch và truy vết chất lượng dữ liệu. Tuy nhiên, chúng chưa được sử dụng làm điều kiện tự động loại bản ghi khỏi tập NV1-valid. Việc sử dụng hoặc loại bỏ các phiên có cờ này được quyết định theo yêu cầu của từng nhiệm vụ phân tích tiếp theo.
+
+Các bản ghi được xác nhận có sai lệch vật lý chỉ được hiệu chỉnh khi có thông tin đối chiếu đáng tin cậy; nếu không thể khôi phục, chúng được loại khỏi tập phân tích sử dụng đại lượng bị sai. Chẳng hạn, phiên có thời lượng sạc không hợp lệ không được dùng để tính thời gian nhàn rỗi và Idle Ratio. Tuy nhiên, phiên đó vẫn có thể phục vụ phân tích mức độ chiếm dụng nếu thời điểm kết nối, ngắt kết nối và thông tin cổng được xác nhận hợp lệ. Cách xử lý theo từng mục đích giúp hạn chế mất dữ liệu không cần thiết, đồng thời bảo đảm các chỉ số phân tích được xây dựng từ thông tin có căn cứ.
+
+Nếu xuất hiện trong dữ liệu bổ sung, các phiên thuộc nhóm này cần được đối chiếu với thời gian kết nối, thời lượng sạc, nguyên nhân kết thúc phiên và thông tin thiết bị. Điện năng bằng 0 có thể liên quan đến việc người dùng hủy phiên, quá trình sạc không khởi động thành công hoặc lỗi ghi nhận; do đó, không thể chỉ dựa vào tiêu chí này để kết luận người dùng cố ý chiếm chỗ. Phiên có thông tin kết nối hợp lệ vẫn có thể được giữ lại để đánh giá mức độ chiếm dụng cổng, đồng thời được tách riêng khi phân tích đặc điểm của các phiên có cung cấp điện năng.
+
+Do một bản ghi có thể vi phạm đồng thời nhiều quy tắc kiểm tra, không cộng trực tiếp số lượng các cờ để xác định tổng số bản ghi không hợp lệ. Số lượng phiên hợp lệ được lấy trực tiếp từ biến is\_valid\_session sau khi hoàn tất quy trình tiền xử lý.
+
+Các nhiệm vụ phân tích tiếp theo có thể áp dụng thêm những điều kiện lọc riêng tùy theo mục tiêu nghiên cứu. Vì vậy, tập NV1-valid gồm 259.356 phiên cần được phân biệt với tập dữ liệu 258.720 phiên phục vụ phân cụm tại NV2, vốn được xác định theo các quy tắc lọc bổ sung của nhiệm vụ đó.
+
+\begin{table}[!t]
+\caption{Đối soát các cờ chất lượng dữ liệu}
+\label{tab:quality_long}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xr@{}}
+\toprule
+\textbf{Chỉ tiêu} & \textbf{Số bản ghi} \\
+\midrule
+Dữ liệu gốc & 259.415 \\
+Trùng hoàn toàn & 4 \\
+Sau loại trùng & 259.411 \\
+Thời gian sạc vượt thời gian kết nối & 45 \\
+Vượt ngưỡng công suất & 10 \\
+Khoảng kết nối không dương hoặc không rõ & 12 \\
+Sai lệch thời gian trên 59 giây hoặc không rõ & 521 \\
+Phiên chồng lấn trên cùng cổng & 181 \\
+Đạt cờ hợp lệ NV1 & 259.356 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright\scriptsize Các cờ có thể giao nhau. Điều kiện hợp lệ NV1 gồm kiểm tra quan hệ thời lượng và giới hạn công suất.
+\end{table}
+
+\subsection{Phân tích ngoại lệ ở dữ liệu gốc và sau tiền xử lý}
+
+Sau khi kiểm tra tính toàn vẹn logic, các biến tổng thời gian kết nối, thời gian sạc và điện năng cung cấp được xem xét để nhận diện những giá trị khác biệt đáng kể so với phần lớn dữ liệu. Việc kiểm tra kết hợp biểu đồ phân phối, biểu đồ hộp và phương pháp khoảng tứ phân vị (Interquartile Range – IQR). Mục đích là phát hiện các phiên cần đối chiếu thêm, đồng thời tránh loại bỏ những hành vi sử dụng ít gặp nhưng có ý nghĩa đối với đề tài.
+
+Các giá trị nhỏ hơn (L) hoặc lớn hơn (U) được gắn cờ là ngoại lệ thống kê. IQR ít chịu ảnh hưởng của các giá trị cực đoan hơn những thước đo dựa trên trung bình và độ lệch chuẩn. Tuy nhiên, với dữ liệu có phân phối lệch phải, những phiên nằm ngoài hàng rào trên vẫn có thể là quan sát hợp lệ.
+
+Nhằm đánh giá đặc điểm phân phối và nhận diện các quan sát bất thường trước khi thực hiện tiền xử lý, nghiên cứu áp dụng phương pháp khoảng tứ phân vị (Interquartile Range – IQR) trên toàn bộ 259.415 bản ghi của tập dữ liệu CSV gốc, chưa loại bỏ bản ghi trùng lặp và chưa xử lý các trường hợp vi phạm tính toàn vẹn logic.
+
+Các quan sát vượt ngưỡng thể hiện sự khác biệt so với phần lớn phân phối dữ liệu nhưng không đồng nghĩa với sai lệch nghiệp vụ. Đặc biệt, những phiên có tổng thời gian kết nối kéo dài có thể phản ánh hành vi sạc qua đêm hoặc chiếm dụng cổng sạc sau khi kết thúc quá trình truyền điện. Vì vậy, kết quả IQR trên dữ liệu gốc chỉ được sử dụng để khảo sát và nhận diện các trường hợp cần kiểm tra thêm, không làm căn cứ tự động loại bỏ bản ghi.
+
+Sau bước khảo sát dữ liệu gốc, quy trình tiền xử lý NV1 thực hiện loại bỏ 4 bản ghi trùng lặp hoàn toàn, đưa số bản ghi còn lại từ 259.415 xuống 259.411 bản ghi.
+
+Tiếp theo, quy trình kiểm tra tính nhất quán giữa thời gian sạc và tổng thời gian kết nối, xác định 45 trường hợp có thời gian sạc lớn hơn tổng thời gian kết nối. Các trường hợp này không được sử dụng khi tính toán các ngưỡng IQR trong bước tiền xử lý.
+
+Kết quả cho thấy số lượng ngoại lệ được gắn cờ sau tiền xử lý có sự khác biệt so với kết quả khảo sát trên dữ liệu CSV gốc. Cụ thể, số bản ghi vượt ngưỡng tổng thời gian kết nối vẫn là 12.763; số bản ghi vượt ngưỡng thời gian sạc tăng từ 5.518 lên 5.519; và số bản ghi vượt ngưỡng điện năng tăng từ 8.696 lên 8.697.
+
+Sự khác biệt này xuất phát từ phạm vi dữ liệu được sử dụng để tính toán hàng rào IQR. Trong khi bước khảo sát ban đầu sử dụng toàn bộ dữ liệu CSV gốc, bước gắn cờ của NV1 xác định ngưỡng trên tập đã loại trùng và không vi phạm quan hệ thời lượng. Vì vậy, hai bảng phản ánh hai giai đoạn kiểm tra khác nhau và không được sử dụng thay thế cho nhau.
+
+Ngoài ra, một phiên sạc có thể đồng thời được gắn cờ ở nhiều biến. Do đó, không thể cộng trực tiếp số lượng ngoại lệ của ba biến để xác định tổng số phiên bất thường duy nhất.
+
+Các cờ IQR được lưu nhằm phục vụ kiểm tra chất lượng dữ liệu và hỗ trợ các nhiệm vụ phân tích tiếp theo. Việc một phiên vượt ngưỡng IQR không tự động làm cho phiên đó trở thành không hợp lệ trong NV1. Trạng thái hợp lệ được xác định riêng thông qua biến is\_valid\_session, dựa trên các quy tắc kiểm tra logic thời lượng và công suất sạc.
+
+Đối với phân tích hành vi chiếm dụng, không tự động loại bỏ hoặc thay thế các giá trị vượt ngưỡng bằng giá trị tại hàng rào IQR. Cách xử lý này có thể làm giảm mức độ chiếm dụng quan sát được và che khuất nhóm phiên mà đề tài cần nghiên cứu. Do đó, IQR được sử dụng như công cụ sàng lọc, còn quyết định xử lý phải dựa trên kết quả đối chiếu cụ thể và được ghi nhận trong nhật ký tiền xử lý.
+
+\begin{table}[!t]
+\caption{Hàng rào trên ở dữ liệu gốc và số cờ sau xử lý}
+\label{tab:iqr_long}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrr@{}}
+\toprule
+\textbf{Biến} & \textbf{Hàng rào} & \textbf{Vượt ở gốc} & \textbf{Cờ NV1} \\
+\midrule
+Kết nối (h) & 5,969 & 12.763 & 12.763 \\
+Sạc (h) & 5,183 & 5.518 & 5.519 \\
+Điện năng (kWh) & 22,970 & 8.696 & 8.697 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright\scriptsize Hai bước dùng phạm vi tính phân vị riêng. Không cộng cờ giữa các biến.
+\end{table}
+
+\subsection{Đặc trưng hành vi và phân phối}
+
+Trong đó, Total Duration phản ánh toàn bộ khoảng thời gian phương tiện kết nối với cổng sạc, Charging Time biểu thị thời lượng hệ thống ghi nhận hoạt động sạc điện, còn Idle Time là phần thời gian kết nối không được ghi nhận là thời gian sạc.
+
+Trước khi tính toán, các trường thời lượng ở định dạng hh:mm:ss được chuyển đổi sang đơn vị giây nhằm bảo đảm tính thống nhất và độ chính xác khi thực hiện các phép tính.
+
+Trong quy trình tiền xử lý NV1, các phiên có thời gian sạc lớn hơn tổng thời gian kết nối được xác định là vi phạm tính toàn vẹn logic và được gắn cờ flag\_charging\_gt\_total. Đối với những trường hợp này, giá trị Idle Time không được tính toán mà được gán giá trị thiếu (NaN), thay vì tự động điều chỉnh thời gian nhàn rỗi âm thành 0. Cách xử lý này nhằm bảo toàn thông tin về sai lệch dữ liệu và tránh đưa các giá trị không hợp lệ vào phân tích hành vi chiếm dụng.
+
+Việc phân tách tổng thời gian kết nối thành thời gian sạc và thời gian nhàn rỗi giúp làm rõ sự khác biệt giữa nhu cầu sạc điện và thời gian chiếm dụng hạ tầng. Một phiên có tổng thời gian kết nối dài không nhất thiết tương ứng với lượng điện năng tiêu thụ lớn, mà có thể phản ánh khoảng thời gian phương tiện tiếp tục chiếm giữ cổng sạc nhưng không thực hiện hoạt động truyền điện.
+
+Kết quả tính toán được lưu trong biến idle\_ratio của bộ dữ liệu sau kỹ nghệ đặc trưng NV1. Trên cơ sở chỉ số này, nghiên cứu tiếp tục xây dựng biến phân loại idle\_severity\_level nhằm nhận diện các mức độ chiếm dụng nhàn rỗi khác nhau, bao gồm No\_Idle, Low\_Idle, Medium\_Idle, Severe\_Idle và Invalid.
+
+Tuy nhiên, cần phân biệt giữa chỉ số được mô tả về mặt phương pháp và đặc trưng đã được tạo trong dữ liệu thực tế. Trong mã nguồn tiền xử lý NV1, biến idle\_ratio đã được tính toán và lưu vào dữ liệu đầu ra, trong khi Useful Charge Ratio chưa được triển khai thành một cột đặc trưng riêng.
+
+Do đó, Useful Charge Ratio được trình bày như một chỉ số dẫn xuất có thể tính toán từ các biến hiện có khi cần thiết, không được xem là đặc trưng đã được tạo trực tiếp và lưu trong dữ liệu Parquet của NV1.
+
+Việc sử dụng Idle Ratio làm chỉ số chính cho phép nghiên cứu đánh giá mức độ chiếm dụng nhàn rỗi trên cùng một thang đo, phục vụ phân tích hành vi, so sánh các phiên sạc và xây dựng các nhóm đặc trưng ở những nhiệm vụ tiếp theo.
+
+Phân tích khám phá dữ liệu (Exploratory Data Analysis – EDA) được thực hiện nhằm mô tả đặc điểm tổng quan của các phiên sạc, nhận diện cấu trúc phân phối của các biến quan trọng và khảo sát sự biến động nhu cầu sử dụng trạm theo thời gian.
+
+Nội dung EDA tập trung vào hai nhóm phân tích chính. Thứ nhất, nghiên cứu xem xét phân phối và các đặc trưng thống kê của tổng thời gian kết nối, thời gian sạc thực tế, thời gian chiếm dụng nhàn rỗi, tỷ lệ thời gian nhàn rỗi và lượng điện năng tiêu thụ. Thứ hai, số lượng phiên sạc được tổng hợp theo giờ trong ngày, ngày trong tuần và năm nhằm nhận diện các quy luật sử dụng theo thời gian.
+
+Hai chỉ số Idle Time và Idle Ratio được sử dụng nhằm bổ sung góc nhìn về mức độ chiếm dụng cổng sạc. Việc chỉ sử dụng Total Duration hoặc số lượng phiên chưa phản ánh đầy đủ hiệu quả sử dụng cổng, bởi một phương tiện có thể tiếp tục chiếm giữ vị trí sau khi quá trình truyền điện đã giảm hoặc kết thúc.
+
+Như vậy, trung bình cho biết mức độ điển hình theo giá trị số học, trung vị phản ánh vị trí trung tâm ít bị ảnh hưởng bởi các giá trị lớn, còn Q1–Q3 cho biết vùng chứa 50\% số quan sát ở giữa.
+
+Charging Time có trung vị khoảng 1,82 giờ, Q1 khoảng 1,04 giờ và Q3 khoảng 2,70 giờ. Như vậy, 50\% số phiên có thời gian sạc thực tế nằm trong khoảng 1,04–2,70 giờ.
+
+Trung vị Charging Time thấp hơn trung vị Total Duration (1,82 giờ so với 2,09 giờ). Điều này cho thấy một phần thời gian kết nối của phương tiện không tương ứng với hoạt động truyền điện.
+
+Sự chênh lệch rất lớn giữa trung vị và trung bình cho thấy phần lớn phiên có thời gian nhàn rỗi ngắn, nhưng tồn tại một nhóm phiên với Idle Time rất lớn. Chính nhóm phiên này có khả năng tạo ra vấn đề chiếm dụng và cần được phân tích sâu hơn ở bước phân tích hành vi.
+
+Điều này cho thấy ít nhất một nửa số phiên có phần thời gian nhàn rỗi chiếm tỷ trọng rất thấp trong tổng thời gian kết nối. Tuy nhiên, sự khác biệt lớn giữa trung bình và trung vị cho thấy tồn tại một nhóm phiên có tỷ lệ nhàn rỗi cao.
+
+Giá trị Idle Ratio lớn nhất đạt khoảng 99,94\%, tức ở một số phiên, gần như toàn bộ thời gian kết nối không tương ứng với thời gian truyền điện. Vì vậy, Idle Ratio là chỉ số phù hợp để phân loại và so sánh hành vi chiếm dụng giữa các phiên.
+
+Như vậy, khoảng 50\% các phiên cung cấp từ 3,79 đến 11,46 kWh. Giá trị lớn nhất đạt 97,36 kWh, cho thấy nhu cầu năng lượng giữa các phiên có sự khác biệt đáng kể.
+
+Trung bình lớn hơn trung vị cho thấy phân phối kéo dài về phía các phiên có mức năng lượng cao. Tuy nhiên, Energy không trực tiếp phản ánh mức độ chiếm dụng cổng; vì vậy biến này cần được xem xét cùng Charging Time, Total Duration và Idle Time.
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/idle_distribution.pdf}
+\caption{Phân phối thời gian nhàn rỗi trên mẫu khám phá 258.720 phiên.}
+\label{fig:ext_idle_distribution}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/idle_ratio_distribution.pdf}
+\caption{Phân bố tỷ lệ thời gian nhàn rỗi trong mẫu khám phá.}
+\label{fig:ext_idle_ratio_distribution}
+\end{figure}
+
+\subsection{Nhịp sử dụng theo giờ, ngày và năm}
+
+Bên cạnh phân tích phân phối của các biến số chính, nghiên cứu tiếp tục xem xét sự biến động số lượng phiên sạc theo thời gian nhằm nhận diện các quy luật sử dụng mạng lưới.
+
+Sau 11 giờ, số phiên vẫn duy trì ở mức cao và xuất hiện một mức tăng khác tại khoảng 17–18 giờ. Ngược lại, 2 giờ sáng thấp nhất với 128 phiên, tương ứng 0,05\%.
+
+Tuy nhiên, số phiên bắt đầu chỉ phản ánh dòng phiên mới phát sinh, không phải số cổng đang bị chiếm dụng. Một phiên bắt đầu lúc 11 giờ có thể tiếp tục sử dụng cổng trong các giờ tiếp theo; vì vậy Station Occupancy phải được xây dựng từ cả thời điểm bắt đầu và kết thúc phiên.
+
+Như vậy, hơn ba phần tư số phiên bắt đầu vào các ngày từ Thứ Hai đến Thứ Sáu. Kết quả cho thấy nhu cầu sạc tồn tại chu kỳ theo tuần, với mức sử dụng cuối tuần thấp hơn nhóm ngày làm việc.
+
+Khác với phân tích Hour và Day of Week nhằm nhận diện chu kỳ ngắn hạn, phân tích Year cung cấp góc nhìn về sự thay đổi nhu cầu trên toàn bộ thời gian nghiên cứu.
+
+Kết quả cho thấy Total Duration nhìn chung lớn hơn Charging Time, đồng thời phân phối Idle Time và Idle Ratio cho thấy tồn tại một nhóm phiên có mức chiếm dụng nhàn rỗi đáng kể. Đây là cơ sở trực tiếp cho phân tích hành vi chiếm dụng.
+
+Bên cạnh đó, số phiên thay đổi rõ rệt theo giờ trong ngày, ngày trong tuần và năm, cho thấy dữ liệu chứa các cấu trúc thời gian có thể khai thác cho bài toán dự báo nhu cầu và mức độ chiếm dụng.
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/start_hour.pdf}
+\caption{Số phiên bắt đầu theo giờ địa phương.}
+\label{fig:ext_start_hour}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/start_day.pdf}
+\caption{Số phiên bắt đầu theo ngày trong tuần.}
+\label{fig:ext_start_day}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/start_year.pdf}
+\caption{Số phiên bắt đầu theo năm.}
+\label{fig:ext_start_year}
+\end{figure}
+
+\section{Phương pháp thực nghiệm}
+
+\subsection{Luồng phân tích và phụ thuộc giữa các nhiệm vụ}
+
+Để giải quyết bài toán phân tích hành vi chiếm dụng và dự báo nhu cầu sạc tại các trạm sạc xe điện công cộng, nghiên cứu xây dựng kiến trúc phân tích tổng thể theo hướng End-to-End Analytics Framework. Kiến trúc này tổ chức quá trình xử lý dữ liệu thành năm nhiệm vụ phân tích (NV1–NV5), bắt đầu từ kiểm soát chất lượng dữ liệu, phân tích hành vi sử dụng, đánh giá sự thay đổi hành vi trước và sau chính sách giá, đánh giá hiệu quả khai thác trạm sạc, đến xây dựng mô hình dự báo nhu cầu và mức độ chiếm dụng theo thời gian.
+
+Nhiệm vụ đầu tiên tập trung vào việc chuẩn bị bộ dữ liệu phiên sạc tại Palo Alto, California, Hoa Kỳ. Dữ liệu ban đầu bao gồm các thông tin về thời điểm bắt đầu và kết thúc phiên sạc, tổng thời gian kết nối, thời gian sạc thực tế, năng lượng tiêu thụ, thông tin trạm sạc và người sử dụng.
+
+Quy trình tiền xử lý thực hiện kiểm tra dữ liệu thiếu, phát hiện bản ghi trùng lặp, kiểm tra tính hợp lệ của các trường thời gian và điện năng, đồng thời nhận diện các giá trị bất thường thông qua phương pháp khoảng tứ phân vị (Interquartile Range – IQR) kết hợp với các quy tắc nghiệp vụ. Đặc biệt, các phiên có thời gian kết nối kéo dài không bị loại bỏ chỉ dựa trên ngưỡng thống kê, bởi đây có thể là những quan sát quan trọng phản ánh hành vi chiếm dụng nhàn rỗi mà nghiên cứu cần phân tích.
+
+Trên cơ sở các đặc trưng được xây dựng từ NV1, nghiên cứu thực hiện phân tích và phân nhóm hành vi chiếm dụng nhằm nhận diện những kiểu sử dụng trạm sạc khác nhau.
+
+Phương pháp phân cụm được sử dụng để khai thác sự tương đồng giữa các phiên sạc dựa trên những đặc trưng phản ánh thời gian kết nối, thời gian sạc thực tế, thời gian nhàn rỗi và đặc điểm thời gian sử dụng.
+
+Nghiên cứu định hướng đối chiếu hai thuật toán K-Means và DBSCAN để đánh giá khả năng nhận diện các nhóm hành vi. Quá trình lựa chọn tham số được thực hiện thông qua các phương pháp như Elbow Method và Silhouette Analysis, kết hợp xem xét đặc điểm phân bố dữ liệu và khả năng diễn giải kết quả phân cụm.
+
+Đầu ra của NV2 là các nhóm hành vi chiếm dụng được xác định từ dữ liệu thực nghiệm, cung cấp góc nhìn chi tiết về cách người dùng sử dụng tài nguyên cổng sạc.
+
+NV3 tập trung đánh giá sự khác biệt trong hành vi sử dụng trạm sạc giữa hai giai đoạn trước và sau ngày 01/08/2017, thời điểm thành phố Palo Alto áp dụng chính sách thu phí sạc mới.
+
+Nghiên cứu sử dụng kiểm định phi tham số Mann–Whitney U nhằm đánh giá sự khác biệt về phân phối của các chỉ tiêu giữa hai giai đoạn. Việc phân tích được kết hợp với phân khúc người dùng để làm rõ những khác biệt trong hành vi sử dụng và chiếm dụng trạm.
+
+NV4 sử dụng dữ liệu đã xử lý và các chỉ số được xây dựng từ NV1 để đánh giá sự khác biệt về hiệu quả vận hành giữa các trạm hoặc cụm trạm sạc.
+
+Quá trình đánh giá tập trung vào những chỉ tiêu như số lượng phiên sạc, thời gian sử dụng cổng, tỷ lệ chiếm dụng nhàn rỗi, điện năng tiêu thụ và mức độ khai thác trạm.
+
+Việc kết hợp nhiều chỉ số cho phép xem xét hiệu quả vận hành dưới các góc độ khác nhau, thay vì chỉ dựa trên số lượng phiên sạc hoặc tổng điện năng cung cấp. Chẳng hạn, một trạm có số phiên sạc lớn chưa chắc đạt hiệu quả khai thác cao nếu các phương tiện thường xuyên duy trì kết nối trong thời gian dài nhưng không tiếp tục truyền điện.
+
+Đầu ra của NV4 là các chỉ số và kết quả đánh giá hiệu quả khai thác, làm cơ sở cho việc xem xét các phương án phân bổ, bảo trì hoặc nâng cấp năng lực hạ tầng.
+
+Khác với NV2–NV4 chủ yếu tập trung phân tích dữ liệu lịch sử, NV5 hướng đến dự báo nhu cầu sử dụng và mức độ chiếm dụng mạng lưới trạm sạc trong các khoảng thời gian tiếp theo.
+
+Nghiên cứu lựa chọn thuật toán XGBoost Regressor để xây dựng mô hình dự báo, nhằm khai thác mối quan hệ giữa nhu cầu sử dụng trạm và các đặc điểm biến động theo thời gian.
+
+Kết quả dự báo được đánh giá thông qua các thước đo sai số phù hợp và đối chiếu với các phương pháp dự báo cơ sở. Bên cạnh đó, nghiên cứu xem xét mức độ đóng góp của các đặc trưng nhằm làm rõ những yếu tố có liên quan đến khả năng dự báo của mô hình.
+
+Đầu ra của NV5 là các giá trị dự báo nhu cầu và mức độ chiếm dụng theo thời gian, hỗ trợ nhận diện những thời điểm có nhu cầu sử dụng cao hoặc nguy cơ gia tăng mức độ chiếm dụng trong tương lai.
+
+Trong đó, NV2 cung cấp thông tin về các nhóm hành vi sử dụng và chiếm dụng trạm; NV3 phản ánh sự khác biệt hành vi giữa hai giai đoạn chính sách; NV4 xác định những đặc điểm và vấn đề liên quan đến hiệu quả khai thác; còn NV5 bổ sung thông tin dự báo nhu cầu và mức độ chiếm dụng trong các khoảng thời gian tiếp theo.
+
+Như vậy, kiến trúc End-to-End Analytics Framework không chỉ bảo đảm tính liên kết giữa các nhiệm vụ phân tích mà còn hình thành quy trình chuyển đổi từ dữ liệu giao dịch ban đầu thành thông tin hỗ trợ quyết định. Trong phạm vi nghiên cứu, Decision Layer đóng vai trò tổng hợp và diễn giải kết quả phân tích, dự báo để phục vụ hoạt động quản lý, không phải một mô hình tối ưu hóa toán học độc lập.
+
+Điểm liên kết giữa các nhiệm vụ là cấu trúc bản ghi và các biến dẫn xuất. Kích thước mẫu tuân theo bộ lọc riêng đã nêu trong phần dữ liệu. Phân cụm, so sánh theo giai đoạn, xếp hạng và kiểm thử dự báo vì vậy giữ các mẫu số riêng khi báo cáo.
+
+
+
+\subsection{Phân cụm hành vi và so sánh theo mốc giá}
+NV2 chuẩn hóa thời lượng sạc, thời lượng nhàn rỗi và điện năng bằng Z-score, rồi đối chiếu K-means với phân cụm theo mật độ DBSCAN. Nhóm chọn số cụm dựa trên chỉ số nội tại cùng khả năng diễn giải hồ sơ và kiểm tra độ ổn định bằng cách chia mẫu thành hai nửa.
+
+Với K-means, số cụm được khảo sát từ 2 đến 8. Để các cấu hình có thể so sánh, chỉ số nội tại được tính trên cùng mẫu ngẫu nhiên 10.000 phiên. Quy mô cụm và các đại lượng mô tả được tính trên toàn bộ 258.720 phiên. Trong kiểm tra chia đôi, nhóm đối chiếu kết quả của mô hình huấn luyện trên nửa đầu với kết quả toàn mẫu, dùng chỉ số Rand điều chỉnh (ARI) và tỷ lệ khớp nhãn sau căn chỉnh. Phép kiểm tra này đo khả năng tái lập phân hoạch trong mẫu quan sát.
+
+NV3 chia các phiên theo thời điểm bắt đầu trước hoặc từ ngày 01/08/2017 theo giờ Palo Alto. Kích thước mẫu thay đổi theo chỉ tiêu. Nhóm báo cáo độ lớn khác biệt thứ hạng bằng hệ số Cliff, với dấu dương khi giai đoạn trước có xu hướng lớn hơn. Khoảng tin cậy 95\% dùng 2.000 mẫu bootstrap theo mã người dùng để xét sự phụ thuộc giữa các phiên cùng người. Kiểm định Mann--Whitney và hiệu chỉnh Holm cung cấp đối chiếu bổ sung.
+
+Mỗi lần bootstrap lấy mẫu mã người dùng và giữ các phiên của người dùng được chọn ở cả hai giai đoạn. Khoảng tin cậy được lấy từ phân vị 2,5\% và 97,5\% của hệ số bootstrap cho từng chỉ tiêu. Hai chẩn đoán bổ sung xem xét tỷ trọng phiên theo cơ cấu người dùng và phân bố thời gian nhàn rỗi quanh ngưỡng 20 phút trong chính sách lịch sử. Kết quả giúp nhận diện khả năng sai khác về thành phần mẫu và phản ứng quanh ngưỡng.
+
+\subsection{Đặc trưng, quy tắc lọc và kiểm tra phân hoạch}
+
+Dữ liệu đầu vào của nhiệm vụ phân nhóm hành vi chiếm dụng trạm sạc (NV2) được lấy từ bộ dữ liệu giao dịch gốc của thành phố Palo Alto, California, gồm 259.415 bản ghi. Để bảo đảm các đặc trưng sử dụng trong phân cụm có tính hợp lệ và nhất quán, nghiên cứu thực hiện quy trình lọc riêng cho NV2 dựa trên các điều kiện về thời lượng, điện năng, công suất sạc trung bình và độ nhất quán của dấu thời gian.
+
+Trước tiên, nhóm loại bỏ 4 bản ghi trùng lặp hoàn toàn, còn 259.411 bản ghi. Tiếp theo, các điều kiện về tổng thời gian kết nối dương, thời gian sạc dương, thời gian sạc không vượt tổng thời gian kết nối và điện năng tiêu thụ dương được áp dụng, thu được 259.366 phiên.
+
+Ở bước tiếp theo, nghiên cứu sử dụng ngưỡng công suất sạc trung bình không vượt quá 19,2 kW để sàng lọc các trường hợp có tỷ lệ điện năng trên thời lượng sạc vượt tham số của thí nghiệm NV2. Sau bước này, tập dữ liệu còn 259.356 phiên.
+
+Cuối cùng, nhóm kiểm tra tính nhất quán giữa tổng thời gian kết nối được ghi nhận và khoảng thời gian tính từ hai dấu thời gian bắt đầu, kết thúc phiên sạc. Các phiên có độ lệch không vượt quá 59 giây được giữ lại, hình thành tập dữ liệu phân tích cuối cùng gồm 258.720 phiên sạc.
+
+Cần lưu ý rằng ngưỡng 19,2 kW là tham số lọc được sử dụng trong thực nghiệm NV2, không phải ngưỡng kiểm tra công suất vật lý được áp dụng trong quy trình NV1. Cụ thể, NV1 sử dụng giới hạn công suất theo loại cổng, gồm 1,92 kW đối với Level 1 và 22 kW đối với Level 2 hoặc loại cổng không xác định.
+
+Ngoài ra, notebook NV2 thực hiện việc đọc và lọc dữ liệu trực tiếp từ CSV gốc thay vì sử dụng tập Parquet đầu ra của NV1. Vì vậy, số lượng 259.356 phiên sau bước kiểm tra công suất của NV2 không được mặc nhiên đồng nhất với tập 259.356 phiên có is\_valid\_session = True trong NV1, mặc dù hai bước có cùng số lượng bản ghi.
+
+Trên tập 258.720 phiên được lựa chọn, nghiên cứu tiếp tục xây dựng các đặc trưng hành vi bao gồm thời gian sạc, thời gian nhàn rỗi và điện năng tiêu thụ để phục vụ quá trình chuẩn hóa và phân cụm K-Means, DBSCAN.
+
+Trên cơ sở đó, đề tài lựa chọn K-Means và DBSCAN để thực hiện NV2. Tuy nhiên, cần phân biệt đơn vị phân tích của hai nghiên cứu: Straka và Buzna chủ yếu diễn giải các nhóm trạm dựa trên đặc trưng sử dụng tổng hợp, trong khi đề tài hướng đến phân nhóm các phiên sạc riêng lẻ tại Palo Alto. Vì vậy, đặc điểm của các cụm trong nghiên cứu trước chỉ đóng vai trò tham khảo về phương pháp, không được xem là nhãn hành vi có thể chuyển trực tiếp sang bộ dữ liệu hiện tại.
+
+Quá trình thực nghiệm sẽ xem xét việc chuẩn hóa các biến đầu vào, lựa chọn tham số và đánh giá kết quả của từng thuật toán. Elbow Method và Silhouette Analysis có thể được sử dụng để hỗ trợ lựa chọn số cụm đối với K-Means khi thích hợp; đối với DBSCAN, cần xem xét các tham số như eps và min\_samples, đồng thời đánh giá tỷ lệ điểm nhiễu và khả năng hình thành các nhóm có ý nghĩa. Kết quả không chỉ được đối chiếu bằng chỉ số định lượng mà còn phải được diễn giải theo các đặc trưng thực tế như thời gian kết nối, thời gian nhàn rỗi, Idle Ratio và thời điểm sử dụng.
+
+Do K-Means và DBSCAN có các giả định và cách hình thành cụm khác nhau, việc lựa chọn phương pháp cuối cùng sẽ căn cứ vào kết quả thực nghiệm, chất lượng phân cụm và khả năng diễn giải hành vi. Như vậy, NV2 kế thừa hướng tiếp cận phân cụm từ nghiên cứu trước nhưng kiểm chứng lại tính phù hợp ở cấp phiên sạc, thay vì giả định trước thuật toán nào sẽ cho kết quả tốt nhất.
+
+Silhouette Score đánh giá mức phù hợp của một quan sát với cụm được gán, thông qua khoảng cách đến các quan sát cùng cụm và đến cụm lân cận gần nhất. Gọi aᵢ là khoảng cách trung bình từ quan sát i đến các quan sát còn lại trong cùng cụm. Gọi bᵢ là giá trị nhỏ nhất trong các khoảng cách trung bình từ i đến từng cụm khác. Điểm của từng quan sát được chuẩn hóa theo khoảng cách lớn hơn trong hai khoảng trên rồi lấy trung bình trên mẫu đánh giá.
+
+S nằm trong đoạn [–1, 1]. Giá trị gần 1 cho thấy quan sát gần cụm được gán hơn cụm lân cận. Giá trị gần 0 cho thấy ranh giới giữa hai cụm chưa rõ, còn giá trị âm cho thấy quan sát gần một cụm khác hơn. Với cụm chỉ có một quan sát, triển khai scikit-learn gán hệ số của quan sát đó bằng 0. Chỉ số trung bình cần được tính khi số nhãn thỏa mãn 2  \(\leq\)  K  \(\leq\)  n – 1.
+
+Trong NV2, K-Means được fit trên toàn bộ tập phân tích sau chuẩn hóa Z-score. Silhouette được tính trên 10.000 phiên lấy ngẫu nhiên không hoàn lại từ tập đó. Mẫu được tạo một lần bằng np.random.seed(0) và dùng lại cho mọi K từ 2 đến 8. K-Means sử dụng random\_state = 42 và n\_init = 10. Việc lấy mẫu đánh giá và khởi tạo mô hình sử dụng hai thiết lập seed riêng.
+
+Davies–Bouldin Index (DBI) tổng hợp mức phân tán nội cụm tương đối với khoảng cách giữa các tâm cụm. Với K cụm, ký hiệu μₖ là tâm cụm k, Sₖ là khoảng cách Euclid trung bình từ các quan sát trong cụm k đến μₖ. Tỷ lệ giữa mức phân tán và khoảng cách được xét cho từng cặp cụm.
+
+DBI càng nhỏ thì tỷ lệ phân tán nội cụm so với khoảng cách giữa tâm các cụm càng thấp. Cách tính dựa trên tâm cụm và khoảng cách Euclid phù hợp với việc đối chiếu các cấu hình K-Means. Các phép so sánh sử dụng cùng bộ đặc trưng và cùng cách chuẩn hóa để giữ nhất quán ý nghĩa khoảng cách.
+
+DBI được tính trên cùng mẫu 10.000 phiên dùng cho Silhouette. Với nhãn từ K-Means, hàm đánh giá tính lại tâm và mức phân tán của từng cụm từ các quan sát thuộc mẫu. Tâm này có thể khác centroid của mô hình được fit trên toàn bộ tập dữ liệu. Do đó, DBI công bố được diễn giải là kết quả trên mẫu đánh giá, còn kích thước và tỷ trọng cụm được thống kê trên toàn bộ tập phân tích.
+
+Số cụm được lựa chọn bằng cách đối chiếu Silhouette, DBI, đường giảm WCSS và hồ sơ hành vi của các nhóm. WCSS được tính từ mô hình fit trên toàn bộ tập dữ liệu. Calinski–Harabasz được dùng làm thông tin bổ sung trên mẫu đánh giá. Việc chọn K xét đồng thời độ tách biệt, quy mô các cụm và khả năng giải thích bằng thời gian sạc, thời gian nhàn rỗi và điện năng.
+
+NV2 chia ngẫu nhiên tập phiên thành hai nửa H₁ và H₂ với seed 42. Kiểm tra thứ nhất đối chiếu nhãn của mô hình fit toàn mẫu trên các quan sát H₁ với nhãn của mô hình A fit riêng trên H₁. Hai dãy nhãn dùng tính ARI và NMI cùng tương ứng với các phiên thuộc H₁, theo cùng thứ tự quan sát.
+
+ARI và NMI bất biến với phép đổi tên mã cụm, nên được tính trực tiếp từ hai dãy nhãn tương ứng. Thuật toán Hungarian chỉ dùng để căn chỉnh mã khi tính tỷ lệ nhãn khớp trực tiếp. Phép kiểm tra bổ sung dùng chung scaler fit toàn mẫu được đọc như mức đồng thuận trong một không gian chuẩn hóa chung. Việc đánh giá dự báo ở giai đoạn tương lai được thực hiện bằng phân hoạch thời gian của NV5.
+
+DBSCAN được đối chiếu qua lưới ε và min\_samples trên mẫu cố định, cùng năm mẫu con có seed 0, 1, 2, 7 và 42. Quy mô cụm lớn nhất, số cụm thực và tỷ lệ noise mô tả mức thay đổi của cấu hình khi đổi tham số hoặc mẫu.
+
+Ba biến đưa vào phân cụm đo độ dài sạc, thời gian giữ cổng ngoài thời gian sạc và lượng điện mỗi phiên. Tổng thời gian kết nối bằng tổng của hai biến thời lượng. Tỷ lệ nhàn rỗi được suy từ hai biến đó và được dùng để mô tả hồ sơ sau phân cụm. Với đặc trưng $j$ của phiên $i$, Z-score là $(x_{ij}-\mu_j)/\sigma_j$, giúp tránh để biến có đơn vị lớn chi phối khoảng cách. K-means tìm phân hoạch giảm tổng bình phương khoảng cách trong cụm. DBSCAN hình thành cụm theo bán kính lân cận và số điểm tối thiểu, nên có thể gắn những điểm thưa là nhiễu.
+
+Chỉ số Silhouette dùng để xem một phiên gần các phiên cùng cụm đến đâu so với cụm gần nhất khác. Chỉ số Davies--Bouldin đo độ phân tán nội cụm tương đối so với khoảng cách giữa các tâm. Hai chỉ số \cite{rousseeuw1987,davies1979} được đọc cùng quy mô cụm và đặc trưng nghiệp vụ. Một cấu hình có chỉ số cao nhưng gộp nhóm giữ cổng kéo dài với nhóm phổ biến có thể khó sử dụng để chọn đối tượng thí điểm. Phép căn chỉnh Hungarian chỉ dùng cho tỷ lệ khớp nhãn. ARI và thông tin tương hỗ chuẩn hóa bất biến với việc đổi tên nhãn.
+
+
+\subsection{Phân kỳ, cơ cấu người dùng và phép kiểm định}
+
+Nhiệm vụ 3 phân tích sự khác biệt trong hành vi sử dụng và chiếm dụng cổng sạc giữa hai giai đoạn trước và sau mốc thay đổi chính sách giá ngày 01/08/2017. Trên cơ sở dữ liệu và các đặc trưng được xây dựng tại NV1, nghiên cứu thực hiện phân đoạn theo thời gian, phân khúc người dùng, kiểm định sự khác biệt và phân tích hành vi quanh ngưỡng ân hạn. Trong đó, phân đoạn dữ liệu xác định hai nhóm phiên phục vụ so sánh; phân khúc người dùng bổ sung thông tin về thành phần mẫu, giúp diễn giải những biến động quan sát được ở cấp mạng lưới.
+
+Trường Start Date được sử dụng theo thời gian địa phương của dữ liệu nguồn để đối chiếu với mốc chính sách. Đối với phiên kéo dài qua thời điểm chuyển tiếp, nhãn giai đoạn được xác định theo thời điểm bắt đầu. Chẳng hạn, phiên bắt đầu ngày 31/07/2017 và kết thúc ngày 01/08/2017 vẫn thuộc nhóm Pre-policy. Toàn bộ phiên được giữ nguyên như một quan sát, không tách thành hai bản ghi.
+
+Trước khi phân đoạn, trường thời điểm bắt đầu được chuyển về kiểu ngày giờ. Những bản ghi không xác định được thời điểm bắt đầu bị loại khỏi phân tích Pre/Post do không đủ cơ sở xác định giai đoạn. Các biến thời lượng, điện năng và tỷ lệ nhàn rỗi được chuyển về kiểu số; những giá trị không hữu hạn được xử lý như dữ liệu thiếu.
+
+Các chỉ tiêu so sánh chính bao gồm thời gian nhàn rỗi, tỷ lệ nhàn rỗi, thời gian sạc thực tế và điện năng tiêu thụ. Mẫu phân tích được xác định riêng cho từng chỉ tiêu theo điều kiện hợp lệ tương ứng: tổng thời gian kết nối phải dương; thời gian nhàn rỗi và điện năng không âm; thời gian sạc thực tế dương; tỷ lệ nhàn rỗi nằm trong khoảng từ 0 đến 1. Vì vậy, số quan sát sử dụng có thể khác nhau giữa các phép phân tích và cần được ghi nhận theo từng chỉ tiêu.
+
+Các phiên có thời lượng dài được xem xét theo tính hợp lệ nghiệp vụ, không tự động loại bỏ chỉ vì vượt ngưỡng ngoại lệ thống kê. Những quan sát này có thể phản ánh hành vi chiếm dụng kéo dài mà nghiên cứu cần nhận diện.
+
+Hai giai đoạn có độ dài quan sát khác nhau, đồng thời chịu ảnh hưởng của xu hướng phát triển nhu cầu, thay đổi hạ tầng, tính mùa vụ và bối cảnh vận hành. Đặc biệt, dữ liệu năm 2020 cần được diễn giải trong bối cảnh ảnh hưởng của đại dịch COVID-19. Do đó, chênh lệch tổng số phiên cần được đặt trong thời gian quan sát tương ứng. Các khác biệt hành vi được trình bày là thay đổi quan sát được giữa hai giai đoạn; thiết kế so sánh trước–sau hiện tại chưa đủ để tách riêng tác động nhân quả của chính sách giá khỏi các yếu tố thay đổi theo thời gian.
+
+Đặc điểm này cho thấy việc chỉ sử dụng giá trị trung bình để đánh giá sự khác biệt giữa hai giai đoạn có thể chưa phản ánh đầy đủ hành vi của phần lớn phiên sạc. Ngoài ra, phân phối dữ liệu có thể chứa nhiều giá trị bằng nhau, đặc biệt đối với những phiên có thời gian nhàn rỗi bằng 0.
+
+Do đó, nghiên cứu lựa chọn kiểm định Mann–Whitney U, một phương pháp kiểm định phi tham số dựa trên thứ hạng của các quan sát, không yêu cầu dữ liệu của hai nhóm tuân theo phân phối chuẩn.
+
+Kết quả kiểm định Mann–Whitney U phản ánh sự khác biệt về phân phối hoặc xu hướng thứ hạng giữa hai nhóm. Chỉ khi hình dạng phân phối của hai nhóm tương đồng, kết quả mới có thể được diễn giải chủ yếu theo sự khác biệt về vị trí trung tâm, chẳng hạn trung vị.
+
+Kiểm định Mann–Whitney U được thực hiện bằng cách kết hợp các quan sát hợp lệ của hai giai đoạn thành một tập dữ liệu chung và sắp xếp chúng theo thứ tự tăng dần. Mỗi giá trị được gán một thứ hạng; các quan sát có giá trị bằng nhau được nhận thứ hạng trung bình.
+
+Giá trị thống kê U được sử dụng để xác định mức độ khác biệt về thứ hạng giữa hai nhóm. Trong quá trình thực nghiệm, nghiên cứu sử dụng thư viện SciPy của Python để thực hiện kiểm định và tính p-value, đồng thời xử lý các trường hợp xuất hiện nhiều giá trị trùng nhau trong dữ liệu.
+
+Đối với dữ liệu có kích thước lớn, p-value có thể được xác định bằng phương pháp xấp xỉ tiệm cận. Việc tính toán được thực hiện riêng cho từng chỉ tiêu, sử dụng các quan sát hợp lệ của hai giai đoạn tương ứng.
+
+Công thức trên sử dụng quy ước thống kê U tương ứng với nhóm Pre-policy và có xét đến các trường hợp đồng hạng. Cách tính này giúp thống nhất kết quả giữa kiểm định thống kê và đo lường kích thước tác động, đồng thời tránh phải thực hiện toàn bộ phép so sánh từng cặp quan sát khi kích thước dữ liệu lớn.
+
+Một người dùng có thể phát sinh nhiều phiên và xuất hiện ở cả hai giai đoạn; do đó, các phiên của cùng người dùng không hoàn toàn độc lập. Nghiên cứu thực hiện cluster bootstrap theo User ID để ước lượng khoảng tin cậy cho Cliff’s Delta, thay vì lấy mẫu lại từng phiên một cách độc lập.
+
+Cluster bootstrap xử lý cấu trúc lặp theo User ID trong phạm vi mẫu quan sát, nhưng không biến thiết kế Pre/Post thành một thí nghiệm nhân quả. Hai giai đoạn có độ dài khác nhau, đồng thời chịu ảnh hưởng của tăng trưởng số xe điện, thay đổi hạ tầng, tính mùa vụ và điều kiện vận hành theo thời gian.
+
+Vì vậy, sự khác biệt về phân phối hoặc khoảng tin cậy không chứa 0 không đồng nghĩa toàn bộ thay đổi hành vi đều do chính sách giá gây ra. Khác với thiết kế hồi quy gián đoạn theo thời gian được đề cập trong nghiên cứu của Luo và Wang (2025), phân tích hiện tại mô tả và so sánh các phiên trước và sau chính sách, chưa đủ cơ sở xác lập quan hệ nhân quả.
+
+Phân tích mức tập trung gần ngưỡng được sử dụng để khảo sát cách các phiên sạc phân bố quanh mốc ân hạn 20 phút của thời gian nhàn rỗi. Kế thừa ý tưởng xem xét phản ứng hành vi quanh ngưỡng chính sách, nghiên cứu so sánh hai khoảng liền kề có cùng độ rộng trước và sau mốc này.
+
+Thời gian nhàn rỗi được đổi sang phút. Trong từng giai đoạn, chỉ giữ các phiên có giá trị Idle Time hữu hạn và không âm. Hai khoảng được xét là [15; 20) phút và [20; 25) phút: khoảng thứ nhất nhận phiên từ 15 phút đến dưới 20 phút, khoảng thứ hai nhận phiên từ 20 phút đến dưới 25 phút. Phiên đúng 20 phút thuộc khoảng thứ hai.
+
+Phân tích hiện tại là so sánh mô tả hai khoảng liền kề và phân phối quan sát. Nghiên cứu chưa ước lượng đường phản thực, chưa kiểm định riêng sự thay đổi mức tích tụ và chưa tách ảnh hưởng của thành phần người dùng, mùa vụ hoặc hạ tầng. Vì vậy, kết quả được gọi là mức tập trung gần ngưỡng; chưa đủ bằng chứng để khẳng định người dùng chủ động điều chỉnh thời gian nhằm tránh phí hoặc xác lập tác động nhân quả của chính sách.
+
+NV3 lấy mẫu có hoàn lại từ hợp người dùng xuất hiện trong hai giai đoạn, với 2.000 lần lặp. Khi một User ID được chọn, toàn bộ phiên hợp lệ của người đó ở cả Pre và Post được giữ cùng nhau. Các User ID chỉ xuất hiện ở một giai đoạn vẫn nằm trong tổng thể lấy mẫu. Việc chuẩn bị mẫu theo chỉ tiêu giữ các phiên có User ID, thời điểm và giá trị chỉ tiêu hợp lệ, cùng tổng thời lượng dương.
+
+Thống kê đích là Cliff’s Delta ở cấp cặp phiên. Trong mỗi lần lặp, mọi phiên của một người nhận trọng số bằng số lần User ID đó được rút. Delta được tính lại từ tổng trọng số các cặp Pre lớn hơn Post trừ tổng trọng số các cặp Pre nhỏ hơn Post, chia tích tổng trọng số phiên của hai giai đoạn. Người dùng có nhiều phiên vì vậy đóng góp nhiều cặp so sánh hơn trong thống kê đích này. Cách tính trọng số tương đương việc sao chép toàn bộ phiên theo số lần người dùng được rút.
+
+CI 95\% lấy theo phân vị 2,5\% và 97,5\% của các Delta bootstrap hợp lệ. Một lần lặp cần có tổng trọng số phiên dương ở cả hai giai đoạn. Triển khai hiện chỉ công bố CI nếu ít nhất 95\% số lần lặp hợp lệ. Dấu dương được quy ước là giá trị Pre có xu hướng lớn hơn Post.
+
+Delta được đọc cùng CI và ngưỡng kích thước tác động. CI chứa 0 được ghi nhận là chưa rõ theo phép ước lượng này. Holm được áp dụng cho bốn p-value Mann–Whitney tham khảo. Các CI bootstrap là CI riêng theo từng chỉ tiêu. Phân tích cơ cấu New\_Post, Regular, Casual và Unclassified hỗ trợ xem xét sự thay đổi thành phần mẫu khi diễn giải so sánh Pre/Post.
+
+Gọi $X$ là một phiên rút từ giai đoạn trước và $Y$ là một phiên từ giai đoạn sau. Hệ số Cliff ước lượng $P(X>Y)-P(X<Y)$, với các cặp bằng nhau đóng góp 0. Dấu của hệ số biểu thị hướng so sánh thứ hạng. Khoảng tin cậy được trình bày riêng theo chỉ tiêu. Holm điều chỉnh các giá trị $p$ của phép kiểm định tham khảo, còn bootstrap theo người dùng phản ánh cấu trúc lặp ở cấp phiên. Phân tích quanh ngưỡng 20 phút đối chiếu hai khoảng liên tiếp từ 15 đến dưới 20 phút và từ 20 đến dưới 25 phút. Kết quả là phép chẩn đoán mô tả để thiết kế thử nghiệm sau này.
+
+
+\subsection{Đối chuẩn trạm}
+NV4 giữ trạm có ít nhất 500 phiên và đủ tiêu chí, thu được 33 trạm. Sáu tiêu chí gồm số phiên, tổng điện năng, điện năng bình quân, thời gian sạc hữu ích bình quân, tỷ lệ nhàn rỗi bình quân và tỷ lệ phiên có $R_i>0{,}5$. Nghiên cứu chuẩn hóa min--max theo hướng mong muốn của từng tiêu chí và xếp hạng theo khoảng cách tới phương án lý tưởng (TOPSIS) \cite{hwang1981}. Kết quả được đối chiếu giữa trọng số entropy và trọng số đều, cùng sáu kịch bản độ nhạy về tiêu chí và cách chuẩn hóa.
+
+Bốn tiêu chí đầu được định hướng lợi ích, hai tiêu chí nhàn rỗi được định hướng chi phí. Điểm tương đối của trạm $i$ bằng $D_i^-/(D_i^++D_i^-)$, với $D_i^+$ và $D_i^-$ là khoảng cách đến véc-tơ lý tưởng tốt nhất và kém nhất trên ma trận đã chuẩn hóa và gắn trọng số. Trọng số entropy phản ánh mức phân tán chỉ tiêu giữa các trạm. Phương án đều cho sáu tiêu chí cùng trọng số $1/6$. Độ nhạy được đánh giá qua tương quan Spearman, số trạm đổi ít nhất năm bậc và số thành viên chung trong nhóm năm trạm đầu.
+
+\subsection{Chuẩn hóa, trọng số và sáu kịch bản độ nhạy}
+
+Lượt chạy bắt đầu từ 259.415 bản ghi, loại 4 bản ghi trùng và thu được 259.356 phiên có cờ is\_valid\_session ở NV1. NV4 tiếp tục đối chiếu thời lượng kết nối với chênh lệch timestamp theo ngưỡng dung sai 59 giây, loại thêm 481 phiên không đạt kiểm tra này, còn 258.875 phiên dùng để tổng hợp cấp trạm. Do đó, mẫu NV4 được xác định bằng bộ điều kiện riêng của nhiệm vụ.
+
+Sau khi gộp biến thể BRYANT \# 1 về BRYANT \#1, dữ liệu còn 46 tên trạm. Trong đó, 13 trạm chỉ có từ 1 đến 8 phiên, tổng cộng 39 phiên; 33 trạm còn lại có từ 1.044 phiên trở lên. Nghiên cứu áp dụng ngưỡng ít nhất 500 phiên mỗi trạm để tránh ước lượng từ mẫu quá nhỏ. Tập đủ điều kiện gồm 33 trạm và 258.836 phiên sạc.
+
+Ma trận không có giá trị thiếu; cả sáu tiêu chí đều biến thiên và nằm trong miền hợp lệ. Thống kê mô tả được tính trên 33 trạm, với C5 và C6 biểu diễn theo phần trăm. Hệ số biến thiên (CV) là tỷ số giữa độ lệch chuẩn mẫu và giá trị trung bình.
+
+Phương án đối chứng gán trọng số wⱼ = 1/6 cho cả sáu tiêu chí. Hai phương án cùng sử dụng ma trận Min-Max và quy trình TOPSIS, chỉ thay bộ trọng số. So sánh này giúp nhận diện mức phụ thuộc của thứ hạng vào cách phân bổ trọng số.
+
+Sáu tiêu chí phản ánh quy mô giao dịch, lượng điện năng, đặc điểm phiên sạc và mức nhàn rỗi của trạm. C1 và C2 có tương quan cao, đồng thời C2 bằng tích của C1 và C3 theo định nghĩa. C5 và C6 cũng thể hiện các khía cạnh liên quan của hành vi nhàn rỗi. Vì vậy, nghiên cứu tổng hợp các tiêu chí bằng TOPSIS và kiểm tra ảnh hưởng của việc loại từng tiêu chí trong phân tích độ nhạy.
+
+Các tiêu chí có thể bù trừ trong phép tổng hợp TOPSIS. Vì vậy, nghiên cứu diễn giải điểm tổng hợp cùng ma trận tiêu chí và các kịch bản độ nhạy, thay vì suy ra chất lượng vận hành chỉ từ một thứ hạng.
+
+Trong đó wⱼ  \(\geq\)  0 và tổng 6 trọng số bằng 1. Nghiên cứu lập song song hai ma trận: V\_entropy với vector trọng số Entropy và V\_đều với mỗi trọng số bằng 1/6. Hai ma trận đi qua cùng quy trình phía sau, nên khác biệt về thứ hạng chỉ do trọng số.
+
+CCᵢ thuộc đoạn [0, 1]. Điểm cao hơn thể hiện vị trí gần nghiệm lý tưởng dương hơn theo bộ tiêu chí đã chọn. Thứ hạng được sắp theo điểm giảm dần với độ chính xác đầy đủ. Nếu điểm bằng nhau hoàn toàn, tên trạm được dùng để phân định thứ tự. Khi tổng hai khoảng cách bằng 0, điểm được quy ước bằng 0,5.
+
+Entropy phản ánh mức phân tán thông tin sau chuẩn hóa. Hai tiêu chí C1 và C2 cùng chiếm 57,21\% trọng số và có tương quan Pearson 0,9815, nên chiều quy mô có ảnh hưởng đáng kể. Trọng số đều phân bổ 1/6 cho mỗi tiêu chí. Cả hai phương án được trình bày để thể hiện độ nhạy của kết quả.
+
+S0 sử dụng đủ C1–C6 với chuẩn hóa Min–Max. S1 loại C2, S2 loại C1, S3 loại C6 và S4 loại C4. S5 thay C5 bằng tỷ số tổng thời gian nhàn rỗi trên tổng thời gian kết nối của trạm. Các kịch bản S1–S5 tính lại trọng số theo bộ tiêu chí tương ứng. S6 chuẩn hóa vector và giữ trọng số Entropy của S0 để khảo sát ảnh hưởng riêng của cách chuẩn hóa. Mỗi phương án được đối chiếu với S0 của cùng bộ trọng số.
+
+Thứ nhất, NV4 tổng hợp theo định danh trạm và chưa chuẩn hóa các tiêu chí quy mô theo số cổng thực sự hoạt động, lịch hoạt động hay công suất thiết kế. Dữ liệu cho phép nhận diện các mã cổng đã quan sát, nhưng thiếu lịch sử sức chứa khả dụng tại từng thời điểm để xác định đầy đủ mức sử dụng hạ tầng.
+
+Thứ hai, nghiên cứu không phản ánh hiệu quả tài chính. Phân tích chỉ dùng dữ liệu giao dịch gồm năng lượng và thời gian, chưa có chi phí đầu tư, bảo trì, mặt bằng và doanh thu bán điện. Trạm xếp hạng cao về vận hành chưa chắc có tỷ suất sinh lời tốt.
+
+Thứ ba, điểm TOPSIS mang tính tương đối. Nghiệm lý tưởng dương và âm xác định từ chính 33 trạm đang xét, nên thêm trạm mới hoặc chuyển sang đô thị khác sẽ làm điểm và thứ hạng dịch chuyển. Kết quả chỉ dùng như thước đo đối chuẩn nội bộ.
+
+S0 sử dụng đủ sáu tiêu chí và chuẩn hóa Min–Max. S1 loại C2, S2 loại C1, S3 loại C6 và S4 loại C4. S5 thay Idle Ratio bình quân phiên bằng tỷ số tổng thời gian nhàn rỗi trên tổng thời gian kết nối. Các kịch bản S1–S5 tính lại trọng số theo ma trận tương ứng. S6 dùng chuẩn hóa vector và giữ trọng số Entropy S0.
+
+Thứ hạng của mỗi kịch bản được đối chiếu với S0 theo cùng phương án trọng số bằng Spearman, Kendall, độ lệch hạng tuyệt đối trung bình và lớn nhất, số trạm lệch ít nhất 5 bậc và số trạm trùng trong Top 5. Bảng Entropy và bảng trọng số đều được trình bày riêng, với S6 chỉ có kết quả Entropy trong thiết kế hiện tại. Các chỉ số cho phép xác định trạm và nhóm hạng nhạy với giả định.
+
+Với tiêu chí lợi ích, giá trị chuẩn hóa tăng từ 0 đến 1 khi giá trị gốc tăng từ nhỏ nhất đến lớn nhất. Với tiêu chí chi phí, hướng được đảo. Gọi $r_{ij}$ là giá trị sau chuẩn hóa, tỷ phần $p_{ij}=r_{ij}/\sum_i r_{ij}$ dùng để tính entropy $e_j=-\sum_i p_{ij}\log(p_{ij})/\log(33)$. Theo quy ước $0\log(0)=0$, tiêu chí có độ phân tán cao hơn được gán trọng số lớn hơn qua $w_j=(1-e_j)/\sum_j(1-e_j)$. Mỗi cột chuẩn hóa được nhân với trọng số tương ứng trước khi tính khoảng cách.
+
+Trong các kịch bản độ nhạy, việc đổi hoặc bỏ tiêu chí được thực hiện song song trên cả trọng số entropy và trọng số đều. Chỉ so sánh với phương án gốc trong cùng họ trọng số. Độ ổn định của danh sách trạm đầu và độ ổn định thứ tự trong danh sách được theo dõi riêng.
+
+
+\subsection{Dự báo một bước theo cụm vị trí}
+NV5 ánh xạ 47 tên trạm vào chín cụm theo vị trí ghi nhận ở từng phiên. Định danh cổng kết hợp địa chỉ MAC chuẩn hóa với số cổng, thu được 117 cổng vật lý. Mỗi cổng được đếm một lần trong một khung nếu có ít nhất một khoảng kết nối $[s_i,e_i)$ giao với khung đó. Mục tiêu thứ hai đếm số phiên bắt đầu trong khung. Sau khi loại 12 khoảng kết nối không dương khỏi mẫu hợp lệ NV1, còn 259.344 phiên. Khung không có phiên quan sát được nhận giá trị 0.
+
+Lưới 15 phút và ranh giới chia tập dùng UTC. Đặc trưng lịch dùng giờ Palo Alto, có tính giờ mùa hè. Đặc trưng gồm biến lịch, độ trễ $\{1,2,4,96,672\}$ và trung bình trượt ở $\{4,12,96,672\}$ khung. Mỗi cửa sổ trượt dịch một bước để chỉ dùng quan sát đến $t-1$. Mô hình dự báo khung kế tiếp từ lịch và các giá trị đã quan sát.
+
+Gọi $W_t=[t,t+\Delta)$ với $\Delta=15$ phút, $P_c$ là tập cổng đã quan sát của cụm $c$, và $\mathcal S_{c,p}$ là tập phiên ghi nhận tại cổng $p$ của cụm đó. Số cổng có phiên kết nối được tính bằng
+\begin{equation}
+O_{c,t}=\sum_{p\in P_c}\mathbf{1}\!
+\left(\exists i\in\mathcal S_{c,p}:\,
+s_i<t+\Delta,\ e_i>t\right).
+\label{eq:occ}
+\end{equation}
+Quy tắc trong \eqref{eq:occ} tránh đếm lặp khi hai phiên của cùng cổng giao với một khung. Các cổng được đếm có thể hoạt động ở những thời điểm khác nhau trong khung. Khả năng phục vụ đồng thời còn phụ thuộc vào số cổng thực sự khả dụng.
+
+XGBoost \cite{chen2016} được so với trung bình lịch sử theo thứ và khung giờ, ba đối chứng lấy giá trị quan sát ở độ trễ 1, 96 và 672, hồi quy Ridge và rừng ngẫu nhiên. Huấn luyện kết thúc trước 01/01/2019. Nửa đầu năm 2019 dùng chọn cấu hình theo căn sai số bình phương trung bình (RMSE). Ridge thử hệ số phạt 0,1, 1, 10 và 100 với bộ chuẩn hóa được khớp trên tập huấn luyện. XGBoost thử 100 cây sâu tối đa 3 hoặc 160 cây sâu tối đa 4, cùng tốc độ học 0,05. Rừng ngẫu nhiên dùng 60 cây, độ sâu tối đa 12 và ít nhất 4 quan sát mỗi lá. Nửa cuối năm 2019 là kỳ kiểm thử chính. Năm 2020 dùng kiểm tra khi mức hoạt động thay đổi. Tham số được giữ cố định trong hai kỳ đánh giá.
+
+Đánh giá bổ sung so sánh XGBoost và đối chứng $t-1$ ở nửa cuối năm 2018 và nửa đầu năm 2019. Mỗi cửa sổ dùng sáu tháng ngay trước kỳ kiểm thử để chọn cấu hình từ mô hình huấn luyện trên dữ liệu sớm hơn. Đây là kiểm chứng hồi cứu. Nửa đầu năm 2019 cũng là tập xác thực của thiết kế chính. Với số phiên bắt đầu, phân tích bổ sung dùng đối chứng luôn 0 và phân nhóm sai số theo 0, 1 hoặc ít nhất 2 phiên quan sát.
+
+Trong phép chia chính, mỗi cụm có 259.667 khung huấn luyện sau khi tạo đặc trưng, 17.376 khung xác thực, 17.664 khung kiểm thử và 35.136 khung trong năm 2020. Sai số được tính riêng cho từng cụm trên cùng các thời điểm giữa các mô hình rồi lấy trung bình đều. Báo cáo tách phép tổng hợp chín cụm và phép tổng hợp tám cụm có chuỗi biến động khi cần. Phân tích bổ sung cho chiếm dụng so sánh nhóm khung không đổi với nhóm có thay đổi so với khung trước. Nhóm chiếm dụng cao tương đối được xác định bằng phân vị 90\% của tập huấn luyện riêng từng cụm.
+
+\subsection{Chuỗi mục tiêu, đối chứng và điều kiện sử dụng}
+
+Cách tiếp cận kế thừa hướng dự báo mức chiếm dụng bằng học có giám sát của Ostermann et al. (2022), với bộ mô hình đối chứng điều chỉnh theo dữ liệu đề tài. Các mô hình được đánh giá trên cùng cụm, chuỗi mục tiêu và ranh giới thời gian. Chênh lệch sai số phản ánh kết quả của từng mô hình dưới cấu hình thực nghiệm đã sử dụng.
+
+Trong công thức, mỗi cổng vật lý p chỉ được đếm một lần trong một khung, dù có nhiều phiên của cổng đó cùng giao với khung. Đếm theo phiên thì một cổng có hai phiên ngắn liên tiếp sẽ thành hai cổng, và mục tiêu vượt quá số cổng thật của trạm.
+
+Bảng ánh xạ chuẩn hóa 47 giá trị Station Name về 9 họ vị trí: BRYANT, CAMBRIDGE, HAMILTON, HIGH, MPL, RINCONADA LIB, SHERMAN, TED THOMPSON và WEBSTER. Cụm được gán theo từng phiên, không theo từng cổng, vì hai cổng của HAMILTON \#2 xuất hiện đến tháng 01/2016 rồi chuyển sang BRYANT \#3. Ánh xạ tĩnh theo cổng sẽ gán sai vị trí cho một trong hai giai đoạn và làm lệch chuỗi của cả hai cụm. Mã cổng vật lý ghép địa chỉ MAC đã chuẩn hóa với số cổng theo dạng {MAC}\_Port\_{Port Number}, gộp 139 cách ghi khác nhau về 117 mã chuẩn. Sau khi lọc, còn 259.356 phiên; 12 phiên có thời lượng bằng 0 bị loại khỏi chuỗi vì không chiếm cổng ở khung nào, còn 259.344 phiên để lập chuỗi.
+
+Với khung cần dự báo t, mô hình sử dụng lịch đã biết của t và các quan sát mục tiêu đến t–1. Sau mỗi khung 15 phút, hệ thống nhận quan sát mới để thực hiện dự báo một bước tiếp theo. Bộ chuẩn hóa và tham số mô hình được fit trên train. Validation được sử dụng để chọn siêu tham số theo RMSE.
+
+Các mô hình đối chứng được đánh giá riêng cho từng cụm và từng mục tiêu. Historical Mean biểu diễn chu kỳ lịch, persistence đo khả năng dự báo từ các quan sát gần hoặc cùng chu kỳ, Ridge mô tả quan hệ tuyến tính, còn Random Forest bổ sung đối chứng cây phi tuyến.
+
+Random Forest được fit riêng theo cụm và mục tiêu với 60 cây, độ sâu tối đa 12, tối thiểu 4 quan sát mỗi lá và seed 42. So sánh với Ridge và XGBoost giúp mô tả kết quả của các cách biểu diễn tuyến tính và cây phi tuyến dưới cấu hình đang xét.
+
+Các mô hình được fit trên train. Validation chọn siêu tham số của Ridge và XGBoost. Test và stress test dùng để đánh giá ngoài mẫu. Dự báo được giữ dạng liên tục và chặn dưới tại 0. Do thiếu lịch sử số cổng khả dụng theo thời điểm, lượt chạy hiện tại chưa áp dụng giới hạn trên theo sức chứa. Lag trong các giai đoạn đánh giá sử dụng quan sát đã có trước mỗi khung dự báo theo thiết lập một bước.
+
+Phân tích bổ sung cho số phiên bắt đầu sử dụng đối chứng luôn dự báo 0. Các dự báo được chấm trên cùng những khung kiểm thử ở tám cụm có chuỗi mục tiêu biến động. Sai số được tổng hợp trên toàn kỳ và riêng cho ba nhóm khung có 0, 1 hoặc từ 2 phiên quan sát được. MAE, RMSE và sai lệch có dấu được tính theo từng cụm rồi lấy trung bình đều. Các nhóm được xác định sau khi có quan sát để chẩn đoán sai số.
+
+XGBoost cộng tuần tự đầu ra của nhiều cây hồi quy, mỗi cây mới sửa phần sai số còn lại của các cây trước. Ở vòng boosting thứ t, với dự báo hiện tại là tổng của t–1 cây, hàm mục tiêu gồm sai số dự báo và chi phí phức tạp của cây mới.
+
+XGBoost sử dụng khai triển Taylor bậc hai của hàm mất mát để tính gradient và Hessian. Các đại lượng này được dùng để đánh giá mức cải thiện mục tiêu khi chia nút. Lượt chạy sử dụng tree\_method hist để xây dựng cây theo các khoảng giá trị đặc trưng.
+
+Số cây do cấu hình định trước quyết định. Mỗi cụm và mục tiêu lựa chọn một trong hai cấu hình theo validation. MAE, RMSE và R² được báo cáo riêng cho từng cụm, mục tiêu và giai đoạn. Khi tổng hợp qua cụm, cần ghi rõ cách lấy trung bình và kiểm tra các chuỗi có mục tiêu hằng.
+
+Chuỗi được sắp theo thời gian và chia thành train, validation, test và stress test 2020. Phân hoạch theo thời gian giúp đánh giá khả năng dự báo ở giai đoạn đến sau dữ liệu huấn luyện. Mọi cụm sử dụng cùng các ranh giới thời gian UTC.
+
+Năm 2020 được trình bày thành một giai đoạn stress test riêng để đánh giá thay đổi sai số ngoài giai đoạn test 2019. Giai đoạn này được giữ ngoài quá trình chọn siêu tham số và có thể chịu ảnh hưởng của thay đổi điều kiện vận hành, nhu cầu di chuyển và chất lượng ghi nhận dữ liệu.
+
+Đặc trưng lag và rolling chỉ sử dụng mục tiêu đã quan sát trước thời điểm dự báo. Bộ chuẩn hóa được fit trên train. Validation phục vụ lựa chọn siêu tham số trong lưới định trước. Với lag lớn nhất 672 bước, mỗi chuỗi mất 672 khung đầu khi tạo đặc trưng. Dữ liệu và tham số được kiểm tra theo cùng ranh giới thời gian.
+
+Ngoài phép chia chính, nghiên cứu kiểm tra độ ổn định của dự báo chiếm dụng qua hai cửa sổ lịch sử. Với kỳ kiểm thử nửa cuối năm 2018, mô hình được huấn luyện trên dữ liệu đến hết năm 2017 và chọn cấu hình trên nửa đầu năm 2018. Với kỳ kiểm thử nửa đầu năm 2019, mô hình được huấn luyện trên dữ liệu đến hết nửa đầu năm 2018 và chọn cấu hình trên nửa cuối năm 2018. Mỗi cửa sổ huấn luyện lại hai cấu hình XGBoost theo cụm, chọn bằng RMSE validation và chấm cùng các khung với đối chứng t–1 theo giao thức dự báo một bước. Các mốc chia dùng UTC. Hai cửa sổ phục vụ kiểm chứng hồi cứu, trong đó kỳ nửa đầu năm 2019 trùng với validation của thí nghiệm chính.
+
+MAE đo độ lớn sai lệch tuyệt đối trung bình và có đơn vị của biến mục tiêu. Với occupancy\_ports, MAE được diễn giải theo số cổng bị chiếm dụng trong một khung. Với session\_arrivals, đơn vị là số phiên bắt đầu trong một khung. Giá trị thấp hơn thể hiện dự báo gần quan sát hơn theo tổn thất tuyệt đối.
+
+Các mô hình hồi quy trả về dự báo liên tục và đầu ra được chặn dưới tại 0 trước khi đánh giá. MAE vì vậy có thể là một số thập phân dù mục tiêu quan sát là số đếm. Quy tắc xử lý này áp dụng nhất quán cho các mô hình trong cùng phép so sánh.
+
+RMSE cùng đơn vị với mục tiêu và tăng mạnh hơn khi xuất hiện sai số lớn do thành phần bình phương. Chỉ số hỗ trợ nhận diện cấu hình có những khung dự báo sai đáng kể, chẳng hạn quanh thời điểm tăng hoặc giảm nhanh mức chiếm dụng. RMSE được tính bằng căn bậc hai của trung bình bình phương sai số.
+
+RMSE trên validation là tiêu chí chọn alpha của Ridge và cấu hình XGBoost. MAE được đọc đồng thời khi đánh giá cuối cùng. Nếu một mô hình giảm RMSE nhưng tăng MAE, kết luận cần nêu rõ sự đánh đổi giữa hai thước đo và đối chiếu với mục đích vận hành.
+
+Trong công thức, ȳ là giá trị trung bình của mục tiêu trong chính tập đánh giá. Với chuỗi có phương sai dương, R² = 1 thể hiện dự báo khớp hoàn toàn, R² = 0 tương ứng sai số bình phương bằng dự báo hằng tại trung bình của tập đó, còn R² âm cho thấy sai số lớn hơn mức tham chiếu này. R² có thể nhận giá trị âm và được diễn giải như một chỉ số tương đối của sai số bình phương.
+
+Trường hợp mục tiêu không đổi trong một cụm và một giai đoạn, tổng bình phương ở mẫu số bằng 0 nên công thức $R^2$ suy biến \cite{sklearnr2}. Hàm r2\_score với force\_finite=True mặc định trả về 1 khi dự báo hoàn hảo và 0 khi dự báo chưa hoàn hảo trong trường hợp này. Khi lập bảng kết quả, nghiên cứu đối chiếu trạng thái chuỗi hằng và số khung có hoạt động để đọc các giá trị R² theo quy ước của thư viện.
+
+MAE, RMSE và R² được tính riêng cho từng tổ hợp cụm vị trí, mục tiêu, mô hình và giai đoạn. Bảng kết quả gồm Historical Mean, persistence t–1, persistence t–96, persistence t–672, Ridge, Random Forest và XGBoost. Đặc trưng được tạo và loại các dòng thiếu lag/rolling trước khi chia cùng tập thời điểm cho bảy mô hình. Trong từng tổ hợp cụm, mục tiêu và giai đoạn, mỗi mô hình được chấm trên cùng các timestamp hợp lệ và cùng giá trị quan sát.
+
+Các so sánh MAE và RMSE được thực hiện trong cùng mục tiêu và cùng giai đoạn đánh giá. Khi đối chiếu occupancy\_ports và session\_arrivals, mức cải thiện được xem xét so với baseline tương ứng và đơn vị của từng mục tiêu. Bảng dự báo lưu khóa cụm, mục tiêu, mô hình, giai đoạn và timestamp để đối soát tập quan sát.
+
+Khi trình bày một số tổng hợp qua các cụm, trung bình cộng không trọng số thể hiện mỗi cụm có mức đóng góp ngang nhau. RMSE trung bình qua cụm và RMSE tính từ toàn bộ sai số gộp có cách tổng hợp khác nhau, nên báo cáo ghi rõ phép tính đã dùng. R² được công bố theo cụm và giai đoạn, kèm nhận diện các chuỗi hằng khi có bảng tổng hợp.
+
+Train kết thúc trước 01/01/2019, validation kết thúc trước 01/07/2019 và test kết thúc trước 01/01/2020. Stress test gồm năm 2020 và kết thúc trước 01/01/2021. Các ranh giới là UTC, được áp dụng giống nhau cho mọi cụm. Bộ chuẩn hóa và tham số mô hình được fit trên train, còn validation lựa chọn siêu tham số trong lưới định trước.
+
+Đánh giá sử dụng thiết lập one-step-ahead. Để dự báo khung t, đặc trưng lịch của t đã biết, còn lag và rolling chỉ lấy các mục tiêu quan sát đến t–1. Sau khi kết thúc mỗi khung 15 phút, giá trị thực của khung đó được cập nhật để làm đầu vào cho lần dự báo kế tiếp. Trong giai đoạn đánh giá, mô hình giữ các tham số đã fit trên train. Chuỗi thông tin đầu vào vẫn được cập nhật bằng các quan sát thực xuất hiện theo thời gian.
+
+Thiết lập này dựa trên giả định hệ thống có thể cung cấp quan sát mục tiêu sau mỗi khung 15 phút. Bộ dữ liệu giao dịch lịch sử cho phép dựng lại chuỗi nhưng chưa xác nhận độ trễ cung cấp dữ liệu của một hệ thống vận hành thực tế. Khả năng áp dụng cần được đối chiếu với nguồn quan sát tại thời điểm dự báo. Các dự báo ở nhiều khung liên tiếp cần mô tả riêng cơ chế cập nhật đầu vào khi sử dụng kết quả thực nghiệm này.
+
+Kết quả test 2019 và stress test 2020 được báo cáo riêng. Việc so sánh bảy mô hình trên cùng chuỗi cho biết mức cải thiện so với các đối chứng lịch, độ trễ và hồi quy. Nghiên cứu kiểm tra thêm từng cụm và từng mục tiêu, bao gồm chuỗi có nhiều giá trị 0 hoặc chuỗi hằng, để diễn giải sai số trong bối cảnh lượng hoạt động quan sát được.
+
+Đối chứng theo độ trễ 96 và 672 sử dụng khoảng cách cố định trên lưới UTC. Vì lịch địa phương có giờ mùa hè, khoảng cách này đôi khi tương ứng với một giờ địa phương lệch so với giờ hiển thị của ngày hoặc tuần trước. Trung bình theo lịch sử dùng quan sát của tập huấn luyện, nhóm theo thứ và khung giờ địa phương để phản ánh quy luật sử dụng theo lịch. Dự báo được chặn dưới tại 0 và giữ dạng liên tục để so sánh trên các thước đo sai số.
+
+
+\subsection{Bootstrap khối cho chênh lệch RMSE chiếm dụng}
+\label{sec:bootstrap_detail}
+Tập dữ liệu dùng để tính khoảng gồm 17.664 khung của mỗi cụm trong nửa cuối 2019. Tám cụm có chuỗi mục tiêu biến động, tương ứng 141.312 quan sát cấp cụm và khung, được giữ cố định. SHERMAN được tách vì chuỗi bằng 0 trong kỳ này. Dự báo XGBoost, dự báo $t-1$ và quan sát được ghép theo định danh cụm và mốc UTC. Mỗi ngày chứa đúng 96 cặp dự báo cho từng cụm.
+
+Đặt $S_{dmc}$ là tổng bình phương sai số trên 96 khung của ngày $d$, mô hình $m$, cụm $c$. Gọi $(d_1,\ldots,d_N)$ là chuỗi ngày tái lấy mẫu với $N=184$. RMSE trung bình đều của mô hình $m$ trên lần lặp là
+\begin{equation}
+\bar E_m^*=\frac{1}{8}\sum_{c=1}^{8}
+\sqrt{\frac{1}{96N}\sum_{j=1}^{N} S_{d_jmc}}.
+\end{equation}
+Hai thống kê trong mỗi lần lặp là $\bar E_{\mathrm{XGB}}^*-\bar E_{t-1}^*$ và
+$100(1-\bar E_{\mathrm{XGB}}^*/\bar E_{t-1}^*)$. Tính lại RMSE từ tổng bình phương sai số của mỗi lần lặp giúp giữ quy tắc lấy căn theo từng cụm rồi mới lấy trung bình. Cách này dùng cùng trình tự tính với ước lượng điểm.
+
+Nhóm lấy mẫu có hoàn lại các điểm bắt đầu khối ngày theo thủ tục khối tròn \cite{politis1992}. Khối đi qua cuối kỳ quay về đầu kỳ. Các khối được ghép và cắt ở đủ 184 ngày. Chỉ số ngày dùng chung giữa hai mô hình và tám cụm. Do đó phép lấy mẫu bảo toàn sự ghép cặp giữa mô hình, đồng biến giữa cụm và phụ thuộc theo ngày bên trong mỗi khối. Cấu hình chính là bảy ngày, gồm chu kỳ ngày làm việc và cuối tuần trong mỗi khối. Cấu hình một và 14 ngày được dùng để kiểm tra độ nhạy, với 10.000 lần lặp và hạt giống 42 cho mỗi cấu hình.
+
+\section{Kết quả và thảo luận}
+\subsection{Nhóm giữ cổng và khác biệt quanh mốc giá}
+K-means với bốn cụm đạt chỉ số Silhouette 0,473 và Davies--Bouldin 0,730. Kiểm tra chia đôi cho chỉ số Rand điều chỉnh 0,9948. Nhóm nhàn rỗi kéo dài gồm 6.913 phiên, tương ứng 2,67\% mẫu, nhưng đóng góp 41,20\% tổng thời gian nhàn rỗi. Kết quả cho thấy các phiên giữ cổng lâu là điểm ưu tiên để thử biện pháp vận hành.
+
+Bảng~\ref{tab:profiles} cho thấy hai nhóm phổ biến có thời gian nhàn rỗi bình quân khoảng 0,26--0,30 giờ. Nhóm giữ cổng kéo dài đạt trung bình 7,49 giờ nhàn rỗi và tỷ lệ nhàn rỗi bình quân 0,680. Nhóm sạc lâu có điện năng cao nhất, trung bình 38,32~kWh so với 13,65~kWh ở nhóm giữ cổng kéo dài. Việc xét cả thời gian truyền điện và thời gian giữ cổng giúp nhận diện hai hồ sơ này.
+
+\begin{table}[!t]
+\caption{Hồ sơ các cụm phiên sạc}
+\label{tab:profiles}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrrr@{}}
+\toprule
+\textbf{Nhóm} & \textbf{Số phiên} & \textbf{Sạc} & \textbf{Nhàn rỗi} & \textbf{kWh} \\
+\midrule
+Sạc trung bình & 90.894 & 2,97 & 0,30 & 13,06 \\
+Nhàn rỗi kéo dài & 6.913 & 3,35 & 7,49 & 13,65 \\
+Sạc lâu & 5.728 & 6,98 & 0,95 & 38,32 \\
+Sạc ngắn & 155.185 & 1,19 & 0,26 & 4,57 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\raggedright\scriptsize Thời lượng tính bằng giờ, điện năng và thời lượng lấy trung bình theo phiên.
+\end{table}
+
+Phương án ba cụm đạt Silhouette 0,491 nhưng gộp nhóm nhàn rỗi kéo dài vào nhóm sạc trung bình. Với năm cụm, Silhouette giảm còn 0,398 và nhóm lớn bị chia thành hai nhánh có quy mô gần nhau. Phương án bốn cụm cân bằng khả năng phân tách với mục tiêu nhận diện hành vi cần theo dõi. Sau căn chỉnh nhãn, phép thử chia đôi đạt tỷ lệ khớp 99,84\%. Trong 18 cấu hình DBSCAN được khảo sát, 11 cấu hình tạo một cụm nếu bỏ các điểm nhiễu.
+
+Các hệ số Cliff của thời gian nhàn rỗi, tỷ lệ nhàn rỗi và thời lượng sạc lần lượt bằng 0,1232, 0,1229 và 0,0714, với khoảng tin cậy bootstrap nằm trên 0. Đối với điện năng, hệ số là $-0{,}0281$ và khoảng tin cậy 95\% chứa 0, từ $-0{,}061$ đến $0{,}002$. Tỷ số giữa tỷ lệ phiên ở khoảng 15--dưới 20 phút và 20--dưới 25 phút nhàn rỗi tăng từ 0,991 lên 1,156. Người dùng xuất hiện lần đầu sau mốc giá đóng góp 55,98\% số phiên giai đoạn sau. Thay đổi cơ cấu người dùng và điều kiện hạ tầng giới hạn khả năng quy riêng khác biệt quan sát cho chính sách giá.
+
+Bảng~\ref{tab:policy} trình bày khoảng tin cậy theo từng chỉ tiêu. Hai chỉ tiêu nhàn rỗi được tính trên 128.253 phiên trước mốc và 123.439 phiên sau mốc. Điện năng và thời lượng sạc dùng lần lượt 128.289 và 123.445 phiên ở hai giai đoạn. Tỷ trọng phiên của nhóm người dùng thường xuyên giảm từ 28,50\% xuống 9,60\% khi tính riêng trên từng giai đoạn. Do mẫu số và thành phần thay đổi, mức giảm tỷ trọng này chưa cho biết mức sử dụng của từng người dùng cũ thay đổi bao nhiêu.
+
+\begin{table}[!t]
+\caption{Khác biệt thứ hạng trước và sau mốc giá}
+\label{tab:policy}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}Xrr@{}}
+\toprule
+\textbf{Chỉ tiêu} & \textbf{Hệ số Cliff} & \textbf{Khoảng tin cậy 95\%} \\
+\midrule
+Thời gian nhàn rỗi & 0,1232 & $[0{,}093;\,0{,}151]$ \\
+Tỷ lệ nhàn rỗi & 0,1229 & $[0{,}096;\,0{,}151]$ \\
+Thời lượng sạc & 0,0714 & $[0{,}042;\,0{,}101]$ \\
+Điện năng & $-0{,}0281$ & $[-0{,}061;\,0{,}002]$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Kiểm tra số cụm và hồ sơ hành vi}
+
+Kết quả thực nghiệm trên tập dữ liệu gồm 258.720 phiên sạc cho thấy chất lượng phân cụm thay đổi theo số lượng cụm k. Xét theo chỉ số Silhouette, cấu hình k = 3 đạt giá trị cao nhất (0,491), trong khi k = 4 đạt 0,473. Tuy nhiên, ở k = 4, chỉ số Davies–Bouldin giảm xuống 0,730, thấp nhất trong các cấu hình k từ 3 đến 8, đồng thời chỉ số Calinski–Harabasz đạt 8.122, cao hơn cấu hình k = 3.
+
+Về phương pháp Elbow, WCSS giảm 30,1\% khi tăng từ k = 2 lên k = 3 và tiếp tục giảm 29,2\% khi tăng từ k = 3 lên k = 4. Khi tăng từ k = 4 lên k = 5, mức giảm WCSS chỉ còn 18,7\%. Điều này cho thấy mức cải thiện của độ phân tán nội cụm bắt đầu giảm rõ rệt sau k = 4.
+
+Mặc dù k = 4 không đạt kết quả tốt nhất trên tất cả các chỉ số, cấu hình này tạo ra bốn nhóm có đặc điểm hành vi khác nhau về thời gian sạc, thời gian nhàn rỗi và điện năng tiêu thụ. Đặc biệt, mô hình nhận diện riêng nhóm có thời gian chiếm dụng nhàn rỗi kéo dài và nhóm có nhu cầu năng lượng cao.
+
+Do đó, nghiên cứu lựa chọn k = 4 dựa trên sự kết hợp giữa chất lượng phân cụm, mức giảm WCSS và khả năng diễn giải nghiệp vụ, thay vì khẳng định đây là số cụm tối ưu tuyệt đối theo mọi tiêu chí.
+
+Nhìn chung, DBSCAN có khả năng nhận diện điểm nhiễu nhưng chưa tạo được các nhóm hành vi có quy mô phù hợp. Vì vậy, nghiên cứu lựa chọn K-Means với k = 4 làm thuật toán phân cụm chính và sử dụng DBSCAN làm phương pháp đối chứng.
+
+Kết quả K-Means với k = 4 cho thấy bốn nhóm hành vi có sự khác biệt rõ rệt về thời gian sạc, thời gian nhàn rỗi và điện năng tiêu thụ. Cụm 3 chiếm tỷ trọng lớn nhất (59,98\%), đặc trưng bởi các phiên sạc ngắn và mức tiêu thụ năng lượng thấp. Cụm 0 chiếm 35,13\%, đại diện cho những phiên sạc có thời lượng trung bình và tỷ lệ nhàn rỗi thấp.
+
+Nghiên cứu chia ngẫu nhiên 258.720 phiên sạc thành hai nửa, mỗi nửa gồm 129.360 phiên và sử dụng K-Means với k = 4 để kiểm tra mức độ đồng thuận giữa các phân hoạch.
+
+Kết quả kiểm tra chính ghi nhận ARI = 0,9948, NMI = 0,9864 và tỷ lệ trùng khớp nhãn sau căn chỉnh Hungarian đạt 99,84\%. Phép kiểm chứng chéo giữa hai nửa dữ liệu đạt ARI = 0,9928.
+
+Trong phép kiểm tra bổ sung sử dụng chung bộ chuẩn hóa, ARI đạt 0,9986 và NMI đạt 0,9939. Kết quả này được xem là kiểm tra bổ sung, không thay thế các chỉ số của quy trình chính.
+
+Các kết quả cho thấy mô hình K-Means với k = 4 có tính ổn định cao đối với các phép chia mẫu đã thực hiện, nhưng không đủ để kết luận mô hình hoàn toàn không có nguy cơ quá khớp.
+
+Xu hướng giảm xuất hiện sau thời điểm thay đổi chính sách giá ngày 01/08/2017. Tuy nhiên, đây chỉ là sự thay đổi quan sát được trong dữ liệu, chưa đủ để kết luận chính sách là nguyên nhân trực tiếp. Các yếu tố khác như sự mở rộng mạng lưới và ảnh hưởng của đại dịch COVID-19 cũng cần được xem xét khi diễn giải kết quả.
+
+Nhìn chung, kết quả cho thấy cấu trúc bốn cụm K-Means có mức độ đồng thuận cao khi thay đổi mẫu huấn luyện. Tuy nhiên, đây là bằng chứng về tính ổn định trong phạm vi thực nghiệm, chưa đủ để khẳng định mô hình hoàn toàn không bị quá khớp hoặc có thể áp dụng cho mọi mạng lưới trạm sạc.
+
+Sau khi lựa chọn cấu hình K-Means với (k=4), nghiên cứu sử dụng mô hình chuẩn để phân nhóm 258.720 phiên sạc hợp lệ. Các cụm được diễn giải dựa trên thời gian sạc, thời gian nhàn rỗi, điện năng tiêu thụ và tỷ lệ nhàn rỗi. Việc đặt tên cụm nhằm mô tả đặc điểm quan sát được trong dữ liệu; các diễn giải về loại phương tiện hoặc mục đích chuyến đi chỉ được xem là giả thuyết nếu chưa có biến dữ liệu trực tiếp xác nhận.\begin{table}[!t]
+\caption{Kết quả quét số cụm K-means}
+\label{tab:k_grid}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrr@{}}
+\toprule
+\textbf{k} & \textbf{WCSS} & \textbf{Silhouette} & \textbf{Davies–Bouldin} \\
+\midrule
+2 & 501.514 & 0,489 & 1,020 \\
+3 & 350.343 & 0,491 & 0,772 \\
+4 & 248.145 & 0,473 & 0,730 \\
+5 & 201.618 & 0,398 & 0,793 \\
+6 & 180.456 & 0,373 & 0,855 \\
+7 & 158.371 & 0,372 & 0,856 \\
+8 & 139.089 & 0,377 & 0,878 \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 
-Từ tổng quan trên,
-có thể thấy mỗi nghiên cứu
-tập trung vào một hoặc
-một số khía cạnh
-của hoạt động trạm sạc.
-
-Tuy nhiên, việc kết hợp
-phân tích hành vi ở cấp phiên,
-đánh giá sự khác biệt
-trước và sau chính sách,
-xếp hạng hiệu suất ở cấp trạm
-và dự báo nhu cầu theo thời gian
-trong một quy trình thống nhất
-vẫn là hướng tiếp cận
-phù hợp với mục tiêu
-của đề tài này.
-
-IS403 không đặt mục tiêu
-đề xuất một thuật toán
-hoàn toàn mới.
-Đóng góp của nghiên cứu
-nằm ở việc tổ chức
-và đối soát các nhiệm vụ
-trên cùng bối cảnh dữ liệu,
-sử dụng nhiều phương pháp
-để làm rõ các khía cạnh
-khác nhau của vận hành
-mạng lưới trạm sạc.
-
-Đặc biệt, nghiên cứu
-phân biệt rõ ba cấp độ
-phân tích.
-
-Ở cấp phiên,
-các đặc trưng
-thời gian và điện năng
-được dùng để phân nhóm
-hành vi chiếm dụng.
-
-Ở cấp trạm,
-sáu tiêu chí vận hành
-được tổng hợp
-để xếp hạng
-theo Entropy--TOPSIS.
-
-Ở cấp chuỗi thời gian,
-dữ liệu được chuyển
-thành các khung 15 phút
-phục vụ dự báo
-nhu cầu và mức độ chiếm dụng.
-
-Việc sử dụng các cấp độ
-và phương pháp khác nhau
-cho phép hình thành
-những kết quả bổ sung
-thay vì suy luận
-toàn bộ hiệu quả vận hành
-chỉ từ một chỉ số duy nhất.
-
-Các nhiệm vụ cũng được
-kiểm chứng theo những
-cơ chế phù hợp:
-kiểm tra chất lượng dữ liệu,
-độ ổn định phân cụm,
-bất định thống kê,
-độ nhạy xếp hạng
-và sai số dự báo ngoài mẫu.
-
-Trên cơ sở đó,
-các phần tiếp theo
-trình bày bộ dữ liệu,
-phương pháp phân tích
-và kết quả thực nghiệm
-của từng nhiệm vụ.
-
-% ==========================================
-% CHỖ CHÈN HÌNH TÙY CHỌN 2
-%
-% ---<So do tong quan cac huong nghien cuu>---
-%
-% Không bắt buộc, vì Bảng II.1 đã
-% tóm tắt bốn nghiên cứu.
-% Nếu muốn có hình, đặt ở cuối Mục II.
-%
-% \begin{figure}[!t]
-%     \centering
-%     \fbox{
-%         \parbox[c][3cm][c]
-%         {0.92\columnwidth}{
-%             \centering
-%             ---<So do cac huong nghien cuu>---
-%         }
-%     }
-%     \caption{Các hướng nghiên cứu
-%     được kế thừa trong đề tài.}
-%     \label{fig:related_directions}
-% \end{figure}
-% ==========================================
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.84\textwidth]{paper_extended/idle_by_cluster.pdf}
+\caption{Phân bố tỷ lệ nhàn rỗi theo bốn cụm phiên sạc.}
+\label{fig:ext_idle_by_cluster}
+\end{figure*}
 
 
-% ==========================================
 
-% ==========================================
-% III. DỮ LIỆU NGHIÊN CỨU
-% ==========================================
+\subsection{Thành phần mẫu và diễn biến quanh ngưỡng}
 
-\section{DỮ LIỆU NGHIÊN CỨU}
+NV3 sử dụng tập 259.411 phiên sau loại trùng và xác định mẫu riêng cho từng phép phân tích, nên số quan sát giữa các bảng có thể khác nhau. Ba phiên kết thúc vào đầu tháng 01/2021 đều bắt đầu ngày 31/12/2020 và được gán vào Post theo thời điểm bắt đầu. Kết quả phản ánh những khác biệt quan sát được giữa hai giai đoạn và được xem xét cùng sự thay đổi thành phần người dùng.
 
-\subsection{Nguồn và đặc điểm dữ liệu}
+Về chất lượng dữ liệu, 45 phiên có thời gian sạc vượt tổng thời gian kết nối không được dùng cho Idle Time và Idle Ratio. Trong đó, 42 phiên vẫn đáp ứng bộ lọc riêng của Energy và Charging Time và còn nằm trong mẫu hai chỉ tiêu này. Đây là giới hạn cần lưu ý khi diễn giải kết quả theo mẫu thực nghiệm hiện hành.
 
-Nghiên cứu sử dụng bộ dữ liệu phiên sạc
-xe điện công cộng do Thành phố Palo Alto,
-California, Hoa Kỳ công bố thông qua
-cổng dữ liệu mở của thành phố.
+Idle Time và Idle Ratio có Delta lần lượt là 0,1232 và 0,1229, với CI 95\% đều nằm phía trên 0. Kết quả cho thấy các phiên Pre có xu hướng nhàn rỗi lâu hơn và có tỷ lệ nhàn rỗi cao hơn các phiên Post theo phép so sánh thứ hạng. Charging Time cũng có Delta dương (0,0714) và CI không chứa 0, cho thấy xu hướng thời gian sạc Pre lớn hơn Post.
 
-Dữ liệu được ghi nhận ở cấp phiên sạc,
-trong đó mỗi bản ghi biểu diễn
-một lần phương tiện sử dụng cổng sạc.
-Bộ dữ liệu gốc gồm 259.415 phiên,
-có thời điểm quan sát từ ngày
-29/07/2011 đến 04/01/2021.
-Do năm 2021 chỉ ghi nhận ba phiên,
-phần phân tích xu hướng theo năm
-chủ yếu tập trung vào giai đoạn 2011--2020.
+Kết quả Mann–Whitney U thông thường và các p-value sau hiệu chỉnh Holm của cả bốn chỉ tiêu đều nhỏ hơn 0,001. Các giá trị này được trình bày như thông tin bổ sung do kiểm định ở cấp phiên chưa xử lý đầy đủ sự phụ thuộc giữa những phiên của cùng User ID. Vì vậy, diễn giải chính dựa trên Delta kết hợp với CI bootstrap theo người dùng, đặc biệt với trường hợp Energy có CI chứa 0.
 
-Các thuộc tính nguyên bản được tổ chức
-thành sáu nhóm thông tin:
-vị trí địa lý, trạm sạc, cổng sạc,
-thời gian phiên sạc, thanh toán
-và định danh người dùng.
+New\_Post chiếm 55,98\% số phiên Post, cho thấy hơn một nửa số phiên sau mốc phân chia thuộc về những người dùng chưa xuất hiện trong dữ liệu Pre. Tỷ trọng Regular thay đổi từ 28,50\% xuống 9,60\%, tương ứng giảm 18,90 điểm phần trăm. Casual thay đổi từ 67,83\% xuống 31,61\%. Do mẫu số của mỗi giai đoạn khác nhau và có nhóm mới tham gia, mức giảm tỷ trọng này không trực tiếp đo mức giảm sử dụng của từng người dùng cũ.
 
-Những trường dữ liệu quan trọng
-gồm thời điểm bắt đầu và kết thúc,
-tổng thời gian kết nối
-(\textit{Total Duration}),
-thời gian sạc thực tế
-(\textit{Charging Time}),
-điện năng tiêu thụ
-(\textit{Energy}),
-mã trạm và mã người dùng.
+Trong Pre, tỷ lệ phiên thuộc [15; 20) và [20; 25) lần lượt là 2,9658\% và 2,9930\%, với tỷ số 0,991. Hai khoảng vì vậy có tỷ lệ gần tương đương. Trong Post, tỷ lệ khoảng trước ngưỡng đạt 3,5445\%, cao hơn mức 3,0656\% của khoảng sau ngưỡng; tỷ số tăng lên 1,156.
 
-Bảng~\ref{tab:data_overview}
-trình bày đặc điểm của tập 258.720 phiên
-được sử dụng trong phân tích tổng quan
-của báo cáo gốc. Quy mô này
-không phải số lượng phiên hợp lệ
-chung của quy trình NV1.
+Chênh lệch giữa hai tỷ lệ chuyển từ -0,0272 lên 0,4789 điểm phần trăm, tương ứng tăng 0,5061 điểm phần trăm. Kết quả mô tả mức tập trung tương đối ngay trước ngưỡng 20 phút cao hơn trong Post. Đây là thay đổi về phân bố quan sát được quanh ngưỡng, chưa phải ước lượng số phiên chủ động điều chỉnh thời gian để tránh phí.
 
-% ==========================================
-% BẢNG III.1 - TỔNG QUAN DỮ LIỆU
-% ==========================================
+Phân tích chưa xây dựng phân phối phản thực, chưa kiểm định riêng sự thay đổi mức tập trung gần ngưỡng và chưa tách ảnh hưởng của cơ cấu người dùng, mùa vụ hoặc mở rộng hạ tầng. Khoảng Post còn bao gồm năm 2020 với bối cảnh COVID-19. Do đó, các kết quả NV3 được diễn giải như khác biệt hành vi và cơ cấu phiên gắn với hai giai đoạn quan sát; thiết kế hiện tại chưa đủ để quy toàn bộ thay đổi cho tác động nhân quả của chính sách giá.\begin{table}[!t]
+\caption{Cơ cấu phiên theo nhóm người dùng}
+\label{tab:composition}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrr@{}}
+\toprule
+\textbf{Nhóm} & \textbf{Trước (\%)} & \textbf{Sau (\%)} \\
+\midrule
+Không thường xuyên & 67,83 & 31,61 \\
+Mới xuất hiện sau mốc & 0,00 & 55,98 \\
+Thường xuyên & 28,50 & 9,60 \\
+Chưa phân loại & 3,67 & 2,81 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/cliff_intervals.pdf}
+\caption{Hệ số Cliff và khoảng tin cậy 95\% theo bootstrap người dùng.}
+\label{fig:ext_cliff_intervals}
+\end{figure}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/idle_threshold.pdf}
+\caption{Tỷ lệ phiên trong hai khoảng liền kề mốc 20 phút, trước và sau thay đổi giá.}
+\label{fig:ext_idle_threshold}
+\end{figure}
+
+
+
+\subsection{Xếp hạng trạm và độ nhạy}
+HAMILTON~\#2, WEBSTER~\#1 và WEBSTER~\#2 cùng thuộc ba hạng đầu ở cả hai bộ trọng số. Số phiên và tổng điện năng chiếm 57,21\% tổng trọng số entropy. Khi dùng trọng số đều, 14 trong 33 trạm thay đổi ít nhất năm bậc. Thứ hạng cần được đọc cùng các tiêu chí thành phần và trạng thái vận hành thực tế.
+
+Điểm và thứ hạng của ba trạm được trình bày ở Bảng~\ref{tab:stations}. Hai thứ hạng có tương quan Spearman 0,8192 nhưng chênh lệch tuyệt đối trung bình 4,30 bậc. Khi bỏ tiêu chí số phiên ở phương án entropy, nhóm năm trạm dẫn đầu chỉ còn ba thành viên chung với phương án gốc. Ngược lại, khi dùng chuẩn hóa véc-tơ, năm thành viên đều được giữ nhưng một trạm đổi đến 16 bậc. Hai thước đo cho thấy cần phân biệt sự ổn định của nhóm được chọn với sự ổn định của thứ tự trong nhóm.
 
 \begin{table}[!t]
-\centering
-\caption{Tổng quan dữ liệu phân tích}
-\label{tab:data_overview}
+\caption{Nhóm ba trạm dẫn đầu theo hai phương án}
+\label{tab:stations}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}Xrr@{}}
+\toprule
+\textbf{Trạm} & \textbf{Entropy (hạng)} & \textbf{Đều (hạng)} \\
+\midrule
+HAMILTON~\#2 & 0,7233 (1) & 0,6723 (2) \\
+WEBSTER~\#1 & 0,6476 (2) & 0,6749 (1) \\
+WEBSTER~\#2 & 0,6046 (3) & 0,6478 (3) \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\footnotesize
+CAMBRIDGE~\#4 đứng cuối theo trọng số entropy dù tỷ lệ nhàn rỗi bình quân là 9,08\%, thấp hơn cả ba trạm dẫn đầu. Trường hợp này minh họa ảnh hưởng của quy mô và tính bù trừ trong điểm tổng hợp. Ngược lại, MPL~\#2 có tỷ lệ nhàn rỗi bình quân 24,28\% và 26,78\% phiên có tỷ lệ nhàn rỗi trên 0,5. Các chỉ tiêu thành phần gợi ý hai hướng khảo sát khác nhau, lần lượt là xem lại vai trò của quy mô và kiểm tra thời gian giữ cổng sau khi sạc.
+
+\subsection{Dịch chuyển thứ hạng và điều kiện diễn giải}
+
+NV4 tổng hợp 258.875 phiên hợp lệ ở cấp trạm. Sau khi áp dụng ngưỡng ít nhất 500 phiên, tập đối chuẩn gồm 258.836 phiên thuộc 33 trạm. Các trạm thuộc tám nhóm vị trí BRYANT, CAMBRIDGE, HAMILTON, HIGH, MPL, RINCONADA LIB, TED THOMPSON và WEBSTER. Đơn vị được xếp hạng là từng định danh trạm trong các nhóm vị trí này.
+
+Theo trọng số Entropy, HAMILTON \#2 đứng đầu với 0,7233, tiếp theo là WEBSTER \#1 với 0,6476 và WEBSTER \#2 với 0,6046. Ba trạm cuối là CAMBRIDGE \#4 với 0,1701, MPL \#3 với 0,1793 và MPL \#1 với 0,1880. Mười trạm đầu có điểm trên 0,47, trong khi sáu trạm cuối có điểm dưới 0,22. Những khoảng điểm này mô tả phân bố quan sát được của tập trạm.
+
+Với trọng số đều, WEBSTER \#1 đứng đầu với 0,6749, HAMILTON \#2 đứng thứ hai với 0,6723 và WEBSTER \#2 giữ hạng ba với 0,6478. Tập ba trạm dẫn đầu được giữ giữa hai phương án. Nhóm năm trạm đầu có ba trạm chung.
+
+Các vị trí cuối bảng có thay đổi giữa hai phương án. MPL \#2 chuyển từ hạng 28 theo Entropy xuống hạng 33 theo trọng số đều. Nhận xét về từng trạm vì vậy dựa trên cả bộ tiêu chí và phương án trọng số đang sử dụng.
+
+CAMBRIDGE \#4 có Idle Ratio bình quân 9,08\% và tỷ lệ phiên có Idle Ratio trên 0,5 là 4,93\%, đều thấp hơn các giá trị tương ứng của ba trạm điểm cao. Điểm TOPSIS của trạm vẫn ở vị trí cuối theo Entropy do kết quả tổng hợp đồng thời xét quy mô, điện năng, thời gian sạc và các trọng số. Trường hợp này thể hiện tính bù trừ giữa các tiêu chí trong mô hình.
+
+Ngoài sáu trạm được chọn, MPL \#2 có 1.531 phiên, Idle Ratio bình quân 24,28\% và tỷ lệ phiên có Idle Ratio trên 0,5 là 26,78\%. Trạm đứng hạng 28 theo Entropy và hạng 33 theo trọng số đều. Các giá trị thành phần hỗ trợ xác định nội dung cần khảo sát về hành vi giữ cổng và quy định sử dụng tại địa điểm.
+
+Hai phương án cơ sở có tương quan Spearman 0,8192 và Kendall 0,6364. Độ lệch hạng tuyệt đối trung bình là 4,30 bậc và lớn nhất là 14 bậc. Có 14/33 trạm, tương đương 42,42\%, đổi ít nhất năm bậc. Nhóm năm trạm dẫn đầu có ba trạm chung. Các kết quả cho thấy sự đồng thuận tổng thể cùng những thay đổi đáng kể ở một số định danh trạm.
+
+BRYANT \#2 giảm từ hạng 7 xuống 16. Trạm có 14.296 phiên, điện năng bình quân 7,46 kWh, Idle Ratio bình quân 12,30\% và tỷ lệ phiên nhàn rỗi cao 8,69\%. Trong khi đó, BRYANT \#6 tăng từ hạng 22 lên 14 và BRYANT \#5 tăng từ 23 lên 15. Các dịch chuyển này cho thấy sự khác nhau giữa lợi thế quy mô và các chỉ tiêu bình quân hoặc nhàn rỗi.
+
+CAMBRIDGE \#1 giảm từ hạng 14 xuống 25. Trạm có 11.154 phiên, 7,21 kWh mỗi phiên và thời gian sạc bình quân 1,88 giờ. MPL \#6 giảm từ hạng 12 xuống 21. Những thay đổi này được tính bằng cách đối chiếu hai kết quả đã căn chỉnh theo tên trạm.
+
+Trong phương án Entropy, C1 nhận trọng số 0,2944 và C2 nhận 0,2777. Tổng hai tiêu chí đạt 57,21\% theo các giá trị chưa làm tròn. Tương quan Pearson giữa C1 và C2 là 0,9815. Vì vậy, chiều quy mô được phản ánh qua hai tiêu chí có mức ảnh hưởng lớn trong điểm tổng hợp. Khi chuyển sang trọng số đều, tổng trọng số C1 và C2 là 33,33\%, còn bốn tiêu chí khác cùng nhận trọng số 1/6. Các thay đổi thứ hạng cần được đọc trong bối cảnh phân bổ trọng số này.
+
+S0 là phương án cơ sở với đủ C1–C6 và chuẩn hóa Min-Max. Các kịch bản thay đổi một thành phần phương pháp để khảo sát mức dịch chuyển thứ hạng. Mỗi kết quả được đối chiếu với S0 của cùng bộ trọng số.
+
+Ở S1–S5, trọng số Entropy được tính lại từ ma trận tiêu chí của kịch bản tương ứng. Trọng số đều được phân bổ bằng nhau theo số tiêu chí còn lại. S5 gán trọng số theo thời lượng cho cách tổng hợp C5 và tiếp tục giữ đủ sáu tiêu chí.
+
+S6 sử dụng chuẩn hóa vector cho từng cột và giữ bộ trọng số Entropy của S0. Ở bước chọn phương án lý tưởng, các tiêu chí chi phí C5 và C6 được xét theo hướng giá trị thấp thuận lợi hơn. Thiết kế này khảo sát thay đổi phương pháp chuẩn hóa trong khi giữ cố định bộ trọng số.
+
+Các thước đo độ nhạy gồm tương quan Spearman và Kendall, độ lệch hạng tuyệt đối trung bình, độ lệch lớn nhất, số trạm đổi ít nhất năm bậc và số trạm chung trong top 5. Ngưỡng năm bậc là quy ước mô tả dịch chuyển được sử dụng trong thực nghiệm. Các chỉ số này được dùng để đánh giá tính vững của thứ hạng theo giả định mô hình.
+
+C5 và C6 có tương quan Pearson 0,9853. Khi loại C6 ở S3 theo Entropy, Spearman đạt 0,9970, độ lệch hạng trung bình là 0,30 bậc và lớn nhất hai bậc. Tập thành viên top 5 được giữ nguyên. C6 tạo thay đổi nhỏ về thứ hạng khi C5 vẫn được giữ trong cấu hình đang xét. Phát hiện này mô tả tính vững của kết quả đối với phép loại C6 trên tập trạm hiện hành.
+
+Khi loại C4 ở S4 theo Entropy, Spearman đạt 0,9920, độ lệch trung bình 0,85 bậc và lớn nhất ba bậc. Tập thành viên top 5 được giữ nguyên. Với trọng số đều, cùng kịch bản có Spearman 0,9208, độ lệch trung bình 2,55 bậc, lớn nhất 10 bậc và sáu trạm đổi ít nhất năm bậc. Ảnh hưởng của C4 vì vậy cần được diễn giải theo từng phương án trọng số. Thay C5 bình quân phiên bằng cách tính theo tổng thời lượng ở S5 cho Spearman 0,9987 theo Entropy, độ lệch trung bình 0,18 bậc và lớn nhất hai bậc. Với trọng số đều, Spearman đạt 0,9923 và độ lệch trung bình 0,73 bậc. Tập thành viên top 5 được giữ nguyên ở cả hai phương án. Hai cách đo tạo thứ hạng gần nhau trên tập dữ liệu đang xét.
+
+Loại C1 ở S2 làm Spearman của phương án Entropy giảm còn 0,9261, có 7/33 trạm đổi ít nhất năm bậc và top 5 chỉ trùng 3/5. Loại C2 ở S1 cho Spearman 0,9559, ba trạm đổi ít nhất năm bậc và top 5 trùng 4/5. Cả hai kết quả cho thấy vai trò của tiêu chí quy mô trong cấu trúc thứ hạng.
+
+S6 sử dụng chuẩn hóa vector và giữ trọng số Entropy của S0. Spearman đạt 0,8870, Kendall đạt 0,7311, độ lệch hạng trung bình là 3,09 bậc và lớn nhất 16 bậc. Có 6/33 trạm đổi ít nhất năm bậc, trong khi tập thành viên top 5 trùng 5/5 với S0. Kết quả cho thấy sự ổn định về thành viên nhóm dẫn đầu cùng độ nhạy đáng kể của vị trí từng trạm. Chuẩn hóa vector chia mỗi cột cho chuẩn Euclid của cột và làm thay đổi cấu trúc khoảng cách so với Min-Max.
+
+Cần đánh giá riêng tính ổn định của tập trạm dẫn đầu và độ ổn định của thứ hạng từng trạm. Theo Entropy, top 5 có cùng thành viên ở S3–S6, S1 giữ 4/5 trạm và S2 giữ 3/5 trạm. Theo trọng số đều, S1, S2 và S4 giữ 4/5 trạm. Chỉ số top 5 trùng nhau phản ánh thành viên của tập trạm, còn Spearman, độ lệch hạng và số trạm đổi ít nhất năm bậc phản ánh thêm thay đổi vị trí trong toàn bảng. Nhóm dẫn đầu được bảo toàn ở một số kịch bản trong khi nhiều vị trí riêng lẻ vẫn dịch chuyển.
+
+HAMILTON \#2, WEBSTER \#1 và WEBSTER \#2 thuộc nhóm có điểm TOPSIS cao theo cả hai bộ trọng số cơ sở. Ba trạm phục vụ nhiều giao dịch và có điện năng bình quân 8,08–9,93 kWh mỗi phiên. Kết quả hỗ trợ lựa chọn các địa điểm cần ưu tiên duy trì độ khả dụng và bố trí bảo trì phù hợp với lưu lượng sử dụng.
+
+TED THOMPSON \#2, \#3 và \#4 tăng hạng khi sử dụng trọng số đều. Các trạm có điện năng bình quân cao và chỉ tiêu nhàn rỗi thấp hơn một số trạm quy mô lớn. Đơn vị vận hành có thể khảo sát khả năng tiếp nhận thêm nhu cầu tại các địa điểm này bằng cách đối chiếu số cổng hoạt động, phân bố nhu cầu theo giờ và vị trí trạm lân cận.
+
+CAMBRIDGE \#1 và BRYANT \#2 giảm hạng khi trọng số được phân bổ đều hơn. Điện năng bình quân, thời gian sạc hữu ích và mức nhàn rỗi theo giờ cần được phân tích thêm để xác định đặc điểm sử dụng tạo ra khác biệt. MPL \#2 có các chỉ tiêu nhàn rỗi cao, còn CAMBRIDGE \#4 có thời gian sạc bình quân thấp trong tập trạm. Các quan sát này hỗ trợ lựa chọn nội dung khảo sát thực địa về thiết bị, quy định đỗ xe và hành vi sử dụng.
+
+Thứ hai, bộ dữ liệu phản ánh giao dịch về năng lượng và thời gian. Hiệu quả tài chính còn cần chi phí đầu tư, bảo trì, mặt bằng và doanh thu. Điểm TOPSIS hiện hành chỉ hỗ trợ đối chuẩn vận hành theo sáu tiêu chí đã chọn.
+
+Thứ ba, điểm và thứ hạng mang tính tương đối trong tập 33 trạm. Khi tập trạm hoặc thời kỳ quan sát thay đổi, các cực trị Min-Max, trọng số Entropy và phương án lý tưởng có thể thay đổi. Việc so sánh giữa các lượt chạy cần xem xét lại phạm vi dữ liệu và các giả định tương ứng.
+
+Thứ tư, C1–C2 và C5–C6 có tương quan cao, trong khi TOPSIS cho phép bù trừ giữa các tiêu chí. Các kịch bản độ nhạy giúp đánh giá ảnh hưởng của một số lựa chọn mô hình. Những chỉ số này phản ánh tính vững trước các thay đổi đã thử nghiệm và cần được trình bày cùng kết quả cơ sở khi sử dụng thứ hạng để hỗ trợ quyết định.
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.84\textwidth]{paper_extended/rank_shift.pdf}
+\caption{Mười trạm có độ lệch hạng lớn nhất giữa hai phương án trọng số.}
+\label{fig:ext_rank_shift}
+\end{figure*}
+
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/rank_sensitivity.pdf}
+\caption{Tương quan thứ hạng theo kịch bản, so với phương án gốc dùng trọng số entropy.}
+\label{fig:ext_rank_sensitivity}
+\end{figure}
+
+
+
+\subsection{Sai số dự báo và kiểm chứng theo thời gian}
+Trong kỳ kiểm thử chính, XGBoost đạt RMSE 0,4652 cổng đối với chiếm dụng, so với 0,4883 của $t-1$ khi lấy trung bình đều trên chín cụm. Theo sai số tuyệt đối trung bình (MAE), $t-1$ tốt hơn với 0,2148 cổng so với 0,2705. Trên tám cụm có chuỗi biến động, 79,09\% số khung giữ nguyên chiếm dụng so với khung trước. Bảng~\ref{tab:forecast_windows} cho thấy lợi thế RMSE của XGBoost ở hai kỳ năm 2019 và mức sai số tăng trong nửa cuối năm 2018, chủ yếu tại CAMBRIDGE và TED THOMPSON. Trong kỳ kiểm tra năm 2020, RMSE của XGBoost và $t-1$ lần lượt là 0,322145 và 0,322563 cổng.
+
+Bảng~\ref{tab:forecast_comparison} bổ sung đối chiếu giữa các mô hình trong kỳ chính. XGBoost đạt RMSE chiếm dụng thấp nhất trong bảy mô hình tại bảy trong tám cụm có chuỗi biến động. Nếu chỉ so với $t-1$, XGBoost giảm RMSE ở cả tám cụm với mức giảm 2,86--6,33\%. Khi chiếm dụng giữ nguyên, $t-1$ có sai số bằng 0 theo định nghĩa. Khi chiếm dụng thay đổi, XGBoost giảm RMSE từ 1,2007 xuống 1,0946 cổng và giảm MAE từ 1,1375 xuống 1,0139 cổng. Điều này giải thích vì sao hai thước đo có thể ưu tiên mô hình khác nhau trong cùng kỳ.
+
+\begin{table}[!t]
+\caption{Sai số của bảy mô hình trong kỳ kiểm thử chính}
+\label{tab:forecast_comparison}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrrr@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Số cổng}} & \multicolumn{2}{c}{\textbf{Số phiên đến}} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+\textbf{Mô hình} & \textbf{MAE} & \textbf{RMSE} & \textbf{MAE} & \textbf{RMSE} \\
+\midrule
+Trung bình lịch sử & 1,0712 & 1,4812 & 0,1936 & 0,3812 \\
+$t-1$ & 0,2148 & 0,4883 & 0,2305 & 0,5129 \\
+$t-96$ & 0,9932 & 1,4702 & 0,2275 & 0,5091 \\
+$t-672$ & 0,9200 & 1,3691 & 0,2237 & 0,5033 \\
+Ridge & 0,2711 & 0,4713 & 0,2343 & 0,3692 \\
+Rừng ngẫu nhiên & 0,2787 & 0,4695 & 0,2167 & 0,3621 \\
+XGBoost & 0,2705 & 0,4652 & 0,2129 & 0,3623 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\raggedright\scriptsize Trung bình đều trên chín cụm. Đơn vị của hai mục tiêu lần lượt là cổng và phiên trên khung 15 phút.
+\end{table}
+
+\begin{table}[!t]
+\caption{Kiểm chứng RMSE dự báo số cổng qua các kỳ}
+\label{tab:forecast_windows}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}Xrrr@{}}
+\toprule
+\textbf{Kỳ kiểm thử} & \textbf{$t-1$} & \textbf{XGBoost} & \textbf{$\Delta$ RMSE} \\
+\midrule
+Nửa cuối 2018 & 0,5236 & 0,6816 & $+30{,}16$\% \\
+Nửa đầu 2019 & 0,5458 & 0,5179 & $-5{,}11$\% \\
+Nửa cuối 2019 & 0,5493 & 0,5234 & $-4{,}72$\% \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\raggedright\scriptsize Trung bình đều trên tám cụm có chuỗi biến động trong mỗi kỳ. $\Delta$ là thay đổi tương đối so với $t-1$.
+\end{table}
+
+Với số phiên bắt đầu trong kỳ kiểm thử chính, rừng ngẫu nhiên và XGBoost có RMSE lần lượt 0,3621 và 0,3623 phiên/khung trên chín cụm. Hệ số xác định của XGBoost là 0,2168 trên chín cụm và 0,1189 khi loại SHERMAN, nơi chuỗi bằng 0 trong toàn kỳ. Trên tám cụm có hoạt động, 85,54\% số khung không có phiên mới. Đối chứng luôn 0 vì vậy đạt MAE toàn kỳ 0,1716, thấp hơn 0,2395 của XGBoost. Riêng các khung có từ hai phiên, MAE giảm từ 2,1217 với dự báo luôn 0 xuống 1,7646 với rừng ngẫu nhiên và 1,7955 với XGBoost. Hai mô hình vẫn dự báo thiếu trong nhóm này.
+
+\begin{table}[!t]
+\caption{MAE số phiên bắt đầu theo nhóm quan sát}
+\label{tab:arrivals}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrrr@{}}
+\toprule
+\textbf{Số phiên} & \textbf{Số khung} & \textbf{Luôn 0} & \textbf{Rừng NN} & \textbf{XGBoost} \\
+\midrule
+0 & 120.877 & 0,0000 & 0,1446 & 0,1344 \\
+1 & 17.178 & 1,0000 & 0,7016 & 0,7227 \\
+Từ 2 & 3.257 & 2,1217 & 1,7646 & 1,7955 \\
+Toàn kỳ & 141.312 & 0,1716 & 0,2438 & 0,2395 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\raggedright\scriptsize MAE lấy trung bình đều trên tám cụm. Rừng NN là rừng ngẫu nhiên.
+\end{table}
+
+Bảng~\ref{tab:arrivals} tách 17.178 khung có một phiên và 3.257 khung có từ hai phiên. Các nhóm dùng kết quả quan sát để chẩn đoán sai số sau kiểm thử. Nếu mục tiêu vận hành là gửi cảnh báo trước khi có nhiều xe đến, cần xác định ngưỡng cảnh báo trên tập xác thực và đánh giá số lần cảnh báo đúng, bỏ sót và báo nhầm trên tập kiểm thử.
+
+Trong nhóm chiếm dụng cao tương đối, có 40.218 khung, chiếm 28,46\% số khung của tám cụm. XGBoost giảm RMSE từ 0,7276 xuống 0,7072 cổng so với $t-1$, trong khi MAE cao hơn, lần lượt là 0,5153 và 0,4123 cổng. Sai lệch dự báo trừ quan sát trung bình của XGBoost là $-0{,}2728$ cổng. Hình~\ref{fig:bryant_example} minh họa khác biệt giữa chuỗi số cổng có các đoạn duy trì trạng thái và chuỗi số phiên bắt đầu có các đợt ngắn. Kết quả cả kỳ cho thấy cần hiệu chỉnh cách sử dụng dự báo ở các khung có nguy cơ chiếm dụng cao.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=.91\textwidth]{paper_bryant_week_2019.png}
+\caption{Quan sát và dự báo tại cụm BRYANT trong tuần 12--18/08/2019. Hai đồ thị lần lượt biểu diễn số cổng có phiên kết nối và số phiên bắt đầu trong mỗi khung 15 phút.}
+\label{fig:bryant_example}
+\end{figure*}
+
+\subsection{Độ bất định của mức cải thiện RMSE}
+Phép lấy mẫu khối tại Mục~\ref{sec:bootstrap_detail} định lượng độ bất định của mức cải thiện trên kỳ kiểm thử chính. So sánh giữa các kỳ ở Bảng~\ref{tab:forecast_windows} đánh giá mức độ lặp lại của lợi thế dự báo theo thời gian.
+
+\begin{table}[!t]
+\caption{Khoảng bootstrap 95\% của chênh lệch RMSE trong kỳ chính}
+\label{tab:bootstrap_summary}
+\centering\footnotesize
 \setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.08}
-
-\begin{tabularx}{\columnwidth}{
-@{}X r@{}
-}
+\begin{tabularx}{\columnwidth}{@{}lXr@{}}
 \toprule
-\textbf{Đặc điểm} &
-\textbf{Giá trị}\\
+\textbf{Khối} & \textbf{Chênh lệch (cổng)} & \textbf{Mức giảm (\%)} \\
 \midrule
-
-Số phiên trong tập phân tích
-& 258.720\\
-
-Thời gian quan sát
-& 07/2011--01/2021\\
-
-Số cụm vị trí
-& 9\\
-
-Số trạm sạc
-& 46\\
-
-Số cổng sạc
-& 79\\
-
-Số người dùng
-& 21.419\\
-
-Cấp sạc
-& Level 1 và Level 2\\
-
+1 ngày & [−0,0276; −0,0242] & 4,45--4,98 \\
+7 ngày & [−0,0284; −0,0232] & 4,32--5,09 \\
+14 ngày & [−0,0286; −0,0229] & 4,28--5,11 \\
 \bottomrule
 \end{tabularx}
+\par\smallskip
+\raggedright\scriptsize Chênh lệch bằng RMSE XGBoost trừ RMSE $t-1$. Mức giảm được tính tương đối so với $t-1$.
 \end{table}
 
-Đặc điểm quan trọng của bộ dữ liệu là
-thời gian kết nối không hoàn toàn
-đồng nhất với thời gian truyền điện.
-Một phương tiện có thể tiếp tục
-chiếm giữ cổng sau khi quá trình sạc
-đã hoàn tất.
 
-Vì vậy, bên cạnh các trường nguyên bản,
-nghiên cứu xây dựng thêm các chỉ số
-về thời gian nhàn rỗi và tỷ lệ chiếm dụng
-để phản ánh hiệu quả sử dụng hạ tầng.
+Trên tám cụm có chuỗi chiếm dụng biến động, RMSE của XGBoost là 0,5234 cổng so với 0,5493 của $t-1$. Chênh lệch là $-0{,}0259$ cổng. Bảng~\ref{tab:bootstrap_summary} cho thấy mức giảm tương đối 4,72\% có khoảng tin cậy 95\% từ 4,32\% đến 5,09\% với khối bảy ngày. Ba khoảng đều giữ dấu của chênh lệch trong kỳ chính. Khối dài hơn giữ phụ thuộc dài hơn trong mỗi lần lặp. Các kết quả này vẫn dựa trên cùng kỳ, cùng mô hình đã huấn luyện và cùng cụm. Chúng phản ánh bất định có điều kiện do lấy lại mẫu khối sai số, trong giả định quá trình sai số đủ ổn định trong kỳ. Phép tính chưa đo bất định do huấn luyện lại, chọn siêu tham số, đổi mạng lưới hoặc thay đổi chế độ vận hành.
 
-Ngoài ra, ngày 01/08/2017
-là mốc chuyển đổi chính sách
-từ miễn phí sang thu phí sạc
-tại Palo Alto.
-Mốc này được sử dụng để
-phân chia hai giai đoạn quan sát
-trong nhiệm vụ NV3 \cite{luowang2025}.
+\subsection{Sai số theo cụm, trạng thái chuỗi và nhóm biến}
 
-\subsection{Kiểm soát chất lượng
-và tiền xử lý dữ liệu}
+NV5 dự báo số cổng bị chiếm dụng và số phiên bắt đầu ở độ phân giải 15 phút trên chín cụm vị trí. Kết quả tập test nửa cuối năm 2019 cho thấy XGBoost đạt RMSE thấp nhất đối với occupancy ở 7/8 cụm có hoạt động và đối với arrivals ở sáu trong tám cụm. Các mô hình cơ sở đạt ưu thế riêng theo MAE, trong khi giai đoạn năm 2020 làm thay đổi thứ tự mô hình. Phần thực nghiệm vì vậy xem xét đồng thời chất lượng trung bình, khác biệt giữa các cụm và sai số trong các điều kiện hoạt động cụ thể.
 
-Trước khi phân tích, dữ liệu được kiểm tra
-nhằm phát hiện những bản ghi trùng lặp,
-sai lệch thời lượng, bất thường công suất
-và thiếu nhất quán giữa các dấu thời gian.
+Dữ liệu đầu vào gồm 259.344 phiên sau khi áp dụng cờ hợp lệ của NV1, kiểm tra định danh cổng và loại 12 khoảng kết nối không dương. Các khung trên lưới thời gian được giữ đồng nhất giữa các cụm, với giá trị 0 khi dữ liệu ghi nhận không có hoạt động. Quy tắc này cần được đọc cùng giới hạn quan sát của bộ dữ liệu lịch sử, đặc biệt ở những giai đoạn một vị trí có ít hoặc chưa ghi nhận phiên.
 
-Quy trình NV1 bắt đầu từ 259.415 bản ghi.
-Sau khi loại bỏ bốn bản ghi
-trùng hoàn toàn, dữ liệu còn
-259.411 phiên.
+Train kết thúc trước ngày 01/01/2019. Validation gồm nửa đầu năm 2019, test gồm nửa cuối năm 2019 và stress test gồm năm 2020. Ranh giới chia tập được xác định theo UTC. Mỗi mô hình được xây dựng riêng theo cụm vị trí và mục tiêu. Sau khi tạo lag và trung bình trượt, các mô hình trong cùng tổ hợp sử dụng chung tập thời điểm hợp lệ.
 
-Các trường thời gian được chuẩn hóa,
-có xét múi giờ PST, PDT và UTC;
-các biến thời lượng được chuyển
-sang đơn vị giây hoặc giờ
-để phục vụ tính toán.
+Hệ thống đối chứng gồm Historical Mean theo thứ và khung giờ, persistence t–1, t–96 và t–672, Ridge Regression và Random Forest. Random Forest sử dụng 60 cây, độ sâu tối đa 12 và tối thiểu 4 mẫu mỗi lá. Ridge lựa chọn alpha trong bốn giá trị gồm 0,1 và 1, cùng 10 và 100 theo RMSE validation. XGBoost lựa chọn giữa hai cấu hình có learning rate 0,05, với 100 cây sâu tối đa 3 hoặc 160 cây sâu tối đa 4. Các cấu hình XGBoost cùng sử dụng subsample 0,85, colsample\_bytree 0,90 và seed 42.
 
-Đối với mỗi phiên có
-thời gian sạc dương,
-công suất trung bình được xác định:
+Các chỉ số tổng hợp được tính bằng trung bình cộng không trọng số giữa các cụm. MAE và RMSE có đơn vị cổng đối với occupancy, và phiên/khung đối với arrivals. R² được tính riêng trên từng chuỗi rồi lấy trung bình. Quy tắc tổng hợp được giữ nhất quán giữa các mô hình và giai đoạn.
 
-\begin{equation}
-P_i =
-\frac{E_i}{T_{\mathrm{charge},i}},
-\label{eq:avg_power}
-\end{equation}
+Random Forest và Ridge đạt RMSE occupancy lần lượt 0,4695 và 0,4713, khá gần XGBoost. Mức cải thiện của XGBoost so với các đối chứng sử dụng cùng đặc trưng nhỏ hơn rõ rệt so với mức cải thiện khi so với Historical Mean. Các giá trị này mô tả lợi thế trên bộ dữ liệu đánh giá hiện hành. Việc lượng hóa bất định của chênh lệch giữa mô hình cần bổ sung thiết kế suy luận thống kê tương ứng.
 
-trong đó $E_i$ là điện năng
-tính bằng kWh,
-$T_{\mathrm{charge},i}$ được tính bằng giờ
-và $P_i$ có đơn vị kW.
+SHERMAN có chuỗi mục tiêu bằng 0 trong toàn bộ kỳ test. Bảy mô hình cùng đạt sai số 0 và R² bằng 1 theo quy ước xử lý chuỗi hằng của thư viện. Khi bỏ cụm này khỏi phép tổng hợp, XGBoost đạt MAE/RMSE/R² bằng 0,3043/0,5234/0,9022 cho occupancy và 0,2395/0,4076/0,1189 cho arrivals. Hai cách tổng hợp được trình bày cùng nhau để làm rõ ảnh hưởng của cụm có chuỗi hằng.
 
-Theo cấu hình kiểm tra của NV1,
-ngưỡng công suất là 1,92 kW
-đối với Level 1
-và 22 kW đối với Level 2
-hoặc cổng chưa xác định cấp sạc.
+Đối với arrivals, XGBoost có RMSE thấp nhất ở sáu trong tám cụm có hoạt động. Random Forest có RMSE thấp nhất tại CAMBRIDGE và WEBSTER. So với Historical Mean, XGBoost giảm RMSE từ 0,50\% tại RINCONADA LIB đến 10,78\% tại CAMBRIDGE. R² của XGBoost trên tám cụm nằm trong khoảng 0,0486–0,1719.
 
-Bảng~\ref{tab:data_audit}
-tóm tắt các kết quả kiểm soát chất lượng.
+Trong năm 2020, persistence t–1 có MAE occupancy thấp nhất, đạt 0,0996. XGBoost có RMSE tốt nhất ở mức 0,322145, rất gần 0,322563 của t–1. Với arrivals, Ridge đạt RMSE thấp nhất là 0,2419, còn persistence t–672 đạt MAE thấp nhất là 0,1004.
 
-% ==========================================
-% BẢNG III.2 - KIỂM TRA CHẤT LƯỢNG NV1
-% ==========================================
+Trung bình qua chín cụm và các khung thời gian, occupancy giảm từ 1,5285 trong kỳ test 2019 xuống 0,6455 trong năm 2020. Arrivals giảm từ 0,1525 xuống 0,0636 phiên/khung. Sai số tuyệt đối được đánh giá cùng sự thay đổi mức hoạt động này. R² arrivals của XGBoost giảm còn 0,0503, thể hiện khả năng giải thích biến động trong năm 2020 thấp theo phép tổng hợp đang dùng. Các kết quả mô tả sự thay đổi của dữ liệu quan sát giữa hai giai đoạn, với nguyên nhân bên ngoài cần được kiểm chứng bằng dữ liệu bổ sung.
+
+Phân tích bổ sung phân chia các khung test theo giá trị mục tiêu thực để chẩn đoán điều kiện phát sinh sai số. Với occupancy, hai trạng thái gồm giữ nguyên và thay đổi so với khung liền trước. Thống kê được thực hiện trên tám cụm có hoạt động. Các chỉ số sai số được tính riêng theo cụm trong từng trạng thái rồi lấy trung bình đều. Số khung và tỷ trọng được cộng trên tám cụm.
+
+Có 111.764 trong 141.312 khung giữ nguyên occupancy, tương ứng 79,09\%. Persistence t–1 dự báo chính xác tại các khung này, còn XGBoost có MAE 0,1156. Với 20,91\% khung có thay đổi, XGBoost giảm MAE từ 1,1375 xuống 1,0139 và giảm RMSE từ 1,2007 xuống 1,0946 so với persistence. Phân rã này giải thích sự khác nhau giữa MAE và RMSE tổng thể. Baseline hưởng lợi từ số lượng lớn khung ổn định, trong khi XGBoost giảm sai số tại các khung biến động.
+
+Các nhóm trong phân tích này được xác định sau khi có quan sát thực. Thống kê phục vụ chẩn đoán sai số theo điều kiện và hỗ trợ đọc các chỉ số chung. Việc chuyển thành cảnh báo trước thời điểm phát sinh phiên cần có quy tắc dự báo và đánh giá cảnh báo riêng.
+
+Mức độ quan trọng được lấy từ gain của các mô hình XGBoost với cấu hình đã chọn bằng validation. Gain phản ánh mức giảm hàm mất mát trung bình tại các phép chia sử dụng một đặc trưng. Các giá trị được chuẩn hóa trong từng mô hình, cộng theo nhóm đặc trưng rồi lấy trung bình đều giữa các cụm có tổng importance dương. Hai mô hình SHERMAN có tổng importance bằng 0, nên thống kê nhóm đặc trưng sử dụng tám cụm còn lại cho mỗi mục tiêu.
+
+Bốn nhóm gồm lag ngắn hạn ở độ trễ 1, 2 và 4 khung, lag ngày/tuần ở độ trễ 96 và 672 khung, trung bình trượt với cửa sổ 4, 12, 96 và 672 khung được dịch một bước, cùng nhóm đặc trưng lịch. Nhóm lịch gồm khung giờ, thứ, tháng, năm, cuối tuần, biểu diễn chu kỳ và biến mốc chính sách.
+
+Lag ngắn hạn chiếm 78,96\% gain trung bình, dao động 72,99–87,13\% giữa các cụm. Riêng lag một khung chiếm 66,28\% và trung bình trượt chiếm 19,22\%. Trong nhóm trung bình trượt, cửa sổ 4 khung có tỷ trọng lớn nhất, đạt 18,97\% trên tổng gain.
+
+Kết quả phù hợp với đặc điểm occupancy duy trì qua nhiều khung liên tiếp và với hiệu năng của persistence t–1. Phần lợi thế của XGBoost được quan sát rõ hơn ở nhóm khung thay đổi, như phân tích sai số đã trình bày. Sự kết hợp giữa importance và phân rã sai số giúp giải thích vai trò của thông tin hiện trạng trong mô hình.
+
+Đối với arrivals, đặc trưng lịch chiếm 43,60\%, trung bình trượt 42,58\%, lag ngày/tuần 11,60\% và lag ngắn hạn 2,22\%. Đặc trưng riêng lẻ có tỷ trọng lớn nhất là trung bình trượt 12 khung (29,79\%), tiếp theo là hour\_cos (15,31\%).
+
+Tỷ trọng lịch dao động từ 26,59\% đến 69,49\%, còn trung bình trượt từ 18,14\% đến 61,14\% giữa các cụm. So với occupancy, mô hình arrivals sử dụng hỗn hợp thông tin khác nhau rõ hơn theo vị trí. Bảng trung bình toàn mạng vì vậy được đọc cùng khoảng biến thiên giữa các mô hình theo cụm.
+
+BRYANT được chọn làm trường hợp minh họa. Tuần test được cố định từ ngày 12 đến 18/08/2019, còn tuần stress từ ngày 10 đến 16/08/2020. Các đường dự báo được lấy từ bảng dự đoán của lượt chạy hiện hành. Trục thời gian được chuyển từ UTC sang giờ Palo Alto theo America/Los\_Angeles. Mỗi điểm giữ độ phân giải 15 phút.
+
+Trong tuần test, occupancy tăng theo các đợt hoạt động ban ngày, có những khung ghi nhận 9–10 cổng có phiên kết nối. XGBoost theo được phần lớn diễn biến tăng và giảm, trong khi một số đỉnh cao còn được dự báo thấp. Persistence t–1 bám sát các đoạn chuỗi giữ trạng thái và thể hiện độ trễ ở các thời điểm thay đổi. Quan sát này phù hợp với phân rã sai số giữa khung ổn định và khung biến động.
+
+Đường arrivals thực tế xuất hiện dưới dạng các đợt ngắn xen giữa nhiều khung bằng 0. XGBoost và Historical Mean thể hiện mức hoạt động trong ngày trơn hơn chuỗi quan sát. Một số đỉnh thực tế lên tới 3–4 phiên/khung vượt rõ đường dự báo. Thống kê sai số ở nhóm từ hai phiên trở lên xác nhận giới hạn được quan sát trên hình minh họa.
+
+Tuần stress có occupancy thấp hơn, chủ yếu quanh 1–3 cổng trong các đợt hoạt động. XGBoost tiếp tục cập nhật từ trạng thái thực gần nhất nên vẫn theo được các biến động. Với arrivals, Historical Mean giữ mức dự báo gắn với lịch sử train và có nhiều đoạn cao hơn quan sát của tuần. XGBoost điều chỉnh theo lịch sử gần nhưng vẫn khó tái hiện từng đợt đến ngắn. Hai tuần là các trường hợp minh họa, còn kết luận hiệu năng chung dựa trên toàn bộ các khung test và stress.
+
+Để xác định thời điểm cần ưu tiên theo dõi, occupancy thực tại BRYANT được tổng hợp theo giờ địa phương trên toàn kỳ test, tách thứ Hai–thứ Sáu và thứ Bảy–Chủ nhật. Mỗi giá trị là trung bình số cổng có phiên kết nối giao với khung, trên các khung thuộc cùng nhóm giờ.
+
+Trong các ngày từ thứ Hai đến thứ Sáu, mức chiếm dụng tăng rõ từ 8 giờ và duy trì cao trong khoảng 10–15 giờ. Hai nhóm giờ 12 và 13 có trung bình lần lượt 6,398 và 6,407 cổng. Vào cuối tuần, mức cao nhất dịch sang nhóm giờ 13 và 14, đạt lần lượt 3,337 và 3,365 cổng. Các nhóm giờ này tương ứng khoảng thời gian từ đầu giờ đến trước đầu giờ kế tiếp.
+
+Kết quả hỗ trợ xác định thời điểm cần theo dõi chiếm dụng ở BRYANT, đồng thời cho thấy lịch cuối tuần có cấu trúc khác ngày trong tuần. Việc áp dụng cho vị trí khác cần dựa trên chuỗi của chính vị trí đó, do mức hoạt động và kết quả dự báo có khác biệt giữa các cụm.
+
+Phân tích bổ sung dùng phân vị 90\% occupancy trong train của từng cụm làm ngưỡng chiếm dụng cao tương đối. Một khung test được đưa vào nhóm này khi occupancy thực lớn hơn hoặc bằng ngưỡng. Ngưỡng được lấy từ dữ liệu train và giữ cố định trong test. Ngưỡng bằng 3 cổng tại BRYANT, CAMBRIDGE, HAMILTON, HIGH và MPL. RINCONADA LIB và TED THOMPSON có ngưỡng 2 cổng, còn WEBSTER có ngưỡng 5 cổng. SHERMAN có ngưỡng 0 và được đọc riêng với chuỗi hằng trong kỳ test. Theo quy tắc trên, có 40.218 khung thuộc nhóm chiếm dụng cao, chiếm 28,46\% tổng khung của tám cụm. Tỷ trọng này phụ thuộc phân phối train, mức hoạt động test và tính rời rạc của số đếm. Ngưỡng được sử dụng để chẩn đoán khả năng dự báo khi mức chiếm dụng cao hơn lịch sử thông thường của từng vị trí.
+
+Chỉ số được tính riêng theo cụm trong nhóm thỏa ngưỡng rồi lấy trung bình đều trên tám cụm. Sai lệch âm tương ứng dự báo thấp hơn thực tế. Ngưỡng phân vị là một quy tắc chẩn đoán bổ sung.
+
+Trong nhóm chiếm dụng cao, XGBoost có RMSE 0,7072, tốt hơn 0,7276 của persistence t–1. MAE tương ứng là 0,5153 và 0,4123. So với MAE 0,3043 và RMSE 0,5234 trên toàn bộ khung của tám cụm, sai số XGBoost tăng khi xét nhóm chiếm dụng cao. Sai lệch có dấu bằng –0,2728 cho thấy dự báo có xu hướng thấp hơn quan sát trong nhóm này. Kết quả này bổ sung thông tin mà các chỉ số trung bình toàn kỳ có thể che khuất.
+
+Ngưỡng chiếm dụng cao tương đối cho phép xác định tình huống cần chú ý về sai số dự báo. Để đánh giá khả năng hết cổng, cần kết hợp dự báo với số cổng khả dụng theo thời điểm, tình trạng bảo trì và quy tắc phục vụ. Việc đánh giá quá tải điện cần thêm quan sát công suất. Phạm vi kết quả hiện tại hỗ trợ theo dõi số cổng có phiên kết nối và lượng phiên đến trong từng khung.
+
+Hai cửa sổ lịch sử dùng lại giao thức dự báo một bước. Với test nửa cuối năm 2018, mô hình được huấn luyện đến hết năm 2017 và chọn cấu hình trên nửa đầu năm 2018. Với test nửa đầu năm 2019, mô hình được huấn luyện đến hết nửa đầu năm 2018 và chọn cấu hình trên nửa cuối năm 2018. Các mốc dùng UTC. Kỳ nửa đầu năm 2019 trùng với validation của thiết kế chính và phục vụ kiểm chứng hồi cứu.
+
+Chỉ số được tính riêng theo cụm rồi lấy trung bình đều trên tám cụm có chuỗi biến động ở mỗi kỳ. Trong nửa cuối năm 2018, XGBoost giảm RMSE tại sáu cụm nhưng tăng mạnh tại CAMBRIDGE và TED THOMPSON, làm RMSE trung bình tăng 30,16\%. Trong nửa đầu năm 2019, XGBoost giảm RMSE ở cả tám cụm. Persistence t–1 có MAE trung bình thấp hơn trong cả ba kỳ.
+
+Đối với arrivals, Random Forest và XGBoost có RMSE gần nhau trong kỳ chính. Các mô hình cây giảm sai số ở những khung có phiên so với đối chứng luôn 0, nhưng vẫn dự báo thấp các đợt đến cao. Việc chuyển thành cảnh báo cần một quy tắc và thiết kế đánh giá riêng.
+
+Kết quả theo cụm, phân rã sai số và phân tích đặc trưng cùng xác định được phạm vi lợi thế của XGBoost. Mô hình khai thác tốt thông tin hiện trạng để dự báo occupancy ngắn hạn. Với arrivals và các khung chiếm dụng cao, sai số theo điều kiện cung cấp căn cứ để đánh giá mức phù hợp với từng yêu cầu vận hành.
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{paper_extended/gain.pdf}
+\caption{Mức quan trọng theo gain của các nhóm đặc trưng trong XGBoost.}
+\label{fig:ext_gain}
+\end{figure}
+
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.84\textwidth]{paper_extended/bryant_stress.pdf}
+\caption{Quan sát và dự báo tại BRYANT trong tuần 10–16/08/2020.}
+\label{fig:ext_bryant_stress}
+\end{figure*}
+
+
+
+\section{Đề xuất hỗ trợ vận hành}
+\label{sec:operations}
+Bảng~\ref{tab:decisions} tóm tắt căn cứ chọn trạm và chỉ số đánh giá cho ba quyết định. Các mục sau trình bày cách thực hiện và các phép đo cần bổ sung.
 
 \begin{table}[!t]
-\centering
-\caption{Kết quả kiểm soát chất lượng NV1}
-\label{tab:data_audit}
-
-\footnotesize
+\caption{Gắn bằng chứng thực nghiệm với quyết định vận hành}
+\label{tab:decisions}
+\centering\footnotesize
 \setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.08}
-
-\begin{tabularx}{\columnwidth}{
-@{}X r@{}
-}
+\begin{tabularx}{\columnwidth}{@{}p{.22\columnwidth}XX@{}}
 \toprule
-\textbf{Hạng mục kiểm tra} &
-\textbf{Số phiên}\\
+\textbf{Quyết định} & \textbf{Căn cứ chọn} & \textbf{Chỉ số đánh giá} \\
 \midrule
-
-Dữ liệu CSV gốc
-& 259.415\\
-
-Bản ghi trùng hoàn toàn
-& 4\\
-
-Dữ liệu sau loại trùng
-& 259.411\\
-
-Charging Time vượt Total Duration
-& 45\\
-
-Công suất vượt ngưỡng
-& 10\\
-
-Khoảng kết nối không dương
-hoặc không xác định
-& 12\\
-
-Sai lệch timestamp trên 59 giây
-hoặc không xác định
-& 521\\
-
-Phiên chồng lấn cùng cổng
-& 181\\
-
-\midrule
-\textbf{Phiên hợp lệ theo NV1}
-& \textbf{259.356}\\
-
+Phí nhàn rỗi & Giờ giữ cổng tập trung vào nhóm nhỏ & Giờ vượt 3 giờ trên 100 phiên, tổng phiên phục vụ \\
+Giá theo giờ & Lượt đến tập trung giữa ngày & Tỷ trọng lượt đến và tỷ lệ cổng bận ở giờ cao điểm \\
+Rà soát sức chứa & Xếp hạng nhạy với trọng số và quy mô & Cổng hoạt động, cổng bận đồng thời và lượt khách phải chờ \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Các trường hợp bất thường được gắn cờ
-để phục vụ kiểm tra và đối chiếu.
-Một phiên có thể đồng thời vi phạm
-nhiều quy tắc, nên không thể cộng
-các số lượng trong bảng
-để xác định tổng số phiên không hợp lệ.
+\subsection{Thí điểm phí giữ cổng lũy tiến}
+Trong mẫu NV2, 9.746 phiên giữ cổng nhàn rỗi trên 3 giờ. Phần vượt ngưỡng cộng lại khoảng 33.320 giờ, trong đó nhóm nhàn rỗi kéo dài đóng góp 93,2\%. Nghiên cứu đề xuất dùng 3 giờ làm ngưỡng thử nghiệm tại các trạm vừa có nhiều phiên giữ cổng lâu vừa có nhu cầu cao. Sau khi xác nhận chính sách tại trạm, giữ thời gian ân hạn và mức phí cơ sở đang áp dụng, rồi tăng phí riêng cho phần vượt 3 giờ kể từ khi hoàn tất sạc. Hệ thống cần ghi nhận trực tiếp thời điểm hoàn tất sạc và ngắt kết nối, đồng thời thông báo trước khi chuyển bậc phí.
 
-Trong quy trình NV1,
-biến \texttt{is\_valid\_session}
-được xác định dựa trên hai điều kiện:
-không vi phạm quan hệ thời lượng
-và không vượt ngưỡng công suất
-theo loại cổng.
+Chỉ số chính là số giờ giữ cổng vượt 3 giờ trên mỗi 100 phiên. So sánh thay đổi trước và trong thí điểm với trạm tương đồng giữ nguyên biểu phí. Theo dõi thêm tổng số phiên phục vụ, khiếu nại và thời gian giữ cổng dưới ngưỡng. Cân nhắc mở rộng khi số giờ giữ cổng kéo dài giảm và mức phục vụ được duy trì.
 
-Kết quả có 259.356 phiên hợp lệ,
-tương đương khoảng 99,98\%
-số bản ghi gốc.
+Để so sánh giữa các trạm có lưu lượng khác nhau, tính chỉ số theo số phiên của từng trạm trong cùng khoảng quan sát. Chọn trạm đối chứng dựa trên mức sử dụng, số cổng hoạt động và nhóm ngày tương đồng. Với mốc ân hạn lịch sử 20 phút, kiểm tra lại biểu phí hiện hành trước khi chọn trạm tham gia. Quan sát thêm thời gian ngay trước và sau ngưỡng mới để phát hiện dịch chuyển hành vi quanh mốc 3 giờ. Nếu số giờ vượt ngưỡng giảm cùng lúc tổng số phiên sụt mạnh, cần xem lại mức phí và mức phục vụ trước khi mở rộng.
 
-Những cờ kiểm tra bổ sung,
-bao gồm sai lệch timestamp
-và khoảng kết nối không dương,
-chưa được đưa trực tiếp
-vào điều kiện xác định
-\texttt{is\_valid\_session}.
-Trong tập NV1-valid vẫn có
-481 phiên được gắn cờ
-sai lệch timestamp trên 59 giây.
-
-Ngoài kiểm tra logic,
-nghiên cứu sử dụng khoảng tứ phân vị
-(\textit{Interquartile Range} -- IQR)
-để nhận diện các giá trị ngoại lệ.
-
-Sau tiền xử lý,
-số bản ghi được gắn cờ IQR
-lần lượt là 12.763 đối với
-Total Duration, 5.519 đối với
-Charging Time và 8.697
-đối với Energy.
-
-Những phiên vượt ngưỡng IQR
-không bị loại tự động,
-bởi thời gian kết nối kéo dài
-có thể phản ánh hành vi
-chiếm dụng thực tế
-mà nghiên cứu cần phân tích.
-
-\subsection{Kỹ nghệ đặc trưng
-và phân tích khám phá dữ liệu}
-
-Từ các trường thời lượng nguyên bản,
-nghiên cứu xây dựng hai đặc trưng
-quan trọng là Idle Time và Idle Ratio,
-theo các công thức
-(\ref{eq:idle_time}) và
-(\ref{eq:idle_ratio})
-đã trình bày trong Mục I.
-
-Idle Time đo thời lượng kết nối
-không thực hiện truyền điện,
-trong khi Idle Ratio chuẩn hóa
-thời gian nhàn rỗi theo
-tổng thời lượng của từng phiên.
-
-Đối với các phiên không hợp lệ
-về quan hệ thời lượng,
-hoặc có tổng thời gian kết nối
-không dương, Idle Ratio
-không được tính và được
-gán giá trị thiếu.
-
-NV1 cũng tạo các đặc trưng thời gian
-như giờ bắt đầu, thứ trong tuần,
-tháng, năm và chỉ báo cuối tuần;
-đồng thời phân loại mức độ nhàn rỗi
-bằng biến
-\texttt{idle\_severity\_level}.
-
-Các đặc trưng chu kỳ sin/cos,
-biến trễ và thống kê cửa sổ trượt
-không được tạo trực tiếp
-trong dữ liệu đầu ra NV1,
-mà được xây dựng sau
-trong quy trình dự báo NV5.
-
-Phân tích khám phá dữ liệu
-(\textit{Exploratory Data Analysis} -- EDA)
-được thực hiện đối với
-thời gian kết nối,
-thời gian sạc,
-thời gian nhàn rỗi,
-tỷ lệ nhàn rỗi
-và điện năng tiêu thụ.
-
-Trên tập 258.720 phiên
-được sử dụng trong EDA,
-Idle Time có trung vị
-khoảng 0,0072 giờ
-(tương đương 26 giây),
-trong khi giá trị trung bình
-đạt khoảng 0,4870 giờ.
-
-Idle Ratio có trung vị 0,87\%
-và trung bình khoảng 11,57\%.
-Sự chênh lệch giữa trung bình
-và trung vị cho thấy phân phối
-lệch phải, với một số phiên
-có thời gian chiếm dụng
-nhàn rỗi kéo dài.
-
-% ==========================================
-% HÌNH III.1
-% Vị trí thay bằng hình trong báo cáo:
-% "Hình 3.1. Phân phối tần suất..."
-% ==========================================
+\subsection{Thí điểm giá sạc theo giờ}
+Khung 10:00 đến trước 15:00 ghi nhận 37,57\% số lượt bắt đầu trong mẫu NV2 tính cả tuần và 70.756 lượt vào ngày làm việc. Tại BRYANT, số cổng có phiên kết nối cũng cao vào giữa ngày làm việc (Hình~\ref{fig:bryant}). Nhóm đề xuất xác minh khung 10:00--15:00 tại các trạm có giờ thấp điểm còn khả năng phục vụ, rồi thử chênh lệch giá theo giờ trong khi giữ nguyên phí nhàn rỗi. Tỷ lệ giá cao điểm bằng 1,3 lần mức thấp điểm là một kịch bản thí điểm. Quy tắc tính tiền cho phiên qua hai khung giờ cần được công bố trước.
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\columnwidth]{feature_distributions_occupancy.png}
-\caption{Phân phối thời gian sạc,
-thời gian nhàn rỗi và tỷ lệ nhàn rỗi.}
-\label{fig:eda_idle}
+\includegraphics[width=\columnwidth]{paper_bryant_hourly.pdf}
+\caption{Số cổng có phiên kết nối trung bình theo giờ địa phương tại BRYANT, nửa cuối năm 2019.}
+\label{fig:bryant}
 \end{figure}
 
-Bên cạnh các đặc trưng về thời lượng,
-dữ liệu còn được tổng hợp theo
-giờ bắt đầu phiên, ngày trong tuần
-và năm để khảo sát
-xu hướng nhu cầu sử dụng.
+Đo số phiên dịch sang giờ vắng, tỷ lệ cổng bận trong giờ cao điểm và tổng số phiên phục vụ. Theo dõi các giờ liền kề và trạm xung quanh để phát hiện việc nhu cầu chuyển vị trí. Nếu đánh giá tác động lên phụ tải điện, cần số đo công suất hoặc điện năng theo thời gian.
 
-Kết quả EDA cho thấy
-11 giờ là thời điểm có
-số phiên bắt đầu cao nhất,
-với 21.015 phiên
-(8,12\% tập phân tích).
-Ngược lại, 2 giờ sáng
-có 128 phiên (0,05\%).
+Một phép kiểm tra khả thi là đối chiếu số lượt bắt đầu trong cùng nhóm ngày trước và trong thí điểm, kèm tỷ lệ cổng bận trên số cổng hoạt động tại giờ cao điểm và giờ nhận thêm lượt sạc. Cần xác nhận các giờ nhận thêm lượt còn khả năng phục vụ. Một phiên bắt đầu ngoài giờ cao điểm vẫn có thể tiếp tục chiếm cổng trong giờ cao điểm, vì vậy số giờ cổng được giải phóng cần tính từ phần thời gian kết nối thực sự giao với khung. Kết quả thí điểm nên được đọc cùng thay đổi tổng số phiên để phân biệt dịch chuyển giờ với giảm nhu cầu tại điểm thử.
 
-Số phiên theo năm cũng biến động
-đáng kể trong giai đoạn quan sát.
-Năm 2017 ghi nhận 48.857 phiên,
-trong khi năm 2020
-giảm còn 20.064 phiên.
-Diễn biến năm 2020 cần được
-xem xét trong bối cảnh đại dịch
-COVID-19 và không nên
-quy toàn bộ thay đổi nhu cầu
-cho chính sách giá.
+\subsection{Lập lịch bảo trì và khảo sát bổ sung cổng}
+Sử dụng thứ hạng NV4 và tiêu chí thành phần để chọn trạm cần khảo sát. Nếu cổng thường xuyên ngừng hoạt động, ưu tiên khôi phục thiết bị. Nếu cổng thường xuyên bị giữ sau sạc, ưu tiên giảm thời gian nhàn rỗi. Khi các cổng hoạt động đều bận và khách tiếp tục phải chờ hoặc rời đi, đánh giá phương án bổ sung cổng theo khả năng cấp điện và chi phí. Phân biệt các tình huống này đòi hỏi nhật ký số cổng hoạt động, số cổng bận đồng thời và số lượt chờ hoặc bỏ đi.
 
-% ==========================================
-% HÌNH III.2
-% Dùng biểu đồ số phiên sạc theo năm
-% trong phần EDA của báo cáo gốc.
-% ==========================================
+Để bố trí bảo trì, chọn giờ ít ảnh hưởng dựa trên hồ sơ chiếm dụng địa phương và xác nhận trạng thái cổng ngay trước khi thực hiện. NV5 hỗ trợ theo dõi khung 15 phút kế tiếp khi hệ thống cập nhật được quan sát. Trong nhóm khung chiếm dụng cao tương đối, sai lệch trung bình của XGBoost là $-0{,}2728$ cổng. Khi ra quyết định sát sức chứa, cần đối chiếu dự báo với trạng thái thiết bị.
 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{yearly_high_idle_ratio_trend.png}
-\caption{Tỷ lệ phiên có Idle Ratio trên 50\%
-theo năm trong giai đoạn 2011--2020.}
-\label{fig:sessions_year}
-\end{figure}
+Dữ liệu lịch sử có 9.904 phiên bắt đầu từ 22:00 đến trước 06:00, tương đương 3,83\% mẫu NV2. Khoảng giờ này có thể dùng để sàng lọc lịch bảo trì rồi đối chiếu với hồ sơ từng địa điểm, kể cả các phiên bắt đầu trước 22:00. Với lịch cần lập trước nhiều giờ hoặc nhiều ngày, hồ sơ sử dụng theo giờ và xác nhận trạng thái cổng là căn cứ phù hợp với thời hạn ra quyết định. Muốn sử dụng mô hình dự báo cho lịch dài hơn, cần đánh giá sai số ở đúng thời hạn dự báo đó.
 
-\subsection{Dữ liệu phục vụ các nhiệm vụ
-phân tích tiếp theo}
+\subsection{Trình tự thí điểm và tiêu chí mở rộng}
+Giai đoạn đầu thu thập số liệu nền, chọn trạm thử và trạm đối chứng, đồng thời thống nhất cách ghi nhận thiết bị ngừng hoạt động, số cổng bận và lượt chờ. Giai đoạn tiếp theo triển khai từng biện pháp giá riêng để quan sát thay đổi theo chỉ số chính. Cuối kỳ, đối chiếu kết quả với trạm đối chứng và kiểm tra các chỉ số về mức phục vụ. Chỉ đánh giá đầu tư bổ sung cổng khi dữ liệu tại trạm cho thấy nhu cầu chưa được đáp ứng kéo dài dù các cổng hiện có hoạt động ổn định.
 
-Các nhiệm vụ NV2--NV5
-sử dụng những tập dữ liệu
-được xác định theo
-điều kiện riêng của từng bài toán.
+\subsection{Tổng hợp bằng chứng và điều kiện triển khai}
 
-NV2 thực hiện phân cụm trên
-258.720 phiên sau các bước
-loại trùng, kiểm tra logic,
-lọc công suất theo ngưỡng
-19,2 kW của thí nghiệm
-và đối chiếu timestamp.
+Các kết quả cho thấy thời gian nhàn rỗi phân bố không đều giữa các phiên, trong khi điểm vận hành và mức hoạt động cũng khác nhau giữa các trạm. NV2 hỗ trợ nhận diện nhóm hành vi cần quan tâm, NV3 bổ sung bối cảnh thay đổi theo giai đoạn, còn NV4 cung cấp góc nhìn đối chuẩn theo địa điểm. NV5 tiếp tục mô tả khả năng dự báo trạng thái và lượng phiên đến trong khung 15 phút kế tiếp.
 
-NV3 sử dụng dữ liệu cấp phiên
-và định danh người dùng
-để so sánh hành vi
-trước và sau ngày 01/08/2017.
+Khi sử dụng kết quả để hỗ trợ vận hành, cần kết hợp đặc điểm hành vi, tiêu chí thành phần của từng trạm và sai số dự báo trong các điều kiện cụ thể. Việc xác định khả năng hết cổng hoặc lựa chọn biện pháp can thiệp còn cần thông tin về số cổng khả dụng theo thời điểm, tình trạng thiết bị và bối cảnh từng địa điểm.
 
-NV4 tổng hợp dữ liệu theo trạm
-để xây dựng ma trận
-sáu tiêu chí vận hành.
-Các trạm không đạt
-ngưỡng tối thiểu 500 phiên
-không được đưa vào xếp hạng,
-còn 33 trạm đủ điều kiện.
+Đóng góp của đề tài là xây dựng một quy trình từ dữ liệu giao dịch sạc đến đề xuất vận hành, trong đó từng nhiệm vụ có mẫu phân tích và cách kiểm chứng phù hợp. Kiểm tra chia đôi mẫu, bootstrap theo người dùng, phân tích độ nhạy thứ hạng và đánh giá dự báo theo thời gian giúp xác định phạm vi sử dụng của từng kết quả. Trên cơ sở đó, đề tài đề xuất các đối tượng, địa điểm và chỉ số theo dõi cụ thể để thí điểm phí nhàn rỗi, biểu giá theo giờ và phương án phân bổ nguồn lực.
 
-NV5 sử dụng các phiên hợp lệ
-được xử lý theo quy tắc riêng
-để xây dựng chuỗi thời gian
-15 phút theo cụm vị trí,
-phục vụ dự báo số phiên mới
-và số cổng bị chiếm dụng.
+NV2 sử dụng ba đặc trưng ở cấp phiên. Trong thử nghiệm với DBSCAN, 11 trong 18 cấu hình chỉ tạo một cụm khi bỏ qua các điểm nhiễu. Số cụm cũng thay đổi giữa các mẫu con. Do đó, bốn hồ sơ hành vi cần được diễn giải trong phạm vi tập dữ liệu và bộ đặc trưng đã sử dụng. Với NV4, ngưỡng tối thiểu 500 phiên giới hạn phân tích ở 33 trong 46 trạm sau bước lọc. Điểm TOPSIS phản ánh mức vận hành tương đối theo sáu tiêu chí đã chọn. Đánh giá hiệu quả tài chính cần thêm chi phí đầu tư, vận hành, bảo trì và dữ liệu doanh thu.
 
-Do các nhiệm vụ có
-đơn vị phân tích,
-điều kiện lọc và mục tiêu
-khác nhau, kích thước mẫu
-không nhất thiết giống nhau.
+NV5 được đánh giá cho một bước 15 phút với quan sát thực cập nhật sau mỗi khung. Trong kỳ kiểm thử năm 2019, R² của XGBoost đối với số phiên bắt đầu là 0,2168 khi lấy trung bình trên chín cụm và 0,1189 khi xét tám cụm có hoạt động. Tại SHERMAN, chuỗi quan sát và dự báo trong kỳ kiểm thử đều bằng 0. Năm 2020 được dùng làm giai đoạn kiểm tra riêng vì mức hoạt động khác kỳ kiểm thử năm 2019. Hai kỳ kiểm chứng lịch sử cho thấy lợi thế RMSE của XGBoost thay đổi theo giai đoạn và cụm. Các nghiên cứu tiếp theo có thể đánh giá dự báo nhiều bước, bổ sung biến thời tiết hoặc sự kiện, và thu thập công suất theo thời gian nếu mở rộng sang dự báo phụ tải điện.
 
-Việc ghi nhận rõ
-quy mô và điều kiện lựa chọn
-ở từng nhiệm vụ giúp
-bảo đảm tính nhất quán
-khi diễn giải kết quả thực nghiệm.
+Bước tiếp theo là thí điểm riêng từng chính sách tại các địa điểm được chọn, chẳng hạn trong 90 ngày, với trạm đối chứng tương đồng và số liệu ghi nhận ngay trước triển khai. Thí điểm phí nhàn rỗi cần theo dõi thay đổi về số giờ nhàn rỗi, mức phục vụ và khiếu nại. Thí điểm biểu giá theo giờ cần theo dõi sự dịch chuyển lượt đến và mức chiếm dụng giữa các khung giờ và địa điểm. Kết quả thí điểm có thể dùng để điều chỉnh biểu phí, lựa chọn phạm vi triển khai hoặc xác định nơi cần khảo sát thêm về đầu tư cổng sạc.
 
-% ==========================================
+Trạng thái cổng, lượt chờ và thời gian hoàn tất sạc cần được thu thập trong giai đoạn nền trước khi thực hiện thí điểm. Mỗi trạm đối chứng nên có lịch hoạt động, nhóm ngày và lưu lượng tương đồng. Khi triển khai lần lượt hai biện pháp giá, cần ghi ngày bắt đầu, biểu phí, thời gian ân hạn và mọi thay đổi thiết bị trong nhật ký vận hành. Việc duy trì khả năng phục vụ được đánh giá bằng tổng số phiên và số khách phải chờ hoặc rời đi, đồng thời xem xét thay đổi ở các trạm lân cận.
 
 
-% ==========================================
-% TÀI LIỆU THAM KHẢO CHUẨN IEEE
-% Mở rộng khi viết các phần III-VII
-% ==========================================
+\subsection{Thiết kế so sánh có đối chứng cho hai thí điểm giá}
+
+Đề xuất thí điểm là bước nối giữa các phát hiện mô tả của nghiên cứu và quyết định vận hành. Trước khi thử chính sách, đơn vị vận hành chọn một nhóm trạm có vấn đề phù hợp với từng biện pháp. Với phí nhàn rỗi, ưu tiên địa điểm có tỷ lệ phiên giữ cổng trên 3 giờ và tổng số giờ vượt ngưỡng cao, đồng thời có các khung thường đông xe. Với giá theo giờ, ưu tiên địa điểm có độ chênh rõ giữa giờ cao điểm và giờ vắng và có khả năng tiếp nhận thêm phiên ở một số khung ngoài giờ cao. Trong cả hai trường hợp, điều kiện của thiết bị và biểu phí hiện hành phải được xác nhận trực tiếp.
+
+Trạm đối chứng nên tương đồng về số cổng hoạt động, hồ sơ sử dụng theo thứ và giờ, lưu lượng trước thí điểm và bối cảnh sử dụng của địa điểm. Kỳ nền và kỳ thử cần có đủ ngày làm việc lẫn cuối tuần. Các ngày trạm gián đoạn, thay đổi số cổng hoặc có sự kiện đặc biệt cần được đánh dấu trong nhật ký. Nếu một trạm gần trạm thử có thể nhận phần nhu cầu dịch chuyển, số phiên tại đó được theo dõi để chẩn đoán lan tỏa. Khi chọn trạm đối chứng, cần cân nhắc khoảng cách đủ để hạn chế khách đổi trạm từ nhóm thử sang nhóm đối chứng.
+
+Với chỉ số $M$, một cách báo cáo thay đổi có đối chiếu là
+\begin{equation}
+\begin{aligned}
+\Delta M={}&(M_{\text{thử,sau}}-M_{\text{thử,trước}})\\
+ &-(M_{\text{đối chứng,sau}}-M_{\text{đối chứng,trước}}).
+\end{aligned}
+\label{eq:pilot_contrast}
+\end{equation}
+Giá trị trong \eqref{eq:pilot_contrast} mô tả chênh lệch thay đổi giữa hai nhóm. Việc diễn giải như tác động chính sách đòi hỏi thiết kế và giả định phù hợp, bao gồm khả năng so sánh xu hướng nền, ghi nhận đầy đủ thay đổi đồng thời và xem xét dịch chuyển khách giữa các trạm. Nếu lưu lượng thấp, cần báo cả mẫu số, số ngày theo dõi và mức dao động theo ngày trước khi quyết định mở rộng.
+
+Thử phí nhàn rỗi và thử giá theo giờ ở các trạm hoặc giai đoạn riêng. Trong thử phí, giữ mốc ân hạn và mức cơ sở của trạm, chỉ thay bậc áp cho phần vượt 3 giờ. Trong thử giá theo giờ, giữ phí nhàn rỗi để theo dõi riêng phản ứng với chênh lệch giá sạc. Nhật ký cần ghi thời điểm bắt đầu chính sách, kịch bản giá, cách tính phí các phiên qua ranh giới giờ và mọi thay đổi thiết bị.
+
+\subsection{Chỉ số theo dõi và quy tắc xem xét triển khai rộng}
+
+\subsubsection{Phí giữ cổng}
+Với $N$ phiên có thời điểm hoàn tất sạc và ngắt kết nối đo được, đặt $D_i$ là số giờ giữ cổng sau khi hoàn tất sạc. Chỉ số chính là
+\begin{equation}
+M_{\text{giữ}}=\frac{100}{N}\sum_{i=1}^{N}\max(0,D_i-3).
+\label{eq:pilot_idle}
+\end{equation}
+Chỉ số trong \eqref{eq:pilot_idle} có đơn vị giờ vượt ngưỡng trên 100 phiên và liên hệ trực tiếp với phần thời gian bị tính bậc phí cao hơn. Tỷ lệ phiên vượt ngưỡng và số giờ vượt ngưỡng trung bình trên mỗi phiên vượt ngưỡng giúp phân biệt giảm số lượt giữ lâu với giảm thời lượng của từng lượt. Cần đối chiếu số phiên thực sự phục vụ và khiếu nại để xem mức giảm có đi kèm suy giảm khả năng tiếp cận trạm hay không. Nếu việc đo thời điểm hoàn tất sạc thay đổi giữa kỳ nền và kỳ thử, chỉ số cần được tính lại trên cùng quy tắc ghi nhận.
+
+\subsubsection{Giá sạc theo giờ}
+Tỷ trọng lượt bắt đầu trong khung 10:00--15:00 ngày làm việc là một chỉ số dịch chuyển theo giờ. Để đánh giá khả năng phục vụ, cần theo dõi thêm tỷ lệ cổng bận trên số cổng hoạt động và tổng số phút cổng bận thực sự giao với khung. Giảm số lượt bắt đầu giờ cao điểm chưa bảo đảm số cổng bận giảm nếu nhiều phiên bắt đầu sớm hơn rồi kéo dài qua khung. Một phép kiểm tra nữa là so sánh lượt chờ và tình trạng cổng ngay trước hoặc sau ranh giới giờ, nơi nhu cầu có thể tập trung mới. Kết quả về thay đổi phụ tải điện cần số đo điện năng hoặc công suất tương ứng.
+
+\subsubsection{Bảo trì và bổ sung cổng}
+Trạm có thứ hạng cao và lưu lượng lớn cần được kiểm tra khả năng duy trì dịch vụ, còn trạm có tỷ lệ nhàn rỗi cao cần xem xét thời điểm hoàn tất sạc và thời gian xe tiếp tục giữ cổng. Nhật ký phải phân biệt thiết bị hỏng hoặc bị khóa với cổng hoạt động nhưng đang bận. Khi thiếu cổng hoạt động do lỗi thiết bị, khôi phục công suất hiện có là phương án cần được đánh giá trước. Khi các cổng hoạt động đã đầy trong những khung lặp lại và có khách chờ hoặc rời đi, cần định lượng quy mô thiếu hụt trước khi so sánh đầu tư bổ sung cổng, cải thiện điều phối hoặc thay đổi biểu phí.
+
+Lịch bảo trì cần duy trì một số cổng còn hoạt động theo mức phục vụ của trạm. Hồ sơ sử dụng theo giờ cung cấp căn cứ để chọn khung dự kiến. Kiểm tra trực tiếp ngay trước khi ngắt thiết bị giúp xử lý các phiên kéo dài ngoài dự kiến. Dự báo NV5 hỗ trợ giám sát khung sắp tới. Khi khung có nguy cơ chiếm dụng cao, cần xem trạng thái cổng thực tế vì sai số trung bình cho thấy mô hình có xu hướng dự báo thấp.
+
+\section{Kết luận}
+Nghiên cứu xác định được nhóm phiên đóng góp lớn vào giờ nhàn rỗi, ghi nhận khác biệt hành vi quanh mốc giá và chỉ ra sự nhạy cảm của xếp hạng đối với trọng số. Kiểm chứng theo thời gian cho thấy lợi thế của mô hình dự báo phụ thuộc vào giai đoạn, cụm và thước đo. Kết quả thực nghiệm phản ánh một mạng lưới trong giai đoạn lịch sử, với giả định có quan sát kịp thời sau mỗi khung 15 phút. Hướng tiếp theo là thí điểm có đối chứng, thu thập trạng thái cổng và lượt chờ, rồi mở rộng đánh giá theo nhiều mốc thời gian cho các chân trời 15, 30 và 60 phút, kể cả khi quan sát bị trễ hoặc thiếu.
+
+
+\subsection{Giới hạn dữ liệu, phương pháp và khả năng chuyển giao}
+Các con số phản ánh mạng lưới tại Palo Alto trong giai đoạn thu thập. Cơ cấu người dùng, cấp sạc, chính sách giá và mạng lưới có thể thay đổi ở giai đoạn khác. Khi chuyển sang địa điểm mới, cần đo lại phân phối thời gian nhàn rỗi, hồ sơ theo giờ và trạng thái khả dụng của thiết bị. Ngưỡng thí điểm và khu vực khảo sát được xác định sau khi đối chiếu với dữ liệu địa phương gần thời điểm triển khai.
+
+Với phân cụm, độ ổn định giữa hai nửa mẫu cho biết hồ sơ có thể tái lập trong cách lấy mẫu đã xét. Việc thay định nghĩa mẫu, đặc trưng, bộ chuẩn hóa hoặc cơ cấu thời gian có thể làm tâm cụm thay đổi. Khi dùng nhãn cụm để theo dõi theo năm, cần ghi rõ mô hình cố định hay được huấn luyện lại và giữ cách diễn giải nhất quán về nhóm giữ cổng dài.
+
+Với so sánh chính sách, ngày 01/08/2017 phân chia các phiên theo lịch địa phương. Cơ cấu nhóm người dùng thay đổi, và các yếu tố cùng thời điểm gồm thời vụ, mở rộng mạng lưới và điều kiện vận hành. Kiểm định theo phiên và bootstrap theo người dùng cung cấp hai lớp thông tin về khác biệt quan sát. Một thí điểm hoặc nghiên cứu nhân quả cần giả thuyết nhận dạng riêng.
+
+Với đối chuẩn, phạm vi 33 trạm được chọn theo ngưỡng tối thiểu 500 phiên. Thứ hạng phụ thuộc vào cách chuẩn hóa, trọng số và phạm vi trạm. Khi một trạm có điểm cao do quy mô, cần đọc cả tỷ lệ nhàn rỗi và thời gian sạc hữu ích bình quân. Phân tích mở rộng về hiệu quả đầu tư đòi hỏi chi phí thiết bị, vận hành, cấp điện và dữ liệu lượt khách chưa được phục vụ.
+
+Với dự báo, số không của chuỗi biểu thị dữ liệu thiếu phiên trong khung quan sát, nên khi vận hành thật cần nhật ký về giờ mở cửa và thiết bị. Mô hình dự báo một bước dựa trên khả năng cập nhật quan sát sau mỗi 15 phút. Mất kết nối hoặc độ trễ thu thập có thể làm đầu vào thực tế khác giả định. Về độ tin cậy, hai kỳ lịch sử và năm 2020 cho thấy sai số thay đổi theo giai đoạn, và khoảng bootstrap mới chỉ định lượng chênh lệch trong kỳ kiểm thử chính. Đánh giá tiếp theo có thể dùng nhiều thời điểm phát dự báo, báo sai số theo nhóm giờ và thử độ nhạy khi nguồn quan sát đến trễ.
+
+\appendices
+\section{Bảng đối soát chi tiết theo trạm}
+Các bảng dưới đây cho phép kiểm tra từ số tóm tắt về thứ hạng về từng trạm. Bảng TOPSIS lấy điểm đã căn chỉnh theo định danh trạm từ báo cáo của nhóm. Điểm được làm tròn đến bốn chữ số thập phân sau khi xếp hạng.
+
+\begin{table*}[!t]
+\caption{Điểm và thứ hạng TOPSIS theo trạm, phần 1}
+\label{tab:all_stations_0}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+\toprule
+\textbf{Trạm} & \textbf{Số phiên} & \textbf{Entropy (hạng)} & \textbf{Đều (hạng)} & \textbf{Lệch} \\
+\midrule
+HAMILTON \#2 & 23.682 & 0,7233 (1) & 0,6723 (2) & 1 \\
+WEBSTER \#1 & 14.408 & 0,6476 (2) & 0,6749 (1) & 1 \\
+WEBSTER \#2 & 12.654 & 0,6046 (3) & 0,6478 (3) & 0 \\
+HAMILTON \#1 & 14.836 & 0,5121 (4) & 0,5551 (9) & 5 \\
+HIGH \#4 & 13.844 & 0,5070 (5) & 0,5547 (10) & 5 \\
+WEBSTER \#3 & 10.467 & 0,4925 (6) & 0,5845 (6) & 0 \\
+BRYANT \#2 & 14.296 & 0,4836 (7) & 0,5332 (16) & 9 \\
+HIGH \#1 & 10.746 & 0,4785 (8) & 0,5598 (8) & 0 \\
+TED THOMPSON \#1 & 9.804 & 0,4729 (9) & 0,6103 (4) & 5 \\
+BRYANT \#1 & 13.406 & 0,4716 (10) & 0,5437 (13) & 3 \\
+TED THOMPSON \#2 & 2.217 & 0,3954 (11) & 0,6006 (5) & 6 \\
+MPL \#6 & 8.979 & 0,3904 (12) & 0,5204 (21) & 9 \\
+HIGH \#3 & 8.311 & 0,3832 (13) & 0,5278 (19) & 6 \\
+CAMBRIDGE \#1 & 11.154 & 0,3776 (14) & 0,4903 (25) & 11 \\
+BRYANT \#4 & 3.594 & 0,3665 (15) & 0,5743 (7) & 8 \\
+RINCONADA LIB 1 & 6.207 & 0,3657 (16) & 0,5312 (18) & 2 \\
+RINCONADA LIB 3 & 6.492 & 0,3550 (17) & 0,5230 (20) & 3 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{Điểm và thứ hạng TOPSIS theo trạm, phần 2}
+\label{tab:all_stations_1}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrr@{}}
+\toprule
+\textbf{Trạm} & \textbf{Số phiên} & \textbf{Entropy (hạng)} & \textbf{Đều (hạng)} & \textbf{Lệch} \\
+\midrule
+RINCONADA LIB 2 & 5.544 & 0,3505 (18) & 0,5313 (17) & 1 \\
+HIGH \#2 & 6.921 & 0,3496 (19) & 0,5123 (22) & 3 \\
+MPL \#4 & 7.758 & 0,3491 (20) & 0,5112 (23) & 3 \\
+MPL \#5 & 7.526 & 0,3469 (21) & 0,5080 (24) & 3 \\
+BRYANT \#6 & 5.848 & 0,3340 (22) & 0,5402 (14) & 8 \\
+BRYANT \#5 & 5.315 & 0,3245 (23) & 0,5342 (15) & 8 \\
+TED THOMPSON \#3 & 2.451 & 0,3221 (24) & 0,5533 (11) & 13 \\
+CAMBRIDGE \#2 & 9.245 & 0,3167 (25) & 0,4694 (27) & 2 \\
+TED THOMPSON \#4 & 2.221 & 0,3129 (26) & 0,5454 (12) & 14 \\
+BRYANT \#3 & 4.466 & 0,2681 (27) & 0,4731 (26) & 1 \\
+MPL \#2 & 1.531 & 0,2100 (28) & 0,2695 (33) & 5 \\
+CAMBRIDGE \#5 & 4.551 & 0,1965 (29) & 0,4194 (28) & 1 \\
+CAMBRIDGE \#3 & 4.472 & 0,1892 (30) & 0,4192 (29) & 1 \\
+MPL \#1 & 1.044 & 0,1880 (31) & 0,2803 (32) & 1 \\
+MPL \#3 & 1.420 & 0,1793 (32) & 0,2820 (31) & 1 \\
+CAMBRIDGE \#4 & 3.426 & 0,1701 (33) & 0,4043 (30) & 3 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+Các hạng được so sánh theo cùng tên trạm. Chênh lệch hạng là trị tuyệt đối của hiệu hai hạng. Các chỉ tiêu chiếm dụng theo trạm là thông tin bổ sung khi chọn nguyên nhân cần khảo sát. Ba vị trí đầu cùng xuất hiện ở hai phương án, nhưng kết quả này chưa cho biết trạm thiếu sức chứa trong bao nhiêu khung.
+
+\begin{table}[!t]
+\caption{Kiểm tra độ nhạy theo trọng số entropy}
+\label{tab:sensitivity_entropy}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrrr@{}}
+\toprule
+\textbf{Kịch bản} & \textbf{Spearman} & \textbf{Lệch TB} & \textbf{Lệch max} & \textbf{Top 5 chung} \\
+\midrule
+S0 & 1,0000 & 0,00 & 0 & 5/5 \\
+S1 & 0,9559 & 2,00 & 8 & 4/5 \\
+S2 & 0,9261 & 2,85 & 11 & 3/5 \\
+S3 & 0,9970 & 0,30 & 2 & 5/5 \\
+S4 & 0,9920 & 0,85 & 3 & 5/5 \\
+S5 & 0,9987 & 0,18 & 2 & 5/5 \\
+S6 & 0,8870 & 3,09 & 16 & 5/5 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[!t]
+\caption{Kiểm tra độ nhạy theo trọng số đều}
+\label{tab:sensitivity_equal}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrrr@{}}
+\toprule
+\textbf{Kịch bản} & \textbf{Spearman} & \textbf{Lệch TB} & \textbf{Lệch max} & \textbf{Top 5 chung} \\
+\midrule
+S0 & 1,0000 & 0,00 & 0 & 5/5 \\
+S1 & 0,9178 & 2,85 & 9 & 4/5 \\
+S2 & 0,8927 & 3,15 & 12 & 4/5 \\
+S3 & 0,9890 & 0,73 & 5 & 5/5 \\
+S4 & 0,9208 & 2,55 & 10 & 4/5 \\
+S5 & 0,9923 & 0,73 & 4 & 5/5 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\section{Bảng sai số chi tiết theo mục tiêu và giai đoạn}
+Các bảng chi tiết lấy kết quả từ cùng lượt kiểm chứng NV5. Số khung và định nghĩa hai mục tiêu đã được cố định trước so sánh. Các hàng của tập xác thực phục vụ chọn cấu hình, còn bảng dưới đây trình bày các kỳ đánh giá ngoài mẫu.
+
+\begin{table*}[!t]
+\caption{MAE số cổng theo cụm, nửa cuối 2019}
+\label{tab:test_occupancy_ports_MAE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 1,4093 & 2,0725 & 0,6995 & 1,2914 & 0,7792 & 0,7159 & 0,0000 & 1,4262 & 1,2473 \\
+t–1 & 0,3090 & 0,3637 & 0,1816 & 0,3182 & 0,1579 & 0,1178 & 0,0000 & 0,2337 & 0,2509 \\
+t–96 & 1,3788 & 1,5769 & 0,7218 & 1,2878 & 0,7882 & 0,8709 & 0,0000 & 1,1385 & 1,1760 \\
+t–672 & 1,2793 & 1,4239 & 0,6741 & 1,1620 & 0,7398 & 0,8402 & 0,0000 & 1,0918 & 1,0687 \\
+Ridge & 0,3793 & 0,4348 & 0,2457 & 0,3823 & 0,2099 & 0,1831 & 0,0000 & 0,2920 & 0,3126 \\
+Rừng ngẫu nhiên & 0,3742 & 0,4656 & 0,2571 & 0,3785 & 0,2253 & 0,1707 & 0,0000 & 0,3112 & 0,3258 \\
+XGBoost & 0,3700 & 0,4389 & 0,2503 & 0,3712 & 0,2165 & 0,1738 & 0,0000 & 0,2934 & 0,3203 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{RMSE số cổng theo cụm, nửa cuối 2019}
+\label{tab:test_occupancy_ports_RMSE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 1,9950 & 2,9557 & 0,8335 & 1,9274 & 0,9095 & 0,8973 & 0,0000 & 2,1442 & 1,6681 \\
+t–1 & 0,6565 & 0,7322 & 0,4574 & 0,6584 & 0,4229 & 0,3586 & 0,0000 & 0,5447 & 0,5638 \\
+t–96 & 2,1271 & 2,2593 & 1,1037 & 1,9884 & 1,1323 & 1,1765 & 0,0000 & 1,7065 & 1,7380 \\
+t–672 & 1,9738 & 2,0320 & 1,0487 & 1,8223 & 1,0877 & 1,1450 & 0,0000 & 1,6322 & 1,5798 \\
+Ridge & 0,6323 & 0,7068 & 0,4369 & 0,6340 & 0,4089 & 0,3511 & 0,0000 & 0,5279 & 0,5432 \\
+Rừng ngẫu nhiên & 0,6256 & 0,7173 & 0,4295 & 0,6251 & 0,4060 & 0,3481 & 0,0000 & 0,5369 & 0,5373 \\
+XGBoost & 0,6222 & 0,7014 & 0,4285 & 0,6218 & 0,4045 & 0,3483 & 0,0000 & 0,5260 & 0,5342 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{MAE số phiên đến theo cụm, nửa cuối 2019}
+\label{tab:test_session_arrivals_MAE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 0,2750 & 0,2987 & 0,2154 & 0,2670 & 0,1682 & 0,1149 & 0,0000 & 0,1687 & 0,2343 \\
+t–1 & 0,3111 & 0,3727 & 0,2394 & 0,3267 & 0,1860 & 0,1260 & 0,0000 & 0,2346 & 0,2781 \\
+t–96 & 0,3174 & 0,3807 & 0,2310 & 0,3225 & 0,1796 & 0,1204 & 0,0000 & 0,2272 & 0,2687 \\
+t–672 & 0,3114 & 0,3648 & 0,2305 & 0,3097 & 0,1760 & 0,1219 & 0,0000 & 0,2302 & 0,2686 \\
+Ridge & 0,3257 & 0,3786 & 0,2413 & 0,3317 & 0,1869 & 0,1259 & 0,0000 & 0,2412 & 0,2773 \\
+Rừng ngẫu nhiên & 0,2911 & 0,3427 & 0,2257 & 0,3036 & 0,1827 & 0,1197 & 0,0000 & 0,2219 & 0,2626 \\
+XGBoost & 0,2947 & 0,3072 & 0,2250 & 0,3042 & 0,1807 & 0,1206 & 0,0000 & 0,2158 & 0,2681 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{RMSE số phiên đến theo cụm, nửa cuối 2019}
+\label{tab:test_session_arrivals_RMSE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 0,4917 & 0,6166 & 0,3709 & 0,5017 & 0,3291 & 0,2633 & 0,0000 & 0,4210 & 0,4370 \\
+t–1 & 0,6682 & 0,7483 & 0,5312 & 0,6751 & 0,4663 & 0,3739 & 0,0000 & 0,5497 & 0,6034 \\
+t–96 & 0,6742 & 0,7658 & 0,5195 & 0,6754 & 0,4542 & 0,3660 & 0,0000 & 0,5355 & 0,5915 \\
+t–672 & 0,6658 & 0,7358 & 0,5199 & 0,6584 & 0,4511 & 0,3678 & 0,0000 & 0,5404 & 0,5901 \\
+Ridge & 0,4874 & 0,5559 & 0,3722 & 0,4891 & 0,3276 & 0,2633 & 0,0000 & 0,3969 & 0,4301 \\
+Rừng ngẫu nhiên & 0,4751 & 0,5415 & 0,3651 & 0,4787 & 0,3259 & 0,2622 & 0,0000 & 0,3909 & 0,4191 \\
+XGBoost & 0,4736 & 0,5501 & 0,3647 & 0,4759 & 0,3251 & 0,2620 & 0,0000 & 0,3890 & 0,4206 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+
+\begin{table*}[!t]
+\caption{MAE số cổng theo cụm, năm 2020}
+\label{tab:stress_2020_occupancy_ports_MAE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 1,3286 & 0,9901 & 0,9757 & 1,0174 & 0,8184 & 0,6334 & 0,0123 & 0,6872 & 1,0461 \\
+t–1 & 0,1107 & 0,2002 & 0,0867 & 0,1376 & 0,0935 & 0,0355 & 0,0020 & 0,1084 & 0,1215 \\
+t–96 & 0,6485 & 0,9284 & 0,4794 & 0,6109 & 0,5731 & 0,3207 & 0,0188 & 0,6697 & 0,6777 \\
+t–672 & 0,6238 & 0,8217 & 0,4953 & 0,5872 & 0,5590 & 0,3364 & 0,0164 & 0,6206 & 0,6585 \\
+Ridge & 0,1712 & 0,2524 & 0,1477 & 0,1846 & 0,1391 & 0,0737 & 0,0123 & 0,1518 & 0,1713 \\
+Rừng ngẫu nhiên & 0,1699 & 0,2917 & 0,1993 & 0,2095 & 0,1753 & 0,0811 & 0,0123 & 0,1895 & 0,2305 \\
+XGBoost & 0,1588 & 0,2530 & 0,1618 & 0,1891 & 0,1429 & 0,0628 & 0,0123 & 0,1569 & 0,1785 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{RMSE số cổng theo cụm, năm 2020}
+\label{tab:stress_2020_occupancy_ports_RMSE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 1,6692 & 1,6956 & 1,1581 & 1,4078 & 0,9320 & 0,7274 & 0,1255 & 1,2112 & 1,2847 \\
+t–1 & 0,3737 & 0,5162 & 0,3109 & 0,4103 & 0,3205 & 0,1935 & 0,0450 & 0,3567 & 0,3763 \\
+t–96 & 1,2439 & 1,5735 & 0,8681 & 1,1539 & 0,9349 & 0,6859 & 0,1557 & 1,1528 & 1,1601 \\
+t–672 & 1,1868 & 1,3898 & 0,8676 & 1,0999 & 0,9191 & 0,6990 & 0,1445 & 1,1007 & 1,1270 \\
+Ridge & 0,3650 & 0,4996 & 0,3036 & 0,3956 & 0,3115 & 0,1921 & 0,1255 & 0,3474 & 0,3654 \\
+Rừng ngẫu nhiên & 0,3621 & 0,5155 & 0,3300 & 0,4015 & 0,3253 & 0,1978 & 0,1255 & 0,3596 & 0,3948 \\
+XGBoost & 0,3584 & 0,4981 & 0,3076 & 0,3941 & 0,3111 & 0,1897 & 0,1255 & 0,3463 & 0,3686 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{MAE số phiên đến theo cụm, năm 2020}
+\label{tab:stress_2020_session_arrivals_MAE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 0,1835 & 0,1814 & 0,1595 & 0,1716 & 0,1289 & 0,0749 & 0,0011 & 0,0927 & 0,1605 \\
+t–1 & 0,1103 & 0,2067 & 0,1038 & 0,1405 & 0,1010 & 0,0369 & 0,0021 & 0,1093 & 0,1284 \\
+t–96 & 0,1091 & 0,2118 & 0,0976 & 0,1356 & 0,0970 & 0,0364 & 0,0020 & 0,1078 & 0,1253 \\
+t–672 & 0,1105 & 0,1946 & 0,0988 & 0,1360 & 0,0970 & 0,0367 & 0,0017 & 0,1058 & 0,1229 \\
+Ridge & 0,1555 & 0,2141 & 0,1520 & 0,1585 & 0,1126 & 0,0524 & 0,0011 & 0,1164 & 0,1374 \\
+Rừng ngẫu nhiên & 0,1548 & 0,2387 & 0,1715 & 0,1737 & 0,1422 & 0,0624 & 0,0011 & 0,1585 & 0,2101 \\
+XGBoost & 0,1352 & 0,2036 & 0,1547 & 0,1546 & 0,1160 & 0,0781 & 0,0011 & 0,1160 & 0,1666 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\begin{table*}[!t]
+\caption{RMSE số phiên đến theo cụm, năm 2020}
+\label{tab:stress_2020_session_arrivals_RMSE}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrrrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Bryant} & \textbf{Cambridge} & \textbf{Hamilton} & \textbf{High} & \textbf{Mpl} & \textbf{Rinconada Lib} & \textbf{Sherman} & \textbf{Ted Thompson} & \textbf{Webster} \\
+\midrule
+TB lịch sử & 0,3011 & 0,4212 & 0,2605 & 0,3154 & 0,2439 & 0,1514 & 0,0342 & 0,2682 & 0,2880 \\
+t–1 & 0,3730 & 0,5365 & 0,3437 & 0,4170 & 0,3360 & 0,1966 & 0,0471 & 0,3616 & 0,3906 \\
+t–96 & 0,3690 & 0,5528 & 0,3314 & 0,4089 & 0,3285 & 0,1946 & 0,0459 & 0,3568 & 0,3851 \\
+t–672 & 0,3740 & 0,5143 & 0,3334 & 0,4087 & 0,3283 & 0,1958 & 0,0420 & 0,3534 & 0,3823 \\
+Ridge & 0,2793 & 0,3932 & 0,2525 & 0,3010 & 0,2378 & 0,1418 & 0,0342 & 0,2591 & 0,2787 \\
+Rừng ngẫu nhiên & 0,2831 & 0,3968 & 0,2629 & 0,3094 & 0,2521 & 0,1495 & 0,0342 & 0,2749 & 0,3127 \\
+XGBoost & 0,2719 & 0,3952 & 0,2564 & 0,2994 & 0,2398 & 0,1482 & 0,0342 & 0,2571 & 0,2917 \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+
+
+\clearpage
+\section{Đối soát quá trình đánh giá}
+Các mẫu trong Bảng~\ref{tab:samples} được theo dõi theo định danh phiên hoặc cụm thời gian phù hợp với từng nhiệm vụ. Với NV2, cấu hình và hồ sơ cụm dùng cùng mẫu 258.720 phiên. Với NV4, so sánh giữa hai bộ trọng số giữ thống nhất 33 định danh trạm. Với NV5, mỗi mô hình được chấm trên cùng các khung của từng cụm, và các ranh giới UTC giữ nguyên giữa hai biến mục tiêu. Nếu tái lập với bản dữ liệu khác, quy mô mẫu và số khung phải được đối chiếu lại trước khi so sánh số liệu.
+
+\begin{table*}[!t]
+\caption{Các cửa sổ dùng trong kiểm chứng NV5}
+\label{tab:all_windows}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrr@{}}
+\toprule
+\textbf{Kiểm thử} & \textbf{Huấn luyện đến} & \textbf{Chọn cấu hình} & \textbf{Mô hình đối chiếu} \\
+\midrule
+Nửa cuối 2018 & Hết 2017 & Nửa đầu 2018 & XGBoost, t–1 \\
+Nửa đầu 2019 & Hết nửa đầu 2018 & Nửa cuối 2018 & XGBoost, t–1 \\
+Nửa cuối 2019 & Hết 2018 & Nửa đầu 2019 & Bảy mô hình \\
+Năm 2020 & Hết 2018 & Nửa đầu 2019 & Bảy mô hình \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+
+Trong kiểm thử chính và giai đoạn 2020, nhãn của tập đánh giá được dùng để tính sai số sau khi chọn cấu hình. Phép đánh giá một bước cho phép quan sát thật của khung đã qua trở thành đầu vào khung tiếp theo. Với quyết định cần lập lịch dài hơn, phải cố định thời điểm phát dự báo và đánh giá theo các mốc cần sử dụng. Số phiên đến trong một khung cũng cần được kiểm tra theo nhóm 0, 1 và từ 2 phiên, vì đối chứng luôn 0 có thể đạt MAE thấp trên tổng thể trong khi bỏ sót toàn bộ các khung có lượt đến.
+
+
+\subsection{Trình tự tái lập các bảng}
+
+\paragraph{Kiểm tra phạm vi nguồn.}
+Ghi nhận phiên bản dữ liệu gốc, ngày trích xuất và phiên bản mã trước khi tạo artefact. So sánh số dòng trước và sau loại trùng, kiểm tra khóa cổng và tên trạm trong các bản ghi hợp lệ. Với những cờ có khả năng chồng lấn, báo đồng thời số dòng được gắn cờ và số dòng bị loại do điều kiện của từng nhiệm vụ. Một chênh lệch bất thường ở bước này cần được giải thích trước khi cập nhật các bảng xếp hạng hoặc dự báo.
+
+\paragraph{Đối chiếu mẫu và nhãn phân cụm.}
+Số phiên của các nhóm phải cộng về đúng kích thước mẫu phân cụm. Khi một lần huấn luyện đổi thứ tự nhãn, căn chỉnh nhãn theo hồ sơ của các cụm trước khi đối chiếu tên nhóm và báo tỷ trọng. Báo số phiên, số giờ nhàn rỗi và trung bình thời lượng riêng để người đọc phân biệt quy mô nhóm với mức độ giữ cổng. Việc dùng cùng mẫu chấm các cấu hình $k$ giúp tách biến động do chọn khác mẫu khỏi thay đổi do số cụm.
+
+\paragraph{Đối chiếu phân kỳ và bảng thứ hạng.}
+Khi tái lập NV3, gán giai đoạn theo thời điểm bắt đầu phiên và kiểm tra các trường hợp sát nửa đêm địa phương. Báo mẫu số cho từng chỉ tiêu, đồng thời ghi rõ cơ cấu theo tỷ trọng phiên hay theo tỷ trọng người dùng duy nhất. Khi tái lập NV4, ghép tên trạm trước khi đối chiếu điểm, hạng và tiêu chí thành phần. Kiểm tra số phiên theo từng trạm chứ không chỉ kiểm tra tổng điểm hoặc thứ hạng.
+
+\paragraph{Kiểm tra giao thức dự báo.}
+Kiểm tra tham số chỉ từ dữ liệu huấn luyện và xác thực. Trước khi tính MAE hoặc RMSE, ghép dữ liệu theo cụm, thời điểm, mục tiêu và giai đoạn để xác nhận các mô hình được chấm trên cùng những khung. Năm 2020 là kỳ riêng và không tham gia chọn cấu hình. Tách kết quả của chuỗi hằng khi phân tích tỷ lệ khung ổn định và hệ số xác định. Báo lại cả sai số gộp đều theo cụm và các trường hợp ngoại lệ ở cấp cụm nếu tài liệu dùng để chọn nơi triển khai.
+
+\paragraph{Kiểm tra tính hữu ích vận hành.}
+So sánh mô hình với đối chứng phù hợp với quyết định. Đối với theo dõi chiếm dụng, dùng giá trị khung vừa quan sát làm điểm tham chiếu. Đối với số phiên đến, đối chiếu với trung bình lịch sử và luôn 0, rồi xem sai số ở các khung thực sự có lượt đến. Nếu đơn vị vận hành chỉ quan tâm cảnh báo vượt một ngưỡng, cần tập kiểm thử tương ứng với bài toán cảnh báo và báo tỷ lệ báo nhầm, bỏ sót và độ trễ so với thời điểm có thể hành động.
+\begin{table*}[!t]
+\caption{Đối soát đầu ra giữa các nhiệm vụ}
+\label{tab:reproducibility}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrr@{}}
+\toprule
+\textbf{Nhiệm vụ} & \textbf{Đơn vị khóa} & \textbf{Thông tin cần đối chiếu} \\
+\midrule
+NV1 & Phiên và cổng & Bản ghi gốc, trùng hoàn toàn, cờ chất lượng, mẫu hợp lệ \\
+NV2 & Phiên và nhãn cụm & Quy mô cụm, tập chấm chỉ số, cấu hình và phép căn chỉnh nhãn \\
+NV3 & Phiên, người dùng, kỳ & Mẫu số theo chỉ tiêu, cơ cấu người dùng, dấu hệ số Cliff và khoảng tin cậy \\
+NV4 & Định danh trạm & Ma trận tiêu chí, trọng số, điểm, hạng và kịch bản độ nhạy \\
+NV5 & Cụm, khung, mục tiêu & Mốc chia, cấu hình đã chọn, dự báo và sai số theo giai đoạn \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+
+\section{Chi tiết kiểm chứng dự báo qua các kỳ}
+Bảng~\ref{tab:fold_clusters} phân rã thay đổi RMSE ở cấp cụm. Tỷ lệ thay đổi được tính bằng
+$100(E_{\mathrm{XGB}}/E_{t-1}-1)$, với $E$ là RMSE ở cùng cửa sổ và cùng tập thời điểm. Dấu âm biểu thị sai số giảm so với dự báo bằng khung trước. Tỷ lệ ở cấp cụm phản ánh mức cải thiện tương đối tại chính địa điểm đó. Tỷ lệ báo cáo cho toàn kỳ được tính từ hai RMSE trung bình đều, vì vậy khác với trung bình các tỷ lệ của từng cụm.
+
+Các cột nửa cuối 2018 tách được một trường hợp quan trọng mà số tổng hợp che khuất. XGBoost giảm RMSE tại phần lớn cụm nhưng có sai số tăng mạnh ở hai cụm. Đây là lý do nên xem cả phân bố thay đổi và trường hợp xấu trước khi chọn một mô hình chung. Ngược lại, trong nửa đầu 2019, lợi thế RMSE xuất hiện ở cả tám cụm. Một quy trình thử nghiệm vận hành có thể dùng baseline khung trước làm mức tham chiếu cho từng cụm, rồi đánh giá mô hình nâng cao trên dữ liệu mới của chính địa điểm đó.
+
+\begin{table*}[!t]
+\caption{RMSE theo cụm trong hai cửa sổ lịch sử}
+\label{tab:fold_clusters}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}Xrrrrrr@{}}
+\toprule
+\textbf{Cụm} & \textbf{t–1, 2018 H2} & \textbf{XGB, 2018 H2} & \textbf{Δ (\%)} & \textbf{t–1, 2019 H1} & \textbf{XGB, 2019 H1} & \textbf{Δ (\%)} \\
+\midrule
+BRYANT & 0,6714 & 0,6345 & -5,49 & 0,6685 & 0,6281 & -6,04 \\
+CAMBRIDGE & 0,6400 & 1,1171 & 74,53 & 0,6998 & 0,6705 & -4,18 \\
+HAMILTON & 0,4513 & 0,4235 & -6,17 & 0,4662 & 0,4339 & -6,92 \\
+HIGH & 0,6058 & 0,5764 & -4,84 & 0,6481 & 0,6100 & -5,87 \\
+MPL & 0,4297 & 0,4103 & -4,53 & 0,4145 & 0,3970 & -4,23 \\
+RINCONADA LIB & 0,3096 & 0,3032 & -2,07 & 0,3528 & 0,3416 & -3,17 \\
+TED THOMPSON & 0,4899 & 1,4269 & 191,24 & 0,5320 & 0,5131 & -3,55 \\
+WEBSTER & 0,5913 & 0,5607 & -5,17 & 0,5843 & 0,5490 & -6,05 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright\scriptsize H1 và H2 tương ứng nửa đầu và nửa cuối năm. SHERMAN có chuỗi hằng trong hai kỳ nên được tách khỏi bảng.
+\end{table*}
+
+
+\subsection{Khối lượng huấn luyện và diễn giải thời gian chạy}
+
+Lượt đánh giá chính thực hiện 126 lần khớp cấu hình trên hai mục tiêu và chín cụm vị trí. Mỗi cặp mục tiêu và cụm thử bốn cấu hình Ridge, một cấu hình rừng ngẫu nhiên và hai cấu hình XGBoost. Các đối chứng từ quan sát trước, trung bình lịch sử và luôn 0 dùng quy tắc xác định trực tiếp. Sau khi chọn bằng RMSE tập xác thực, mô hình đã khớp được sử dụng cho kiểm thử và kỳ năm 2020. Ở bước dự báo, các khung được xử lý theo lô trên những đặc trưng phù hợp với giao thức một bước.
+
+Thời gian đo được trong lượt chạy minh họa bao gồm khớp cấu hình và dự báo trên tập xác thực. Kết quả phụ thuộc CPU, mức song song, phiên bản thư viện và kích thước dữ liệu. Thời gian này không bao gồm đọc dữ liệu, xây dựng chuỗi, tạo đặc trưng, ghi tệp dự báo và dựng hình. Hai cửa sổ bổ sung chỉ khớp hai cấu hình XGBoost trên mỗi cụm cho mục tiêu số cổng, tức 36 lần. Việc rút phạm vi mô hình ở bước bổ sung phục vụ câu hỏi về tính ổn định của đối chiếu XGBoost với $t-1$.
+
+\begin{table}[!t]
+\caption{Thời gian khớp cấu hình và chấm tập xác thực}
+\label{tab:run_timings}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}Xrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{Số lần} & \textbf{Trung vị (s)} & \textbf{Tổng (s)} \\
+\midrule
+Ridge & 72 & 0,08 & 5,25 \\
+Rừng ngẫu nhiên & 18 & 21,50 & 399,13 \\
+XGBoost & 36 & 2,08 & 82,41 \\
+\bottomrule
+\end{tabularx}
+\par\smallskip\raggedright\scriptsize Số đo của một lượt thực nghiệm. Tổng thời gian của hai cửa sổ phụ được báo riêng.
+\end{table}
 
 \begin{thebibliography}{00}
-
 \bibitem{bayram2023}
-I. S. Bayram, A. Saad, R. Sims,
-A. Babu, C. Edmunds, and S. Galloway,
-``Statistical Characterization of
-Public AC EV Chargers in the U.K.,''
-\textit{IEEE Access},
-vol. 11, 2023,
-doi: 10.1109/ACCESS.2023.3293091.
-
+I. S. Bayram, A. Saad, R. Sims, A. Babu, C. Edmunds, and S. Galloway,
+“Statistical characterization of public AC EV chargers in the U.K.,”
+\textit{IEEE Access}, vol. 11, pp. 70274--70287, 2023, doi: 10.1109/ACCESS.2023.3293091.
 \bibitem{straka2019}
-M. Straka and L. Buzna,
-``Clustering algorithms applied
-to usage related segments of
-electric vehicle charging stations,''
-\textit{Transportation Research Procedia},
-vol. 40, pp. 1576--1582, 2019,
-doi: 10.1016/j.trpro.2019.07.218.
-
+M. Straka and Ľ. Buzna, “Clustering algorithms applied to usage related segments of electric vehicle charging stations,”
+\textit{Transp. Res. Procedia}, vol. 40, pp. 1576--1582, 2019, doi: 10.1016/j.trpro.2019.07.218.
 \bibitem{luowang2025}
-S. Luo and Y. Wang,
-``The impacts of rate surge on
-electric vehicle charging behaviors:
-Evidence from California,''
-\textit{Journal of Economic Behavior
-\& Organization},
-vol. 236, Art. no. 107048, 2025,
-doi: 10.1016/j.jebo.2025.107048.
-
+S. Luo and Y. Wang, “The impacts of rate surge on electric vehicle charging behaviors: Evidence from California,”
+\textit{J. Econ. Behav. Organ.}, vol. 236, Art. no. 107048, 2025, doi: 10.1016/j.jebo.2025.107048.
 \bibitem{ostermann2022}
-A. Ostermann, Y. Fabel,
-K. Ouan, and H. Koo,
-``Forecasting Charging Point Occupancy
-Using Supervised Learning Algorithms,''
-\textit{Energies},
-vol. 15, no. 9, Art. no. 3409, 2022,
-doi: 10.3390/en15093409.
-
+A. Ostermann, Y. Fabel, K. Ouan, and H. Koo, “Forecasting charging point occupancy using supervised learning algorithms,”
+\textit{Energies}, vol. 15, no. 9, Art. no. 3409, 2022, doi: 10.3390/en15093409.
+\bibitem{paloalto2021}
+City of Palo Alto, “Electric vehicle charging station usage (July 2011--Dec. 2020),”
+Open Data Portal. [Online]. Available:
+\url{https://data.paloalto.gov/dataviews/257812/electric-vehicle-charging-station-usage-july-2011-dec-2020/}
+\bibitem{rousseeuw1987}
+P. J. Rousseeuw, “Silhouettes: A graphical aid to the interpretation and validation of cluster analysis,”
+\textit{J. Comput. Appl. Math.}, vol. 20, pp. 53--65, 1987, doi: 10.1016/0377-0427(87)90125-7.
+\bibitem{davies1979}
+D. L. Davies and D. W. Bouldin, “A cluster separation measure,”
+\textit{IEEE Trans. Pattern Anal. Mach. Intell.}, vol. PAMI-1, no. 2, pp. 224--227, 1979,
+doi: 10.1109/TPAMI.1979.4766909.
+\bibitem{hwang1981}
+C.-L. Hwang and K. Yoon, \textit{Multiple Attribute Decision Making: Methods and Applications}.
+Berlin, Germany: Springer, 1981, doi: 10.1007/978-3-642-48318-9.
+\bibitem{chen2016}
+T. Chen and C. Guestrin, “XGBoost: A scalable tree boosting system,”
+in \textit{Proc. ACM SIGKDD Int. Conf. Knowl. Discovery Data Mining}, 2016,
+pp. 785--794, doi: 10.1145/2939672.2939785.
+\bibitem{sklearnr2}
+scikit-learn developers, “Coefficient of determination (\texttt{r2\_score}),”
+\textit{scikit-learn documentation}. [Online]. Available:
+\url{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html}
+\bibitem{politis1992}
+D. N. Politis and J. P. Romano, “A circular block-resampling procedure for stationary data,”
+in \textit{Exploring the Limits of Bootstrap}, R. LePage and L. Billard, Eds.
+New York, NY, USA: Wiley, 1992, pp. 263--270.
 \end{thebibliography}
-
 \end{document}

@@ -1,7 +1,12 @@
+import json
+from pathlib import Path
+
 import pandas as pd
 import pytest
+from scipy.stats import kendalltau, spearmanr
 
 from src.nv4_analysis import build_station_criteria, build_station_rankings, prepare_nv4_sessions
+from src.topsis import entropy_weights, normalize_minmax, topsis
 
 
 def source_row(station, start, end, zone_start, zone_end, duration, energy, port_type="Level 2"):
@@ -88,6 +93,44 @@ def test_station_rankings_align_independently_ordered_inputs_by_station_name():
         result,
         build_station_rankings(criteria.iloc[::-1], entropy.iloc[::-1], equal.iloc[::-1]),
     )
+
+
+def test_notebook_ranks_stations_by_name_when_score_and_session_orders_differ():
+    notebook = Path(__file__).resolve().parents[1] / "notebooks" / "04_NV4_station_benchmarking.ipynb"
+    cells = json.loads(notebook.read_text(encoding="utf-8"))["cells"]
+    code = ("".join(cell["source"]) for cell in cells if cell["cell_type"] == "code")
+    ranking_source = next(source for source in code if "top_entropy = topsis(" in source)
+    criteria = pd.DataFrame(
+        {"C1_so_phien": [900, 700, 500], "C2_tong_dien_nang": [1, 10, 2]},
+        index=["Station C", "Station B", "Station A"],
+    )
+    scope = {
+        "X": criteria,
+        "decision": criteria,
+        "criterion_columns": list(criteria.columns),
+        "directions": dict.fromkeys(criteria.columns, 1),
+        "labels": {column: column for column in criteria.columns},
+        "pd": pd,
+        "normalize_minmax": normalize_minmax,
+        "entropy_weights": entropy_weights,
+        "topsis": topsis,
+        "build_station_rankings": build_station_rankings,
+        "spearmanr": spearmanr,
+        "kendalltau": kendalltau,
+        "display": lambda _: None,
+    }
+    exec(ranking_source, scope)
+    ranking = scope["df_rank"].set_index("Station Name")
+
+    for label, results in (("Entropy", scope["top_entropy"]), ("Equal", scope["top_equal"])):
+        assert not results.index.equals(criteria.index)
+        assert results["Rank"].idxmin() == "Station B"
+        pd.testing.assert_series_equal(
+            ranking[f"Rank_{label}"], results["Rank"].reindex(ranking.index), check_names=False,
+        )
+        pd.testing.assert_series_equal(
+            ranking[f"Score_{label}"], results["TOPSIS_Score"].reindex(ranking.index), check_names=False,
+        )
 
 
 def test_station_rankings_reject_missing_or_different_station_identifiers():
