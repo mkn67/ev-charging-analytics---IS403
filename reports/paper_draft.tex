@@ -28,11 +28,17 @@ Chiếm dụng cổng sạc, dự báo chuỗi thời gian, đối chuẩn trạ
 
 \section{Giới thiệu}
 \label{sec:intro}
-Khi một trạm thường xuyên đông, người vận hành có thể cân nhắc giải phóng cổng đang bị giữ, dịch chuyển lượt đến hoặc tăng số cổng hoạt động. Ba quyết định cần những bằng chứng khác nhau. Số phiên tại một trạm chưa cho thấy bao nhiêu thời gian bị giữ ngoài thời gian sạc. Thứ hạng cao cũng chưa cho biết khi nào trạm hết khả năng phục vụ. Tại cấp phiên, Bayram và cộng sự \cite{bayram2023} dùng thời gian sạc và nhàn rỗi để mô tả cách sử dụng cổng. Straka và Buzna \cite{straka2019} nghiên cứu phân nhóm hành vi. Luo và Wang \cite{luowang2025} phân tích phản ứng quanh mốc giá tại Palo Alto, còn Ostermann và cộng sự \cite{ostermann2022} đánh giá dự báo chiếm dụng bằng học có giám sát.
+Khi một trạm thường xuyên đông, người vận hành có thể cân nhắc giải phóng cổng đang bị giữ, dịch chuyển lượt đến hoặc tăng số cổng hoạt động. Ba quyết định cần những bằng chứng khác nhau. Số phiên cho biết lưu lượng quan sát được, còn tổng giờ nhàn rỗi cho biết hạ tầng bị giữ bao lâu ngoài thời gian sạc. Để đánh giá tình trạng thiếu cổng, cần biết thêm bao nhiêu cổng có thể phục vụ tại thời điểm đó.
 
-Trong phạm vi các công trình đối chiếu, các hướng trên tập trung vào những đơn vị phân tích khác nhau. Bài báo đặt câu hỏi chung trong cùng mạng lưới: \emph{Khi kết hợp bằng chứng về phiên giữ cổng, khác biệt giữa trạm và sai số dự báo theo thời gian, quyết định nào đã có căn cứ và quyết định nào cần đo thêm?} Cụ thể, nghiên cứu kiểm tra mức tập trung giờ nhàn rỗi, độ nhạy của danh sách ưu tiên theo trọng số và tính ổn định của lợi thế dự báo so với khung trước.
+Bài báo nghiên cứu tình huống tại Palo Alto để trả lời câu hỏi chung: \emph{Khi kết hợp bằng chứng cấp phiên, cấp trạm và theo thời gian, kết quả nào đủ để chọn một thí điểm vận hành và quyết định nào cần thêm phép đo?} Bốn câu hỏi cụ thể được kiểm tra bằng các thực nghiệm sau.
+\begin{enumerate}
+\item Những nhóm hành vi nào chiếm phần lớn giờ nhàn rỗi và hồ sơ cụm ổn định đến đâu (NV2)?
+\item Thời gian nhàn rỗi, thời gian sạc và điện năng khác nhau ra sao giữa hai giai đoạn quanh mốc 01/08/2017, khi cơ cấu người dùng cũng thay đổi (NV3)?
+\item Những trạm nào giữ vị trí ưu tiên khi thay bộ trọng số và tiêu chí xếp hạng (NV4)?
+\item Dự báo 15 phút cải thiện sai số ra sao so với các đối chứng, và mức cải thiện có lặp lại giữa các kỳ đánh giá không (NV5)?
+\end{enumerate}
 
-Đóng góp là một nghiên cứu tình huống thực nghiệm tích hợp ba cấp độ, trong đó mỗi phát hiện được gắn với quyết định, đối chứng và điều kiện sử dụng. Cấp phiên sàng lọc hành vi cần can thiệp. Cấp trạm giúp chọn nơi khảo sát và kiểm tra độ nhạy của thứ hạng. Cấp thời gian xác định lợi thế và giới hạn của dự báo ngắn hạn. Bài báo sử dụng các thuật toán đã công bố để kiểm định các mắt xích này trên cùng bối cảnh Palo Alto.
+Đóng góp thực nghiệm nằm ở việc nối các kết quả thành căn cứ chọn đối tượng, địa điểm và thời điểm can thiệp trong cùng một mạng lưới. Mỗi đề xuất ở Mục~\ref{sec:operations} gắn với một kết quả định lượng, chỉ số đánh giá thí điểm và các phép đo cần bổ sung.
 
 \section{Nghiên cứu liên quan}
 \subsection{Thời gian kết nối và hành vi nhàn rỗi}
@@ -49,9 +55,7 @@ Straka và Buzna \cite{straka2019} nghiên cứu việc phân nhóm các trạm 
 
 Về phương pháp, nhóm tác giả xây dựng đặc trưng ở cả cấp giao dịch và cấp trạm. Các đặc trưng bao gồm số lượng giao dịch, tỷ lệ thời gian sạc trên tổng thời gian kết nối, cùng thời điểm bắt đầu và kết thúc giao dịch. Việc đối chiếu nhiều thuật toán cho phép xem xét sự khác biệt giữa các cách tiếp cận phân cụm, trong khi kết quả được diễn giải dựa trên đặc điểm của từng nhóm. Nghiên cứu cho thấy các cụm có thể phản ánh những kiểu sử dụng khác nhau, chẳng hạn trạm được sử dụng trong giờ làm việc, trạm phục vụ nhu cầu mua sắm hoặc giải trí, và trạm có thời gian kết nối kéo dài qua đêm.
 
-Tuy nhiên, đối tượng phân nhóm trong nghiên cứu bao gồm các trạm sạc được mô tả thông qua đặc trưng sử dụng tổng hợp; vì vậy, kết quả không thể được xem là bằng chứng trực tiếp rằng các thuật toán sẽ phân nhóm tốt nhất khi áp dụng cho từng phiên sạc riêng lẻ. Ngoài ra, việc lựa chọn thuật toán và đặc trưng cần được điều chỉnh theo đơn vị phân tích, cấu trúc dữ liệu và mục tiêu nghiên cứu cụ thể.
-
-Đối với đề tài này, nghiên cứu cung cấp cơ sở tham khảo trực tiếp cho việc đối chiếu K-Means và DBSCAN, đồng thời gợi ý sử dụng các đặc trưng liên quan đến thời gian kết nối, tỷ lệ thời gian sạc và thời điểm sử dụng. Khác với nghiên cứu trên tập trung phân nhóm trạm sạc, đề tài hướng đến phân nhóm các phiên sạc tại Palo Alto nhằm nhận diện những kiểu hành vi chiếm dụng khác nhau. Do đó, chất lượng phân cụm được kiểm tra bằng thực nghiệm trên dữ liệu của đề tài, sau đó các cụm được diễn giải dựa trên đặc trưng thực tế thay vì kế thừa nguyên trạng nhãn nhóm từ nghiên cứu trước.
+Trong nghiên cứu tại Palo Alto, đơn vị phân cụm là từng phiên sạc. K-Means và DBSCAN được đối chiếu trên các đặc trưng cấp phiên, rồi hồ sơ hành vi được diễn giải từ thời gian sạc, thời gian nhàn rỗi và điện năng quan sát được.
 
 \subsection{Thiết kế đánh giá thay đổi giá}
 
@@ -61,9 +65,7 @@ Về phương pháp, nhóm tác giả áp dụng thiết kế hồi quy gián đ
 
 Một đóng góp khác của nghiên cứu là phân biệt sự điều chỉnh hành vi của cùng người dùng với sự thay đổi thành phần người dùng. Phân tích ở cấp cá nhân cho thấy 35,1\% mức giảm điện năng trung bình mỗi phiên được quy cho sự điều chỉnh của cùng người dùng, còn 64,9\% gắn với thay đổi thành phần người sử dụng trạm. Sau khi thu phí, tỷ trọng người dùng thường xuyên giảm và tỷ trọng người dùng tạm thời tăng. Phát hiện này cho thấy biến động ở cấp mạng lưới không nhất thiết phản ánh mức thay đổi tương ứng trong hành vi của từng cá nhân; vì vậy, thông tin định danh người dùng có vai trò quan trọng trong việc diễn giải kết quả.
 
-Đối với đề tài này, nghiên cứu cung cấp cơ sở trực tiếp để lựa chọn mốc 01/08/2017 và các chỉ số so sánh trước–sau, gồm số phiên sạc, điện năng mỗi phiên và thời gian nhàn rỗi. Kết quả cũng gợi ý xem xét đồng thời tần suất sử dụng và sự thay đổi thành phần người dùng khi diễn giải hành vi chiếm dụng. Tuy nhiên, kiểm định Mann–Whitney U được định hướng trong đề tài chỉ hỗ trợ đánh giá sự khác biệt về phân phối giữa hai giai đoạn, chưa đủ để khẳng định quan hệ nhân quả như mục tiêu của thiết kế RDiT. Vì vậy, các kết quả được diễn giải trong phạm vi thay đổi quan sát được, làm cơ sở đề xuất chính sách quản lý thời gian nhàn rỗi và hỗ trợ vận hành mạng lưới.
-
-Khác biệt quan trọng là Mann–Whitney U không thay thế cho thiết kế RDiT trong việc ước lượng tác động nhân quả của chính sách. Trong phạm vi đề tài, kết quả kiểm định được sử dụng để xác định liệu có bằng chứng thống kê về sự khác biệt giữa hai giai đoạn hay không. Các khác biệt quan sát được không được quy hoàn toàn cho chính sách giá, bởi chúng cũng có thể chịu ảnh hưởng của xu hướng thời gian, tính mùa vụ, thay đổi thành phần người dùng hoặc những yếu tố khác.
+Nghiên cứu này dùng cùng mốc giá để so sánh phân phối chỉ tiêu và cơ cấu người dùng. Mann--Whitney U và bootstrap theo người dùng cung cấp bằng chứng về khác biệt quan sát được. Việc ước lượng tác động riêng của chính sách đòi hỏi một thiết kế nhận dạng phù hợp.
 
 \subsection{Đánh giá dự báo chiếm dụng}
 
@@ -75,7 +77,27 @@ Kết quả cho thấy việc bổ sung thông tin chiếm dụng trong quá kh�
 
 Hạn chế của nghiên cứu là chỉ khảo sát hai địa điểm, sử dụng bộ dữ liệu cố định và loại trừ giai đoạn COVID-19. Vì vậy, khả năng thích ứng khi hành vi sử dụng thay đổi chưa được kiểm chứng đầy đủ. Mỗi thuật toán cũng chỉ được thực hiện một lần trong từng cấu hình, trong khi phạm vi tìm kiếm siêu tham số còn giới hạn. Các kết quả do đó cung cấp cơ sở lựa chọn phương pháp, nhưng chưa đủ để khẳng định một mô hình luôn phù hợp với mọi mạng lưới sạc.
 
-Đối với đề tài này, nghiên cứu cung cấp định hướng xây dựng chuỗi thời gian 15 phút từ dữ liệu phiên sạc Palo Alto, kết hợp đặc trưng lịch và các biến trễ để dự báo mức độ chiếm dụng. Số cổng bị chiếm dụng có thể được chuyển thành tỷ lệ lấp đầy khi xác định được số cổng đang hoạt động tại từng thời điểm. Việc đánh giá cần tuân theo thứ tự thời gian và so sánh với các phương pháp dự báo cơ sở trước khi lựa chọn mô hình. Đồng thời, số phiên phát sinh, điện năng tiêu thụ và mức độ chiếm dụng cần được xác định thành các biến mục tiêu riêng. Cách tiếp cận này hỗ trợ nhận diện thời điểm có nhu cầu sử dụng cao, làm đầu vào cho tầng hỗ trợ quyết định về phân bổ và mở rộng năng lực trạm sạc.
+Tại Palo Alto, nghiên cứu lập chuỗi 15 phút riêng cho số cổng có phiên kết nối và số phiên bắt đầu. Kết quả được đối chiếu với quan sát ở khung liền trước và kiểm tra qua nhiều kỳ. Muốn suy ra tỷ lệ lấp đầy cần xác định số cổng khả dụng theo từng thời điểm.
+
+\subsection{Tổng hợp và khoảng trống nghiên cứu}
+Bảng~\ref{tab:related_work} cho thấy các công trình được đối chiếu cung cấp bằng chứng cho những câu hỏi riêng. Nghiên cứu này kiểm tra trong cùng mạng lưới Palo Alto cách kết hợp hồ sơ phiên, độ nhạy của thứ hạng trạm và sai số dự báo 15 phút để lựa chọn thí điểm vận hành.
+
+\begin{table}[!t]
+\caption{Phạm vi các nghiên cứu liên quan và nội dung đối chiếu}
+\label{tab:related_work}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{@{}p{.27\columnwidth}X@{}}
+\toprule
+\textbf{Nghiên cứu} & \textbf{Phạm vi và nội dung đối chiếu tại Palo Alto} \\
+\midrule
+Bayram và cs.~\cite{bayram2023} & Mô tả thời gian kết nối và nhàn rỗi. NV2 kiểm tra mức tập trung giờ nhàn rỗi theo hồ sơ phiên. \\
+Straka và Buzna~\cite{straka2019} & Phân cụm trạm. NV2 kiểm tra độ ổn định của cụm ở cấp phiên. \\
+Luo và Wang~\cite{luowang2025} & Phân tích thay đổi giá. NV3 đối chiếu phân phối chỉ tiêu và cơ cấu người dùng quanh cùng mốc. \\
+Ostermann và cs.~\cite{ostermann2022} & Dự báo chiếm dụng. NV5 kiểm tra lợi thế so với đối chứng theo kỳ và theo thước đo. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Dữ liệu và tiền xử lý}
 Dữ liệu mở Palo Alto \cite{paloalto2021} gồm 259.415 bản ghi với thời điểm bắt đầu phiên từ tháng 7/2011 đến hết tháng 12/2020. Ba phiên bắt đầu cuối năm 2020 kết thúc vào tháng 1/2021. Các trường sử dụng gồm thời điểm kết nối và ngắt kết nối, thời gian sạc, điện năng, định danh cổng, tên trạm và mã người dùng.
@@ -476,7 +498,9 @@ Thống kê đích là Cliff’s Delta ở cấp cặp phiên. Trong mỗi lần
 
 CI 95\% lấy theo phân vị 2,5\% và 97,5\% của các Delta bootstrap hợp lệ. Một lần lặp cần có tổng trọng số phiên dương ở cả hai giai đoạn. Triển khai hiện chỉ công bố CI nếu ít nhất 95\% số lần lặp hợp lệ. Dấu dương được quy ước là giá trị Pre có xu hướng lớn hơn Post.
 
-Delta được đọc cùng CI và ngưỡng kích thước tác động. CI chứa 0 được ghi nhận là chưa rõ theo phép ước lượng này. Holm được áp dụng cho bốn p-value Mann–Whitney tham khảo. Các CI bootstrap là CI riêng theo từng chỉ tiêu. Phân tích cơ cấu New\_Post, Regular, Casual và Unclassified hỗ trợ xem xét sự thay đổi thành phần mẫu khi diễn giải so sánh Pre/Post.
+Delta được đọc cùng CI và ngưỡng kích thước tác động. CI chứa 0 được ghi nhận là chưa rõ theo phép ước lượng này. Holm được áp dụng cho bốn p-value Mann--Whitney tham khảo. Các CI bootstrap là CI riêng theo từng chỉ tiêu.
+
+Khi mô tả cơ cấu, New\_Post gồm các phiên Post của người có User ID và chưa xuất hiện trong Pre. Với các phiên còn lại có User ID và mã bưu chính đọc được, Regular yêu cầu người dùng có ít nhất 10 phiên Pre và mã bưu chính thuộc vùng quy định. Các phiên có đủ hai trường nhưng chưa đạt điều kiện Regular thuộc nhóm còn lại (Casual). Các phiên chưa được phân vào ba nhóm trên thuộc Unclassified.
 
 Gọi $X$ là một phiên rút từ giai đoạn trước và $Y$ là một phiên từ giai đoạn sau. Hệ số Cliff ước lượng $P(X>Y)-P(X<Y)$, với các cặp bằng nhau đóng góp 0. Dấu của hệ số biểu thị hướng so sánh thứ hạng. Khoảng tin cậy được trình bày riêng theo chỉ tiêu. Holm điều chỉnh các giá trị $p$ của phép kiểm định tham khảo, còn bootstrap theo người dùng phản ánh cấu trúc lặp ở cấp phiên. Phân tích quanh ngưỡng 20 phút đối chiếu hai khoảng liên tiếp từ 15 đến dưới 20 phút và từ 20 đến dưới 25 phút. Kết quả là phép chẩn đoán mô tả để thiết kế thử nghiệm sau này.
 
@@ -549,7 +573,7 @@ Cách tiếp cận kế thừa hướng dự báo mức chiếm dụng bằng h�
 
 Trong công thức, mỗi cổng vật lý p chỉ được đếm một lần trong một khung, dù có nhiều phiên của cổng đó cùng giao với khung. Đếm theo phiên thì một cổng có hai phiên ngắn liên tiếp sẽ thành hai cổng, và mục tiêu vượt quá số cổng thật của trạm.
 
-Bảng ánh xạ chuẩn hóa 47 giá trị Station Name về 9 họ vị trí: BRYANT, CAMBRIDGE, HAMILTON, HIGH, MPL, RINCONADA LIB, SHERMAN, TED THOMPSON và WEBSTER. Cụm được gán theo từng phiên, không theo từng cổng, vì hai cổng của HAMILTON \#2 xuất hiện đến tháng 01/2016 rồi chuyển sang BRYANT \#3. Ánh xạ tĩnh theo cổng sẽ gán sai vị trí cho một trong hai giai đoạn và làm lệch chuỗi của cả hai cụm. Mã cổng vật lý ghép địa chỉ MAC đã chuẩn hóa với số cổng theo dạng {MAC}\_Port\_{Port Number}, gộp 139 cách ghi khác nhau về 117 mã chuẩn. Sau khi lọc, còn 259.356 phiên; 12 phiên có thời lượng bằng 0 bị loại khỏi chuỗi vì không chiếm cổng ở khung nào, còn 259.344 phiên để lập chuỗi.
+Bảng ánh xạ chuẩn hóa 47 giá trị Station Name về 9 họ vị trí: BRYANT, CAMBRIDGE, HAMILTON, HIGH, MPL, RINCONADA LIB, SHERMAN, TED THOMPSON và WEBSTER. Cụm được gán theo vị trí của từng phiên vì hai cổng của HAMILTON \#2 xuất hiện đến tháng 01/2016 rồi chuyển sang BRYANT \#3. Ánh xạ tĩnh theo cổng sẽ gán sai vị trí cho một trong hai giai đoạn và làm lệch chuỗi của cả hai cụm. Mã cổng vật lý ghép địa chỉ MAC đã chuẩn hóa với số cổng theo dạng {MAC}\_Port\_{Port Number}, gộp 139 cách ghi khác nhau về 117 mã chuẩn. Trong 259.356 phiên hợp lệ NV1, có 12 phiên mà dấu thời gian bắt đầu và kết thúc trùng nhau sau khi quy về UTC, dù thời lượng khai báo vẫn dương. NV5 loại 12 phiên này và dùng 259.344 phiên còn lại để lập chuỗi.
 
 Với khung cần dự báo t, mô hình sử dụng lịch đã biết của t và các quan sát mục tiêu đến t–1. Sau mỗi khung 15 phút, hệ thống nhận quan sát mới để thực hiện dự báo một bước tiếp theo. Bộ chuẩn hóa và tham số mô hình được fit trên train. Validation được sử dụng để chọn siêu tham số theo RMSE.
 
@@ -746,9 +770,9 @@ Phân tích chưa xây dựng phân phối phản thực, chưa kiểm định r
 \toprule
 \textbf{Nhóm} & \textbf{Trước (\%)} & \textbf{Sau (\%)} \\
 \midrule
-Không thường xuyên & 67,83 & 31,61 \\
+Nhóm còn lại (Casual) & 67,83 & 31,61 \\
 Mới xuất hiện sau mốc & 0,00 & 55,98 \\
-Thường xuyên & 28,50 & 9,60 \\
+Thường xuyên (Regular) & 28,50 & 9,60 \\
 Chưa phân loại & 3,67 & 2,81 \\
 \bottomrule
 \end{tabularx}
